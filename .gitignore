@@ -1,0 +1,38 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+bin/
+obj/
+
+# NuGet Packages
+packages/
+*.nupkg
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+
+# Build results
+*.dll
+*.pdb
+*.exe
+
+# Sensitive config
+AppSettings.config
+
+# OS files
+Thumbs.db
+desktop.ini
+
+# Uploaded files
+photos/*
+!photos/.gitkeep
+Resumes/*
+!Resumes/.gitkeep
+Images/*
+!Images/.gitkeep
