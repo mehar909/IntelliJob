@@ -23,7 +23,7 @@ packages/
 *.exe
 
 # Sensitive config
-AppSettings.config
+# AppSettings.config
 
 # OS files
 Thumbs.db
