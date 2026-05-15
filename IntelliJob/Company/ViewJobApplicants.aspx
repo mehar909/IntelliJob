@@ -82,7 +82,7 @@
                         <ItemTemplate>
                             <div>
                                 <%-- Send / Resend button (calls JS → AJAX → handler) --%>
-                                <asp:Button ID="btnSendInvite" runat="server"
+                                <asp:Button ID="btnSendInvite" runat="server" />
                                     Text="Send Invite"
                                     CssClass="btn btn-sm btn-invite"
                                     OnClientClick=`<%# "sendInvite(" + Eval("AppliedJobId") + "); return false;" %>` />

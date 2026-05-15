@@ -168,6 +168,38 @@
                                                 Text="Not Uploaded" 
                                                 Visible='<%# Eval("Resume") == DBNull.Value || string.IsNullOrEmpty(Eval("Resume").ToString()) %>'
                                                 CssClass="text-muted"></asp:Label>
+                                            <asp:LinkButton ID="btnDeleteResume" runat="server"
+                                                CommandName="DeleteResume"
+                                                CommandArgument='<%# Eval("UserId") %>'
+                                                Visible='<%# Eval("Resume") != DBNull.Value && !string.IsNullOrEmpty(Eval("Resume").ToString()) %>'
+                                                CssClass="btn btn-outline-danger btn-sm mt-2"
+                                                OnClientClick="return confirm('Are you sure you want to remove your stored resume?');">
+                                                <i class="fas fa-trash"></i> Remove Resume
+                                            </asp:LinkButton>
+                                        </div>
+                                    </div>
+                                    <hr />
+                                    <asp:Panel ID="pnlImportResume" runat="server" Visible='<%# Eval("Resume") == DBNull.Value || string.IsNullOrEmpty(Eval("Resume").ToString()) %>'>
+                                        <div class="row">
+                                            <div class="col-sm-3">
+                                                <h6 class="mb-0">Import Resume</h6>
+                                            </div>
+                                            <div class="col-sm-9 text-secondary">
+                                                <asp:FileUpload ID="fuResumeImport" runat="server" CssClass="form-control" />
+                                                <asp:LinkButton ID="btnImportResume" runat="server"
+                                                    CommandName="ImportResume"
+                                                    CommandArgument='<%# Eval("UserId") %>'
+                                                    CssClass="btn btn-primary btn-sm mt-2">
+                                                    <i class="fas fa-file-import"></i> Import & Parse Resume
+                                                </asp:LinkButton>
+                                                <div class="text-muted small mt-2">Upload a PDF or DOCX resume to refresh the parsed profile sections.</div>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                    </asp:Panel>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <%# BuildResumeOverviewHtml(Eval("ResumeParseStatus"), Eval("ResumeValidationMessage"), Eval("ResumeOriginalFileName"), Eval("ResumeHeadline"), Eval("ResumeSummary"), Eval("ResumeSkills"), Eval("ResumeEducation"), Eval("ResumeExperienceDetails"), Eval("ResumeProjects"), Eval("ResumeCertifications"), Eval("ResumeLanguages")) %>
                                         </div>
                                     </div>
                                     <hr />

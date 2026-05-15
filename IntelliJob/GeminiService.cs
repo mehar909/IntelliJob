@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -310,6 +313,144 @@ Return your response as a JSON object with this exact structure (no markdown, no
                 };
             }
         }
+
+        #region Resume Enhancement
+
+        public async Task<ResumeEnhancementResult> GenerateResumeEnhancementAsync(
+            string resumeText,
+            string jobTitle,
+            string jobDescription,
+            string interviewFeedback,
+            string mandatoryKeywords)
+        {
+            string prompt = $@"You are an AI resume enhancer for job seekers.
+
+Compare the resume against the target role, the job description, the soft keyword hints, and the interview feedback.
+Do not be overly strict. If a keyword is missing but the meaning is close, give partial credit and suggest an improvement.
+Focus on practical improvements the candidate can actually apply.
+
+Target role: {jobTitle}
+Soft keyword hints: {mandatoryKeywords}
+
+Job description:
+{jobDescription}
+
+Interview feedback:
+{interviewFeedback}
+
+Resume text:
+{resumeText}
+
+Return only valid JSON with this exact structure and no extra text:
+{{
+  ""overallScore"": 78,
+  ""atsScore"": 74,
+  ""semanticScore"": 80,
+  ""keywordScore"": 68,
+  ""resumeSummary"": ""Short summary of the resume fit."",
+  ""updatedResumeText"": ""A structured resume rewrite using these headings on separate lines: Full Name, Email, Mobile, Address, Headline, Summary, Skills, Education, Experience, Projects, Certifications, Languages. Keep each section human-readable and use one line per bullet item inside the section."",
+  ""strengths"": [""Strength 1"", ""Strength 2""],
+  ""gaps"": [""Gap 1"", ""Gap 2""],
+  ""priorityKeywords"": [""Keyword 1"", ""Keyword 2""],
+  ""rewriteSuggestions"": [
+    {{
+      ""sectionName"": ""Summary"",
+      ""currentObservation"": ""What is currently weak or missing"",
+      ""suggestedRewrite"": ""A concise rewrite suggestion the user can apply""
+    }}
+  ],
+  ""finalAssessment"": ""A detailed but concise overall assessment.""
+}}";
+
+            string responseText = await CallGeminiAsync(prompt, "You are a resume optimization assistant. Always respond with valid JSON only.", 0.35);
+            return ParseResumeEnhancementResponse(responseText);
+        }
+
+        private ResumeEnhancementResult ParseResumeEnhancementResponse(string responseText)
+        {
+            string cleaned = responseText.Trim();
+            if (cleaned.StartsWith("```json"))
+                cleaned = cleaned.Substring(7);
+            else if (cleaned.StartsWith("```"))
+                cleaned = cleaned.Substring(3);
+            if (cleaned.EndsWith("```"))
+                cleaned = cleaned.Substring(0, cleaned.Length - 3);
+            cleaned = cleaned.Trim();
+
+            try
+            {
+                JObject json = JObject.Parse(cleaned);
+                var result = new ResumeEnhancementResult();
+
+                result.OverallScore = json["overallScore"]?.Value<int>() ?? 0;
+                result.AtsScore = json["atsScore"]?.Value<int>() ?? result.OverallScore;
+                result.SemanticScore = json["semanticScore"]?.Value<int>() ?? result.OverallScore;
+                result.KeywordScore = json["keywordScore"]?.Value<int>() ?? result.OverallScore;
+                result.ResumeSummary = json["resumeSummary"]?.Value<string>() ?? string.Empty;
+                result.UpdatedResumeText = json["updatedResumeText"]?.Value<string>() ?? string.Empty;
+                result.FinalAssessment = json["finalAssessment"]?.Value<string>() ?? string.Empty;
+
+                var strengths = json["strengths"] as JArray;
+                if (strengths != null)
+                {
+                    result.Strengths = new List<string>();
+                    foreach (var item in strengths)
+                        result.Strengths.Add(item.Value<string>());
+                }
+
+                var gaps = json["gaps"] as JArray;
+                if (gaps != null)
+                {
+                    result.Gaps = new List<string>();
+                    foreach (var item in gaps)
+                        result.Gaps.Add(item.Value<string>());
+                }
+
+                var keywords = json["priorityKeywords"] as JArray;
+                if (keywords != null)
+                {
+                    result.PriorityKeywords = new List<string>();
+                    foreach (var item in keywords)
+                        result.PriorityKeywords.Add(item.Value<string>());
+                }
+
+                var rewrites = json["rewriteSuggestions"] as JArray;
+                if (rewrites != null)
+                {
+                    result.RewriteSuggestions = new List<ResumeRewriteSuggestion>();
+                    foreach (JObject item in rewrites)
+                    {
+                        result.RewriteSuggestions.Add(new ResumeRewriteSuggestion
+                        {
+                            SectionName = item["sectionName"]?.Value<string>() ?? string.Empty,
+                            CurrentObservation = item["currentObservation"]?.Value<string>() ?? string.Empty,
+                            SuggestedRewrite = item["suggestedRewrite"]?.Value<string>() ?? string.Empty
+                        });
+                    }
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ResumeEnhancementResult
+                {
+                    OverallScore = 0,
+                    AtsScore = 0,
+                    SemanticScore = 0,
+                    KeywordScore = 0,
+                    ResumeSummary = "Resume enhancement could not be parsed.",
+                    UpdatedResumeText = string.Empty,
+                    Strengths = new List<string> { "The AI response could not be parsed." },
+                    Gaps = new List<string> { "Please try again after the AI service recovers." },
+                    PriorityKeywords = new List<string>(),
+                    RewriteSuggestions = new List<ResumeRewriteSuggestion>(),
+                    FinalAssessment = "ERROR: The AI resume enhancement response could not be parsed. Exception: " + ex.Message
+                };
+            }
+        }
+
+        #endregion
 
         #endregion
 

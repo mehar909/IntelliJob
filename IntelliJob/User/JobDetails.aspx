@@ -92,6 +92,43 @@
             border-top: 2px solid #f0f0f0;
         }
 
+        .apply-btn-container .application-resume-block {
+            margin-top: 14px;
+            background: #f8fafc;
+            border: 1px dashed #dbe3ec;
+            border-radius: 12px;
+            padding: 14px 14px 16px;
+        }
+
+        .apply-btn-container .application-resume-block label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .apply-btn-container .application-resume-block .form-control[type='file'] {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            line-height: 1.4;
+        }
+
+        .job-alert-popup {
+            position: relative;
+            z-index: 1;
+            max-width: 100%;
+            width: 100%;
+            padding: 16px 22px;
+            border-radius: 14px;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
         .apply-btn-container .btn {
             width: 100%;
             padding: 16px 24px;
@@ -232,7 +269,7 @@
                                     <div class="job-items">
                                         <div class="company-img company-img-details">
                                             <a href="#">
-                                                <img width="80" src="<%# GetImageUrl(Eval("CompanyImage")) %>" alt=""></a>
+                                                <img width="80" src="<%# GetImageUrl(Eval("DisplayImage")) %>" alt="Company logo"></a>
                                         </div>
                                         <div class="job-tittle">
                                             <a href="#">
@@ -345,7 +382,27 @@
                                     </ul>
                                     <!-- Apply Button -->
                                     <div class="apply-btn-container">
-                                        <asp:LinkButton ID="lbApplyJob" runat="server" CssClass="btn" Text="Apply Now" CommandName="ApplyJob"></asp:LinkButton>
+                                        <asp:LinkButton ID="lbApplyJob" runat="server" CssClass="btn" Text="Apply Now" CommandName="ApplyJob" OnClientClick="if(!confirm('Are you sure you want to apply for this job?')) return false; this.style.pointerEvents='none'; this.innerHTML='Applying...';"></asp:LinkButton>
+                                        <asp:Panel ID="pnlApplicationResumeUpload" runat="server" CssClass="application-resume-block mt-3 text-left" Visible='<%# Eval("ShowApplicationResumeUpload") != DBNull.Value && Convert.ToBoolean(Eval("ShowApplicationResumeUpload")) %>'>
+                                            <label class="d-block mb-2" style="font-weight:600; color:#495057;">Optional resume for this application</label>
+                                            <asp:FileUpload ID="fuApplicationResume" runat="server" CssClass="form-control pt-2" ToolTip=".doc, .docx, .pdf extension only" />
+                                            <small class="text-muted d-block mt-2">If you do not upload a resume here, IntelliJob will use the resume from your profile.</small>
+                                            <asp:LinkButton ID="lbSaveApplicationResume" runat="server" CssClass="btn btn-post mt-3" CommandName="SaveApplicationResume">Upload Resume</asp:LinkButton>
+                                        </asp:Panel>
+                                        <asp:Panel ID="pnlApplicationResumeEdit" runat="server" CssClass="application-resume-block mt-3 text-left" Visible='<%# Eval("HasApplicationResumeDraft") != DBNull.Value && Convert.ToBoolean(Eval("HasApplicationResumeDraft")) %>'>
+                                            <label class="d-block mb-2" style="font-weight:600; color:#495057;">Application resume draft</label>
+                                            <asp:HyperLink ID="lnkEditApplicationResume" runat="server" CssClass="btn btn-post" NavigateUrl='<%# Eval("ApplicationResumeEditUrl") %>'>
+                                                <i class="fas fa-pen"></i> Edit Resume
+                                            </asp:HyperLink>
+                                            <small class="text-muted d-block mt-2"><%# Eval("ApplicationResumeNote") %></small>
+                                        </asp:Panel>
+                                        <asp:Panel ID="pnlAppliedResumeEdit" runat="server" CssClass="application-resume-block mt-3 text-left" Visible='<%# Eval("ShowAppliedResumeEdit") != DBNull.Value && Convert.ToBoolean(Eval("ShowAppliedResumeEdit")) %>'>
+                                            <label class="d-block mb-2" style="font-weight:600; color:#495057;">Applied resume</label>
+                                            <asp:HyperLink ID="lnkAppliedResumeEdit" runat="server" CssClass="btn btn-post" NavigateUrl='<%# Eval("AppliedResumeEditUrl") %>'>
+                                                <i class="fas fa-pen"></i> Edit Resume
+                                            </asp:HyperLink>
+                                            <small class="text-muted d-block mt-2"><%# Eval("AppliedResumeNote") %></small>
+                                        </asp:Panel>
                                     </div>
                                 </div>
 

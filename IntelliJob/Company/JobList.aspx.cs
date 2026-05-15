@@ -85,30 +85,103 @@ namespace IntelliJob.Company
         {
             try
             {
-                GridViewRow row = GridView1.Rows[e.RowIndex];
                 int jobId = Convert.ToInt32(GridView1.DataKeys[e.RowIndex].Values[0]);
                 con = new SqlConnection(str);
-                cmd = new SqlCommand("Delete from Jobs where JobId = @id", con);
-                cmd.Parameters.AddWithValue("@id", jobId);
                 con.Open();
-                int r = cmd.ExecuteNonQuery();
-                if (r > 0)
+                using (SqlTransaction tran = con.BeginTransaction())
                 {
-                    lblMsg.Text = "Job delete successfully!";
-                    lblMsg.CssClass = "alert alter-success";
-                    // Auto-hide message after 7 seconds
-                    ClientScript.RegisterStartupScript(this.GetType(), "hideMessage",
-                        "setTimeout(function() { var msg = document.getElementById('" + lblMsg.ClientID + "'); if(msg) msg.style.display='none'; }, 7000);", true);
+                    using (SqlCommand deleteFeatured = new SqlCommand("DELETE FROM FeaturedMarks WHERE JobId = @id", con, tran))
+                    {
+                        deleteFeatured.Parameters.AddWithValue("@id", jobId);
+                        deleteFeatured.ExecuteNonQuery();
+                    }
 
-                }
-                else
-                {
-                    lblMsg.Text = "Cannot delete this record!";
-                    lblMsg.CssClass = "alert alter-success";
-                    // Auto-hide message after 7 seconds
-                    ClientScript.RegisterStartupScript(this.GetType(), "hideMessage",
-                        "setTimeout(function() { var msg = document.getElementById('" + lblMsg.ClientID + "'); if(msg) msg.style.display='none'; }, 7000);", true);
+                    DataTable applications = new DataTable();
+                    using (SqlCommand loadApplications = new SqlCommand("SELECT AppliedJobId FROM AppliedJobs WHERE JobId = @id", con, tran))
+                    {
+                        loadApplications.Parameters.AddWithValue("@id", jobId);
+                        using (SqlDataAdapter adapter = new SqlDataAdapter(loadApplications))
+                        {
+                            adapter.Fill(applications);
+                        }
+                    }
 
+                    foreach (DataRow applicationRow in applications.Rows)
+                    {
+                        int appliedJobId = Convert.ToInt32(applicationRow[0]);
+
+                        using (SqlCommand deleteInvitations = new SqlCommand("DELETE FROM InterviewInvitations WHERE AppliedJobId = @AppliedJobId", con, tran))
+                        {
+                            deleteInvitations.Parameters.AddWithValue("@AppliedJobId", appliedJobId);
+                            deleteInvitations.ExecuteNonQuery();
+                        }
+
+                        int interviewId = 0;
+                        using (SqlCommand interviewIdCmd = new SqlCommand("SELECT TOP 1 InterviewId FROM Interviews WHERE AppliedJobId = @AppliedJobId ORDER BY InterviewId DESC", con, tran))
+                        {
+                            interviewIdCmd.Parameters.AddWithValue("@AppliedJobId", appliedJobId);
+                            object interviewResult = interviewIdCmd.ExecuteScalar();
+                            if (interviewResult != null && interviewResult != DBNull.Value)
+                            {
+                                interviewId = Convert.ToInt32(interviewResult);
+                            }
+                        }
+
+                        if (interviewId > 0)
+                        {
+                            using (SqlCommand deleteTranscript = new SqlCommand("DELETE FROM InterviewTranscripts WHERE InterviewId = @InterviewId", con, tran))
+                            {
+                                deleteTranscript.Parameters.AddWithValue("@InterviewId", interviewId);
+                                deleteTranscript.ExecuteNonQuery();
+                            }
+
+                            using (SqlCommand deleteFeedback = new SqlCommand("DELETE FROM InterviewFeedback WHERE InterviewId = @InterviewId", con, tran))
+                            {
+                                deleteFeedback.Parameters.AddWithValue("@InterviewId", interviewId);
+                                deleteFeedback.ExecuteNonQuery();
+                            }
+
+                            using (SqlCommand deleteQuestions = new SqlCommand("DELETE FROM InterviewQuestions WHERE InterviewId = @InterviewId", con, tran))
+                            {
+                                deleteQuestions.Parameters.AddWithValue("@InterviewId", interviewId);
+                                deleteQuestions.ExecuteNonQuery();
+                            }
+
+                            using (SqlCommand deleteInterview = new SqlCommand("DELETE FROM Interviews WHERE InterviewId = @InterviewId", con, tran))
+                            {
+                                deleteInterview.Parameters.AddWithValue("@InterviewId", interviewId);
+                                deleteInterview.ExecuteNonQuery();
+                            }
+                        }
+
+                        using (SqlCommand deleteApplication = new SqlCommand("DELETE FROM AppliedJobs WHERE AppliedJobId = @AppliedJobId", con, tran))
+                        {
+                            deleteApplication.Parameters.AddWithValue("@AppliedJobId", appliedJobId);
+                            deleteApplication.ExecuteNonQuery();
+                        }
+                    }
+
+                    using (SqlCommand deleteJob = new SqlCommand("DELETE FROM Jobs WHERE JobId = @id", con, tran))
+                    {
+                        deleteJob.Parameters.AddWithValue("@id", jobId);
+                        int r = deleteJob.ExecuteNonQuery();
+                        if (r > 0)
+                        {
+                            tran.Commit();
+                            lblMsg.Text = "Job delete successfully!";
+                            lblMsg.CssClass = "alert alter-success";
+                            ClientScript.RegisterStartupScript(this.GetType(), "hideMessage",
+                                "setTimeout(function() { var msg = document.getElementById('" + lblMsg.ClientID + "'); if(msg) msg.style.display='none'; }, 7000);", true);
+                        }
+                        else
+                        {
+                            tran.Rollback();
+                            lblMsg.Text = "Cannot delete this record!";
+                            lblMsg.CssClass = "alert alter-success";
+                            ClientScript.RegisterStartupScript(this.GetType(), "hideMessage",
+                                "setTimeout(function() { var msg = document.getElementById('" + lblMsg.ClientID + "'); if(msg) msg.style.display='none'; }, 7000);", true);
+                        }
+                    }
                 }
                 GridView1.EditIndex = -1;
                 ShowJob();
@@ -117,7 +190,13 @@ namespace IntelliJob.Company
             {
                 Response.Write("<script>alert('" + ex.Message + "');</script>");
             }
-            finally { con.Close(); }
+            finally
+            {
+                if (con != null && con.State == System.Data.ConnectionState.Open)
+                {
+                    con.Close();
+                }
+            }
         }
 
         protected void GridView1_RowCommand(object sender, GridViewCommandEventArgs e)

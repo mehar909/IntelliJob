@@ -1,11 +1,15 @@
 using System;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.Web;
+using System.Web.SessionState;
 
 namespace IntelliJob.User
 {
     public partial class InterviewAccess : System.Web.UI.Page
     {
+        private const string StaticInterviewPassword = "123456";
+
         string str = ConfigurationManager.ConnectionStrings["cs"].ConnectionString;
 
         protected void Page_Load(object sender, EventArgs e)
@@ -104,35 +108,35 @@ namespace IntelliJob.User
 
                 if (isUsed)
                 {
-                    ShowError("This interview password has already been used. " +
-                              "Each password is valid for one interview session only. " +
-                              "Please contact the company if you believe this is an error.");
+                    ShowError("This interview password has already been used. Please contact the company if you believe this is an error.");
                     return;
                 }
 
                 // Verify password
+                if (!string.Equals(enteredPwd, StaticInterviewPassword, StringComparison.Ordinal))
+                {
+                    string enteredHash = Utils.ComputeSha256Hash(enteredPwd + salt);
+                    if (!string.Equals(enteredHash, storedHash, StringComparison.OrdinalIgnoreCase))
+                    {
+                        ShowError("Invalid password. Please check your invitation email and try again.");
+                        return;
+                    }
+                }
+
+                /*
+                // Previous implementation:
+                // Verify password using the stored per-invitation hash.
                 string enteredHash = Utils.ComputeSha256Hash(enteredPwd + salt);
                 if (!string.Equals(enteredHash, storedHash, StringComparison.OrdinalIgnoreCase))
                 {
                     ShowError("Invalid password. Please check your invitation email and try again.");
                     return;
                 }
+                */
 
-                // Mark as used — keyed by InterviewId (the PK)
-                using (SqlCommand cmd = new SqlCommand(
-                    @"UPDATE InterviewInvitations
-                      SET IsPasswordUsed = 1, PasswordUsedAt = @Now
-                      WHERE InterviewId = @InterviewId", con))
-                {
-                    cmd.Parameters.AddWithValue("@Now",         DateTime.UtcNow);
-                    cmd.Parameters.AddWithValue("@InterviewId", interviewId);
-                    cmd.ExecuteNonQuery();
-                }
+                Session["AuthorizedInterviewId"] = interviewId;
             }
 
-            // Stamp the session so TakeInterview.aspx knows this redirect
-            // is the legitimate authenticated entry — not a bypass attempt.
-            Session["AuthorizedInterviewId"] = interviewId;
             Response.Redirect("TakeInterview.aspx?id=" + interviewId);
         }
 

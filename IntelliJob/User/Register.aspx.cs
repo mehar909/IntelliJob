@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
+using System.IO;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -35,6 +36,8 @@ namespace IntelliJob.User
                 // Prepare photo filename
                 string photoFileName = "avatar.png";
                 bool IsValid = false;
+                string resumeFilePath = string.Empty;
+                ResumeImportResult resumeImportResult = null;
                 if (fuimage.HasFile)
                 {
                     if (Utils.IsValidExtension(fuimage.FileName))
@@ -54,6 +57,36 @@ namespace IntelliJob.User
                 else
                 {
                     IsValid = true;
+                }
+
+                if (fuResume.HasFile)
+                {
+                    if (Utils.IsValidExtension4Resume(fuResume.FileName))
+                    {
+                        resumeImportResult = ResumeProfileService.ImportAndParse(
+                            fuResume.PostedFile,
+                            Server.MapPath("~/Resumes"),
+                            "Resumes");
+
+                        if (!resumeImportResult.IsSuccess)
+                        {
+                            lblMsg.Visible = true;
+                            lblMsg.Text = string.IsNullOrWhiteSpace(resumeImportResult.ValidationMessage)
+                                ? "Please upload a valid resume file."
+                                : resumeImportResult.ValidationMessage;
+                            lblMsg.CssClass = "alert alert-danger";
+                            return;
+                        }
+
+                        resumeFilePath = resumeImportResult.StoredRelativePath;
+                    }
+                    else
+                    {
+                        lblMsg.Visible = true;
+                        lblMsg.Text = "Please Select .doc, .docx, .pdf file for resume!";
+                        lblMsg.CssClass = "alert alert-danger";
+                        return;
+                    }
                 }
 
                 if (IsValid)
@@ -79,14 +112,24 @@ namespace IntelliJob.User
                         int newUserId = Convert.ToInt32(userCmd.ExecuteScalar());
 
                         // 2) Insert into JOBSEEKERS (child table)
-                        string jsSql = @"INSERT INTO JobSeekers (ProfileId, Name, Mobile, Photo)
-                                        VALUES (@ProfileId, @Name, @Mobile, @Photo)";
+                        string jsSql = @"INSERT INTO JobSeekers (ProfileId, Name, Mobile, TenthGrade, TwelfthGrade, GraduationGrade, PostGraduationGrade, Phd, WorksOn, Experience, Photo, Resume, ResumeOriginalFileName, ResumeParseStatus, ResumeValidationMessage, ResumeUploadedAt, ResumeParsedAt, ResumeStructuredJson, ResumeRawText, ResumeHeadline, ResumeSummary, ResumeSkills, ResumeEducation, ResumeExperienceDetails, ResumeProjects, ResumeCertifications, ResumeLanguages)
+                                        VALUES (@ProfileId, @Name, @Mobile, @TenthGrade, @TwelfthGrade, @GraduationGrade, @PostGraduationGrade, @Phd, @WorksOn, @Experience, @Photo, @Resume, @ResumeOriginalFileName, @ResumeParseStatus, @ResumeValidationMessage, @ResumeUploadedAt, @ResumeParsedAt, @ResumeStructuredJson, @ResumeRawText, @ResumeHeadline, @ResumeSummary, @ResumeSkills, @ResumeEducation, @ResumeExperienceDetails, @ResumeProjects, @ResumeCertifications, @ResumeLanguages)";
 
                         SqlCommand jsCmd = new SqlCommand(jsSql, con, tran);
                         jsCmd.Parameters.AddWithValue("@ProfileId", newUserId);
                         jsCmd.Parameters.AddWithValue("@Name", txtName.Text.Trim());
                         jsCmd.Parameters.AddWithValue("@Mobile", txtMobile.Text.Trim());
+                        jsCmd.Parameters.AddWithValue("@TenthGrade", string.IsNullOrWhiteSpace(string.Empty) ? (object)DBNull.Value : DBNull.Value);
+                        jsCmd.Parameters.AddWithValue("@TwelfthGrade", string.IsNullOrWhiteSpace(string.Empty) ? (object)DBNull.Value : DBNull.Value);
+                        jsCmd.Parameters.AddWithValue("@GraduationGrade", string.IsNullOrWhiteSpace(string.Empty) ? (object)DBNull.Value : DBNull.Value);
+                        jsCmd.Parameters.AddWithValue("@PostGraduationGrade", string.IsNullOrWhiteSpace(string.Empty) ? (object)DBNull.Value : DBNull.Value);
+                        jsCmd.Parameters.AddWithValue("@Phd", string.IsNullOrWhiteSpace(string.Empty) ? (object)DBNull.Value : DBNull.Value);
+                        jsCmd.Parameters.AddWithValue("@WorksOn", string.IsNullOrWhiteSpace(string.Empty) ? (object)DBNull.Value : DBNull.Value);
+                        jsCmd.Parameters.AddWithValue("@Experience", string.IsNullOrWhiteSpace(string.Empty) ? (object)DBNull.Value : DBNull.Value);
                         jsCmd.Parameters.AddWithValue("@Photo", photoFileName);
+                        jsCmd.Parameters.AddWithValue("@Resume", string.IsNullOrWhiteSpace(resumeFilePath) ? (object)DBNull.Value : resumeFilePath);
+
+                        ResumeProfileService.AddResumeProfileParameters(jsCmd, resumeImportResult != null ? resumeImportResult.Document : null, resumeFilePath);
 
                         jsCmd.ExecuteNonQuery();
 

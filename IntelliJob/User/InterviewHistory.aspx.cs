@@ -27,35 +27,44 @@ namespace IntelliJob.User
         private void LoadStats()
         {
             int userId = Convert.ToInt32(Session["userId"]);
+            bool hasJobFilter = TryGetJobFilter(out int jobId);
             using (SqlConnection con = new SqlConnection(str))
             {
                 con.Open();
 
                 // Total interviews
-                using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Interviews WHERE UserId = @UserId", con))
+                using (SqlCommand cmd = new SqlCommand(hasJobFilter ? "SELECT COUNT(*) FROM Interviews WHERE UserId = @UserId AND JobId = @JobId" : "SELECT COUNT(*) FROM Interviews WHERE UserId = @UserId", con))
                 {
                     cmd.Parameters.AddWithValue("@UserId", userId);
+                    if (hasJobFilter)
+                        cmd.Parameters.AddWithValue("@JobId", jobId);
                     litTotalInterviews.Text = cmd.ExecuteScalar().ToString();
                 }
 
                 // Completed
-                using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Interviews WHERE UserId = @UserId AND Status = 'completed'", con))
+                using (SqlCommand cmd = new SqlCommand(hasJobFilter ? "SELECT COUNT(*) FROM Interviews WHERE UserId = @UserId AND Status = 'completed' AND JobId = @JobId" : "SELECT COUNT(*) FROM Interviews WHERE UserId = @UserId AND Status = 'completed'", con))
                 {
                     cmd.Parameters.AddWithValue("@UserId", userId);
+                    if (hasJobFilter)
+                        cmd.Parameters.AddWithValue("@JobId", jobId);
                     litCompletedCount.Text = cmd.ExecuteScalar().ToString();
                 }
 
                 // Avg score
-                using (SqlCommand cmd = new SqlCommand("SELECT ISNULL(AVG(TotalScore), 0) FROM InterviewFeedback WHERE UserId = @UserId", con))
+                using (SqlCommand cmd = new SqlCommand(hasJobFilter ? "SELECT ISNULL(AVG(f.TotalScore), 0) FROM InterviewFeedback f INNER JOIN Interviews i ON f.InterviewId = i.InterviewId WHERE f.UserId = @UserId AND i.JobId = @JobId" : "SELECT ISNULL(AVG(TotalScore), 0) FROM InterviewFeedback WHERE UserId = @UserId", con))
                 {
                     cmd.Parameters.AddWithValue("@UserId", userId);
+                    if (hasJobFilter)
+                        cmd.Parameters.AddWithValue("@JobId", jobId);
                     litAvgScore.Text = cmd.ExecuteScalar().ToString();
                 }
 
                 // Best score
-                using (SqlCommand cmd = new SqlCommand("SELECT ISNULL(MAX(TotalScore), 0) FROM InterviewFeedback WHERE UserId = @UserId", con))
+                using (SqlCommand cmd = new SqlCommand(hasJobFilter ? "SELECT ISNULL(MAX(f.TotalScore), 0) FROM InterviewFeedback f INNER JOIN Interviews i ON f.InterviewId = i.InterviewId WHERE f.UserId = @UserId AND i.JobId = @JobId" : "SELECT ISNULL(MAX(TotalScore), 0) FROM InterviewFeedback WHERE UserId = @UserId", con))
                 {
                     cmd.Parameters.AddWithValue("@UserId", userId);
+                    if (hasJobFilter)
+                        cmd.Parameters.AddWithValue("@JobId", jobId);
                     litBestScore.Text = cmd.ExecuteScalar().ToString();
                 }
             }
@@ -64,6 +73,7 @@ namespace IntelliJob.User
         private void LoadInterviews()
         {
             int userId = Convert.ToInt32(Session["userId"]);
+            bool hasJobFilter = TryGetJobFilter(out int jobId);
             using (SqlConnection con = new SqlConnection(str))
             {
                 string query = @"SELECT mi.InterviewId, mi.Role, mi.Level, mi.InterviewType, mi.TechStack, 
@@ -71,11 +81,13 @@ namespace IntelliJob.User
                                  ISNULL(mf.TotalScore, -1) as TotalScore
                                  FROM Interviews mi
                                  LEFT JOIN InterviewFeedback mf ON mi.InterviewId = mf.InterviewId
-                                 WHERE mi.UserId = @UserId
+                                 WHERE mi.UserId = @UserId" + (hasJobFilter ? " AND mi.JobId = @JobId" : string.Empty) + @"
                                  ORDER BY mi.CreatedAt DESC";
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@UserId", userId);
+                    if (hasJobFilter)
+                        cmd.Parameters.AddWithValue("@JobId", jobId);
                     using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
@@ -87,7 +99,7 @@ namespace IntelliJob.User
                         {
                             litEmpty.Text = @"<div class='empty-state'>
                                 <i class='fas fa-microphone-alt'></i>
-                                <p>You haven't taken any interviews yet.</p>
+                                <p>You haven't taken any interviews yet." + (hasJobFilter ? " for this job." : "") + @"</p>
                                 <a href='Interview.aspx'>Start Your First Interview</a>
                             </div>";
                             litEmpty.Visible = true;
@@ -95,6 +107,15 @@ namespace IntelliJob.User
                     }
                 }
             }
+        }
+
+        private bool TryGetJobFilter(out int jobId)
+        {
+            jobId = 0;
+            if (Request.QueryString["jobId"] == null)
+                return false;
+
+            return int.TryParse(Request.QueryString["jobId"], out jobId);
         }
 
         public string GetScoreBadge(object score)

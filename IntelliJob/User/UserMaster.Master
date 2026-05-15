@@ -25,6 +25,27 @@
     <link rel="stylesheet" href="../assets/css/slick.css">
     <link rel="stylesheet" href="../assets/css/nice-select.css">
     <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        @media (max-width: 991.98px) {
+            .header-area .header-btn.d-none.d-lg-block {
+                display: flex !important;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+                width: 100%;
+                margin-top: 14px;
+            }
+
+            .header-area .header-btn.d-none.d-lg-block .btn {
+                flex: 1 1 120px;
+                text-align: center;
+            }
+
+            .header-area .menu-wrapper {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
     <asp:ContentPlaceHolder ID="head" runat="server">
     </asp:ContentPlaceHolder>
 </head>
@@ -61,7 +82,7 @@
                                         <nav class="d-none d-lg-block">
                                             <ul id="navigation">
                                                 <li><a href="Home.aspx">Home</a></li>
-                                                <li><a href="JobListing.aspx">Find a Jobs </a></li>
+                                                <li><a href="JobListing.aspx">Find Jobs</a></li>
                                                 <li><a href="Interview.aspx">Interviews</a></li>
                                                 <li><a href="About.aspx">About</a></li>
                                                 <li><a href="Contact.aspx">Contact</a></li>

@@ -55,6 +55,8 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Net.Http, Version=4.1.1.3, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Net.Http.4.3.4\lib\net46\System.Net.Http.dll</HintPath>
       <Private>True</Private>
@@ -112,6 +114,8 @@
     <Content Include="Admin\ViewJobApplicants.aspx" />
     <Content Include="Admin\ViewJobDetails.aspx" />
     <Content Include="Admin\ViewUserDetails.aspx" />
+    <Content Include="App_Data\IntelliJob_Tables.sql" />
+    <Content Include="App_Data\Interview_Tables.sql" />
     <Content Include="assets\css\animate.min.css" />
     <Content Include="assets\css\bootstrap.min.css" />
     <Content Include="assets\css\flaticon.css" />
@@ -297,13 +301,16 @@
     <Content Include="User\InterviewFeedback.aspx" />
     <Content Include="User\InterviewHistory.aspx" />
     <Content Include="User\JobDetails.aspx" />
+    <Content Include="User\ApplicationResumeBuild.aspx" />
     <Content Include="User\JobListing.aspx" />
     <Content Include="User\Login.aspx" />
     <Content Include="User\Interview.aspx" />
+    <Content Include="User\JobApplications.aspx" />
     <Content Include="User\Profile.aspx" />
     <Content Include="User\Register.aspx" />
     <Content Include="User\RegisterCompany.aspx" />
     <Content Include="User\ResumeBuild.aspx" />
+    <Content Include="User\ResumeEnhancer.aspx" />
     <Content Include="User\TakeInterview.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -378,6 +385,8 @@
     <Compile Include="Admin\ViewUserDetails.aspx.designer.cs">
       <DependentUpon>ViewUserDetails.aspx</DependentUpon>
     </Compile>
+    <Compile Include="ApplicationDataStore.cs" />
+    <Compile Include="ResumePdfExporter.cs" />
     <Compile Include="Company\Applicants.aspx.cs">
       <DependentUpon>Applicants.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -519,6 +528,20 @@
     <Compile Include="User\JobDetails.aspx.designer.cs">
       <DependentUpon>JobDetails.aspx</DependentUpon>
     </Compile>
+    <Compile Include="User\ApplicationResumeBuild.aspx.cs">
+      <DependentUpon>ApplicationResumeBuild.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="User\ApplicationResumeBuild.aspx.designer.cs">
+      <DependentUpon>ApplicationResumeBuild.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="User\JobApplications.aspx.cs">
+      <DependentUpon>JobApplications.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="User\JobApplications.aspx.designer.cs">
+      <DependentUpon>JobApplications.aspx</DependentUpon>
+    </Compile>
     <Compile Include="User\JobListing.aspx.cs">
       <DependentUpon>JobListing.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -561,6 +584,10 @@
     <Compile Include="User\RegisterCompany.aspx.designer.cs">
       <DependentUpon>RegisterCompany.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Models\ResumeEnhancementModels.cs" />
+    <Compile Include="Models\ResumeProfileModels.cs" />
+    <Compile Include="ResumeTextExtractor.cs" />
+    <Compile Include="ResumeProfileService.cs" />
     <Compile Include="User\ResumeBuild.aspx.cs">
       <DependentUpon>ResumeBuild.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -568,8 +595,18 @@
     <Compile Include="User\ResumeBuild.aspx.designer.cs">
       <DependentUpon>ResumeBuild.aspx</DependentUpon>
     </Compile>
+    <Compile Include="User\ResumeEnhancer.aspx.cs">
+      <DependentUpon>ResumeEnhancer.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="User\ResumeEnhancer.aspx.designer.cs">
+      <DependentUpon>ResumeEnhancer.aspx</DependentUpon>
+    </Compile>
     <Compile Include="User\RetakeInterview.ashx.cs">
       <DependentUpon>RetakeInterview.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="User\ConsumeInterviewAccess.ashx.cs">
+      <DependentUpon>ConsumeInterviewAccess.ashx</DependentUpon>
     </Compile>
     <Compile Include="User\SaveVoiceTranscript.ashx.cs">
       <DependentUpon>SaveVoiceTranscript.ashx</DependentUpon>
@@ -647,6 +684,7 @@
     <None Include="packages.config" />
     <Content Include="User\UserMaster.Master" />
     <Content Include="User\RetakeInterview.ashx" />
+    <Content Include="User\ConsumeInterviewAccess.ashx" />
     <Content Include="User\SaveVoiceTranscript.ashx" />
     <Content Include="User\CancelInterview.ashx" />
     <None Include="Web.Debug.config">
@@ -656,10 +694,7 @@
       <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

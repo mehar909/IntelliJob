@@ -1,6 +1,7 @@
 using System;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.IO;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -69,7 +70,7 @@ namespace IntelliJob.Company
                 SqlDataReader sdr = cmd.ExecuteReader();
                 if (sdr.Read())
                 {
-                    // These are your existing textboxes – they stay editable
+                    // These are your existing textboxes ï¿½ they stay editable
                     txtCompany.Text = sdr["CompanyName"].ToString();
                     txtWebsite.Text = sdr["Website"].ToString();
                     txtEmail.Text = sdr["Email"].ToString();
@@ -136,16 +137,15 @@ namespace IntelliJob.Company
                         //    lblPostedDate.Text = Convert.ToDateTime(sdr["CreateDate"]).ToString("yyyy-MM-dd");
                         //}
 
-                        // Display company logo if available
-                        if (sdr["CompanyImage"] != DBNull.Value && !string.IsNullOrEmpty(sdr["CompanyImage"].ToString()))
+                        // Display the job logo if present, otherwise show the company's logo or fallback image.
+                        string displayLogo = sdr["CompanyImage"] != DBNull.Value ? sdr["CompanyImage"].ToString().Trim() : string.Empty;
+                        if (string.IsNullOrWhiteSpace(displayLogo))
                         {
-                            imgCompanyLogo.ImageUrl = "~/" + sdr["CompanyImage"].ToString();
-                            imgCompanyLogo.Visible = true;
+                            displayLogo = GetCompanyLogo();
                         }
-                        else
-                        {
-                            imgCompanyLogo.Visible = false;
-                        }
+
+                        imgCompanyLogo.ImageUrl = ResolveLogoUrl(displayLogo);
+                        imgCompanyLogo.Visible = true;
                     }
                 }
                 else
@@ -176,6 +176,7 @@ namespace IntelliJob.Company
                 con = new SqlConnection(str);
                 if (Request.QueryString["id"] != null)
                 {
+                    string companyImageParamValue = string.Empty;
                     if (fuCompanyLogo.HasFile)
                     {
                         if (IsValidExtension(fuCompanyLogo.FileName))
@@ -189,7 +190,7 @@ namespace IntelliJob.Company
                     }
                     else
                     {
-                        concatQuery = string.Empty;
+                        concatQuery = "CompanyImage= @CompanyImage,";
                     }
                     query = @"Update Jobs set Title=@Title,NoOfPost=@NoOfPost,Description=@Description,Qualification=@Qualification,
                                 Experience=@Experience,Specialization=@Specialization,LastDateToApply=@LastDateToApply,
@@ -221,18 +222,25 @@ namespace IntelliJob.Company
                             Guid obj = Guid.NewGuid();
                             imagePath = "Images/" + obj.ToString() + fuCompanyLogo.FileName;
                             fuCompanyLogo.PostedFile.SaveAs(Server.MapPath("~/Images/") + obj.ToString() + fuCompanyLogo.FileName);
-                            cmd.Parameters.AddWithValue("@CompanyImage", imagePath);
+                            companyImageParamValue = imagePath;
                             isValidToExecute = true;
                         }
                         else
                         {
                             lblMsg.Text = "Please select .jpg, .jpeg, .png for logo";
                             lblMsg.CssClass = "alert alert-danger";
+                            return;
                         }
                     }
                     else
                     {
+                        companyImageParamValue = GetCompanyLogo();
                         isValidToExecute = true;
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(concatQuery))
+                    {
+                        cmd.Parameters.AddWithValue("@CompanyImage", companyImageParamValue);
                     }
                 }
                 else
@@ -330,8 +338,49 @@ namespace IntelliJob.Company
                 cmd.Parameters.AddWithValue("@id", Session["userId"]);
                 con.Open();
                 var logo = cmd.ExecuteScalar()?.ToString();
-                return string.IsNullOrEmpty(logo) ? "company_logo.png" : logo;
+                if (string.IsNullOrWhiteSpace(logo))
+                {
+                    return "Images/No_image.png";
+                }
+
+                return logo.Trim();
             }
+        }
+
+        private string ResolveLogoUrl(string logo)
+        {
+            if (string.IsNullOrWhiteSpace(logo))
+            {
+                return "~/Images/No_image.png";
+            }
+
+            if (logo.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || logo.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                return logo;
+            }
+
+            string[] candidates = new[]
+            {
+                "~/" + logo.TrimStart('~', '/'),
+                "~/Images/" + logo.TrimStart('~', '/'),
+                "~/photos/" + logo.TrimStart('~', '/')
+            };
+
+            foreach (string candidate in candidates)
+            {
+                try
+                {
+                    if (File.Exists(Server.MapPath(candidate)))
+                    {
+                        return candidate;
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            return "~/Images/No_image.png";
         }
 
         private void clear()

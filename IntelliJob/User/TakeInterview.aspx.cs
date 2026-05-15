@@ -11,7 +11,7 @@ namespace IntelliJob.User
     /// Interview session page.
     /// Works for BOTH the new job-linked flow (reached via InterviewAccess.aspx)
     /// AND the old self-service practice flow (reached via Interview.aspx).
-    ///
+    /// 
     /// The Vapi voice agent is initialised with the interview's questions so
     /// it can conduct the full conversation; the transcript is saved via
     /// SaveVoiceTranscript.ashx, which then triggers AI feedback generation.
@@ -41,7 +41,7 @@ namespace IntelliJob.User
         private void LoadInterview()
         {
             int interviewId = Convert.ToInt32(Request.QueryString["id"]);
-            int userId = Convert.ToInt32(Session["userId"]);
+            int userId      = Convert.ToInt32(Session["userId"]);
 
             using (SqlConnection con = new SqlConnection(str))
             {
@@ -55,7 +55,7 @@ namespace IntelliJob.User
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@InterviewId", interviewId);
-                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.Parameters.AddWithValue("@UserId",      userId);
                     using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
@@ -80,11 +80,10 @@ namespace IntelliJob.User
                             return;
                         }
 
-                        // Block direct URL access for company-assigned interviews
-                        // whose one-time password has already been consumed.
-                        // Exception: if InterviewAccess.aspx just authenticated this
-                        // session it stamps AuthorizedInterviewId — we honour that
-                        // for exactly one entry and then clear it.
+                        // Block direct URL access for company-assigned interviews.
+                        // InterviewAccess.aspx stamps AuthorizedInterviewId after the user
+                        // enters the password. That stamp remains valid until the live call
+                        // actually starts and the client consumes it.
                         using (SqlConnection invCon = new SqlConnection(str))
                         {
                             string checkInvSql = @"SELECT IsPasswordUsed FROM InterviewInvitations
@@ -97,32 +96,24 @@ namespace IntelliJob.User
                                 if (invResult != null && invResult != DBNull.Value)
                                 {
                                     bool pwdUsed = Convert.ToBoolean(invResult);
-                                    if (pwdUsed)
+                                    object authorizedId = Session["AuthorizedInterviewId"];
+                                    bool hasValidStamp = authorizedId != null && Convert.ToInt32(authorizedId) == interviewId;
+
+                                    if (pwdUsed || !hasValidStamp)
                                     {
-                                        // Check if InterviewAccess.aspx just granted access
-                                        object authorizedId = Session["AuthorizedInterviewId"];
-                                        if (authorizedId != null && Convert.ToInt32(authorizedId) == interviewId)
-                                        {
-                                            // Consume the stamp — valid for one pass only
-                                            Session.Remove("AuthorizedInterviewId");
-                                        }
-                                        else
-                                        {
-                                            // No valid stamp — block re-entry
-                                            Response.Redirect("Interview.aspx?err=access_revoked");
-                                            return;
-                                        }
+                                        Response.Redirect("Interview.aspx?err=access_revoked");
+                                        return;
                                     }
                                 }
                             }
                         }
 
-                        litRole.Text = row["Role"].ToString();
-                        litLevel.Text = row["Level"].ToString();
-                        litType.Text = row["InterviewType"].ToString();
+                        litRole.Text      = row["Role"].ToString();
+                        litLevel.Text     = row["Level"].ToString();
+                        litType.Text      = row["InterviewType"].ToString();
                         litTechStack.Text = string.IsNullOrEmpty(row["TechStack"].ToString())
                                            ? "General" : row["TechStack"].ToString();
-                        litUserName.Text = row["Username"].ToString();
+                        litUserName.Text  = row["Username"].ToString();
                         hdnInterviewId.Value = interviewId.ToString();
 
                         string username = row["Username"].ToString();
@@ -170,7 +161,7 @@ namespace IntelliJob.User
                     "UPDATE Interviews SET Status = @Status WHERE InterviewId = @Id", con))
                 {
                     cmd.Parameters.AddWithValue("@Status", status);
-                    cmd.Parameters.AddWithValue("@Id", interviewId);
+                    cmd.Parameters.AddWithValue("@Id",     interviewId);
                     con.Open();
                     cmd.ExecuteNonQuery();
                 }
@@ -201,7 +192,7 @@ namespace IntelliJob.User
                     }
                 }
 
-                var gemini = new GeminiService();
+                var gemini  = new GeminiService();
                 var feedback = System.Threading.Tasks.Task.Run(
                     () => gemini.GenerateFeedbackAsync(transcript, level)
                 ).GetAwaiter().GetResult();
@@ -236,7 +227,7 @@ namespace IntelliJob.User
                         {
                             messages.Add(new TranscriptMessage
                             {
-                                Role = rdr["SpeakerRole"].ToString(),
+                                Role    = rdr["SpeakerRole"].ToString(),
                                 Content = rdr["Content"].ToString()
                             });
                         }
@@ -284,23 +275,23 @@ namespace IntelliJob.User
 
                 using (SqlCommand cmd = new SqlCommand(sql, con))
                 {
-                    cmd.Parameters.AddWithValue("@InterviewId", interviewId);
-                    cmd.Parameters.AddWithValue("@UserId", userId);
-                    cmd.Parameters.AddWithValue("@JobId", jobId.HasValue ? (object)jobId.Value : DBNull.Value);
-                    cmd.Parameters.AddWithValue("@TotalScore", fb.TotalScore);
-                    cmd.Parameters.AddWithValue("@CommScore", fb.CommunicationScore);
-                    cmd.Parameters.AddWithValue("@CommComment", fb.CommunicationComment ?? "");
-                    cmd.Parameters.AddWithValue("@TechScore", fb.TechnicalScore);
-                    cmd.Parameters.AddWithValue("@TechComment", fb.TechnicalComment ?? "");
-                    cmd.Parameters.AddWithValue("@ProblemScore", fb.ProblemSolvingScore);
+                    cmd.Parameters.AddWithValue("@InterviewId",   interviewId);
+                    cmd.Parameters.AddWithValue("@UserId",         userId);
+                    cmd.Parameters.AddWithValue("@JobId",          jobId.HasValue ? (object)jobId.Value : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@TotalScore",     fb.TotalScore);
+                    cmd.Parameters.AddWithValue("@CommScore",      fb.CommunicationScore);
+                    cmd.Parameters.AddWithValue("@CommComment",    fb.CommunicationComment ?? "");
+                    cmd.Parameters.AddWithValue("@TechScore",      fb.TechnicalScore);
+                    cmd.Parameters.AddWithValue("@TechComment",    fb.TechnicalComment ?? "");
+                    cmd.Parameters.AddWithValue("@ProblemScore",   fb.ProblemSolvingScore);
                     cmd.Parameters.AddWithValue("@ProblemComment", fb.ProblemSolvingComment ?? "");
-                    cmd.Parameters.AddWithValue("@CulturalScore", fb.CulturalFitScore);
-                    cmd.Parameters.AddWithValue("@CulturalComment", fb.CulturalFitComment ?? "");
-                    cmd.Parameters.AddWithValue("@ConfidenceScore", fb.ConfidenceScore);
-                    cmd.Parameters.AddWithValue("@ConfidenceComment", fb.ConfidenceComment ?? "");
-                    cmd.Parameters.AddWithValue("@Strengths", fb.Strengths != null ? string.Join("|", fb.Strengths) : "");
-                    cmd.Parameters.AddWithValue("@Areas", fb.AreasForImprovement != null ? string.Join("|", fb.AreasForImprovement) : "");
-                    cmd.Parameters.AddWithValue("@FinalAssessment", fb.FinalAssessment ?? "");
+                    cmd.Parameters.AddWithValue("@CulturalScore",  fb.CulturalFitScore);
+                    cmd.Parameters.AddWithValue("@CulturalComment",fb.CulturalFitComment ?? "");
+                    cmd.Parameters.AddWithValue("@ConfidenceScore",fb.ConfidenceScore);
+                    cmd.Parameters.AddWithValue("@ConfidenceComment",fb.ConfidenceComment ?? "");
+                    cmd.Parameters.AddWithValue("@Strengths",      fb.Strengths != null ? string.Join("|", fb.Strengths) : "");
+                    cmd.Parameters.AddWithValue("@Areas",          fb.AreasForImprovement != null ? string.Join("|", fb.AreasForImprovement) : "");
+                    cmd.Parameters.AddWithValue("@FinalAssessment",fb.FinalAssessment ?? "");
                     con.Open();
                     cmd.ExecuteNonQuery();
                 }
@@ -312,19 +303,14 @@ namespace IntelliJob.User
             SaveFeedbackToDb(interviewId, userId, new InterviewFeedbackResult
             {
                 TotalScore = 0,
-                CommunicationScore = 0,
-                CommunicationComment = "Feedback failed.",
-                TechnicalScore = 0,
-                TechnicalComment = "Feedback failed.",
-                ProblemSolvingScore = 0,
-                ProblemSolvingComment = "Feedback failed.",
-                CulturalFitScore = 0,
-                CulturalFitComment = "Feedback failed.",
-                ConfidenceScore = 0,
-                ConfidenceComment = "Feedback failed.",
-                Strengths = new List<string> { "Could not generate feedback" },
-                AreasForImprovement = new List<string> { "Please use Regenerate on feedback page" },
-                FinalAssessment = "ERROR: " + detail
+                CommunicationScore = 0, CommunicationComment = "Feedback failed.",
+                TechnicalScore = 0,     TechnicalComment     = "Feedback failed.",
+                ProblemSolvingScore = 0,ProblemSolvingComment = "Feedback failed.",
+                CulturalFitScore = 0,   CulturalFitComment   = "Feedback failed.",
+                ConfidenceScore = 0,    ConfidenceComment    = "Feedback failed.",
+                Strengths            = new List<string> { "Could not generate feedback" },
+                AreasForImprovement  = new List<string> { "Please use Regenerate on feedback page" },
+                FinalAssessment      = "ERROR: " + detail
             });
         }
     }

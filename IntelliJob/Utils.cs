@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 
@@ -23,17 +24,15 @@ namespace IntelliJob
 
         public static bool IsValidExtension4Resume(string fileName)
         {
-            bool isValid = false;
-            string[] fileExtension = { ".doc", ".docx", ".pdf" };
-            for (int i = 0; i < fileExtension.Length; i++)
-            {
-                if (fileName.Contains(fileExtension[i]))
-                {
-                    isValid = true;
-                    break;
-                }
-            }
-            return isValid;
+            if (string.IsNullOrWhiteSpace(fileName))
+                return false;
+
+            string extension = Path.GetExtension(fileName);
+            if (string.IsNullOrWhiteSpace(extension))
+                return false;
+
+            extension = extension.ToLowerInvariant();
+            return extension == ".doc" || extension == ".docx" || extension == ".pdf";
         }
         public static string ExtractDuplicateValue(string message)
         {

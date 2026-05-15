@@ -667,6 +667,7 @@
         var voiceTranscript = [];
         var callActive = false;
         var micMuted = false;
+        var accessConsumed = false;
 
         // === Timers ===
         var totalInterviewTime = 0;
@@ -809,6 +810,7 @@
 
             voiceTranscript = [];
             micMuted = false;
+            accessConsumed = false;
 
             if (!vapiInstance) {
                 alert('Vapi SDK is still loading. Please try again in a moment.');
@@ -972,6 +974,7 @@
                 document.getElementById('speakingIndicator').classList.add('active');
                 // AI is speaking → start a new question timer
                 startQuestionTimer();
+                consumeInterviewAccessOnce();
             });
 
             vapiInstance.on('speech-end', function () {
@@ -983,6 +986,23 @@
                 feedbackLog('Vapi error: ' + JSON.stringify(err));
                 console.error('Vapi error:', err);
             });
+        }
+
+        function consumeInterviewAccessOnce() {
+            if (accessConsumed) return;
+            accessConsumed = true;
+
+            var interviewId = document.getElementById('<%= hdnInterviewId.ClientID %>').value;
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'ConsumeInterviewAccess.ashx', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status !== 200) {
+                    feedbackLog('Failed to consume interview access: ' + xhr.responseText);
+                    accessConsumed = false;
+                }
+            };
+            xhr.send('InterviewId=' + encodeURIComponent(interviewId));
         }
 
         function appendTranscriptMessage(role, content) {

@@ -7,7 +7,7 @@
         /* Modern Filter Panel Styles */
         .filter-panel {
             background: #ffffff;
-            border-radius: 12px;
+/*            border-radius: 12px;*/
             box-shadow: 0 2px 12px rgba(0,0,0,0.08);
             padding: 24px;
             position: sticky;
@@ -24,7 +24,7 @@
 
         .filter-header i {
             font-size: 20px;
-            color: #FF4357;
+            color: #FB2461;
             margin-right: 12px;
         }
 
@@ -51,7 +51,7 @@
 
         .filter-label i {
             margin-right: 8px;
-            color: #FF4357;
+            color: #FB2461;
             width: 16px;
         }
 
@@ -60,7 +60,7 @@
             width: 100%;
             padding: 12px 16px;
             border: 2px solid #e9ecef;
-            border-radius: 8px;
+/*            border-radius: 8px;*/
             font-size: 14px;
             transition: all 0.3s ease;
             background: #f8f9fa;
@@ -69,7 +69,7 @@
 
         .modern-input:focus {
             outline: none;
-            border-color: #FF4357;
+            border-color: #FB2461;
             background: #ffffff;
             box-shadow: 0 0 0 3px rgba(255, 67, 87, 0.1);
         }
@@ -83,12 +83,12 @@
             width: 100%;
             padding: 12px 16px;
             border: 2px solid #e9ecef;
-            border-radius: 8px;
+/*            border-radius: 8px;*/
             font-size: 14px;
             background: #f8f9fa;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-sizing: border-box;
+/*            box-sizing: border-box;*/
             text-align: center;
             text-align-last: center;
             line-height: normal;
@@ -96,7 +96,7 @@
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23adb5bd' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+/*            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23adb5bd' d='M6 9L1 4h10z'/%3E%3C/svg%3E");*/
             background-repeat: no-repeat;
             background-position: center right 16px;
             background-size: 12px;
@@ -104,7 +104,7 @@
 
         .modern-select:focus {
             outline: none;
-            border-color: #FF4357;
+            border-color: #FB2461;
             background-color: #ffffff;
             box-shadow: 0 0 0 3px rgba(255, 67, 87, 0.1);
         }
@@ -130,14 +130,14 @@
             align-items: center;
             padding: 10px 14px;
             border: 2px solid #e9ecef;
-            border-radius: 8px;
+/*            border-radius: 8px;*/
             transition: all 0.3s ease;
             background: #f8f9fa;
             cursor: pointer;
         }
 
         #RadioButtonListJobType td:hover {
-            border-color: #FF4357;
+            border-color: #FB2461;
             background: #fff5f6;
         }
 
@@ -146,7 +146,7 @@
             height: 18px;
             margin: 0 10px 0 0;
             cursor: pointer;
-            accent-color: #FF4357;
+            accent-color: #FB2461;
         }
 
         #RadioButtonListJobType label {
@@ -160,12 +160,12 @@
 
         #RadioButtonListJobType input[type="radio"]:checked ~ label,
         #RadioButtonListJobType input[type="radio"]:checked + label {
-            color: #FF4357;
+            color: #FB2461;
             font-weight: 600;
         }
 
         #RadioButtonListJobType td:has(input[type="radio"]:checked) {
-            border-color: #FF4357;
+            border-color: #FB2461;
             background: #fff5f6;
         }
 
@@ -189,7 +189,7 @@
             display: inline-block;
             padding: 8px 16px;
             border: 2px solid #e9ecef;
-            border-radius: 20px;
+/*            border-radius: 20px;*/
             font-size: 13px;
             font-weight: 500;
             color: #495057;
@@ -203,7 +203,7 @@
         }
 
         #RadioButtonList1 label:hover {
-            border-color: #FF4357;
+            border-color: #FB2461;
             background: #fff5f6;
         }
 
@@ -214,9 +214,9 @@
         }
 
         #RadioButtonList1 input[type="radio"]:checked + label {
-            background: #FF4357;
+            background: #FB2461;
             color: white;
-            border-color: #FF4357;
+            border-color: #FB2461;
             font-weight: 600;
             box-shadow: 0 2px 8px rgba(255, 67, 87, 0.3);
         }
@@ -235,7 +235,7 @@
             width: 100%;
             padding: 14px 24px;
             border: none;
-            border-radius: 8px;
+/*            border-radius: 8px;*/
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
@@ -248,7 +248,7 @@
         }
 
         .btn-filter-primary {
-            background: linear-gradient(135deg, #FF4357 0%, #ff6b7a 100%);
+            background: #fb2461;
             color: white !important;
             box-shadow: 0 4px 12px rgba(255, 67, 87, 0.3);
         }
@@ -267,6 +267,8 @@
             background: #f8f9fa;
             color: #495057 !important;
             border: 2px solid #e9ecef;
+/*            border-radius: unset;*/
+            box-shadow:unset;
         }
 
         .btn-filter-secondary:hover {
@@ -296,7 +298,7 @@
         /* Responsive */
         @media (max-width: 768px) {
             .filter-panel {
-                border-radius: 8px;
+                /*border-radius: 8px;*/
                 padding: 20px;
             }
         }
@@ -337,6 +339,11 @@
                 <div class="row">
                     <!-- Left Filter Panel -->
                     <div class="col-xl-3 col-lg-4 col-md-4">
+                        <div class="mb-3 text-center">
+                            <a href="JobApplications.aspx" class="btn btn-post" style="display:inline-block; width:100%;">
+                                <i class="fas fa-folder-open"></i> My Job Applications
+                            </a>
+                        </div>
                         <div class="filter-panel">
                             <!-- Filter Header -->
                             <div class="filter-header">
@@ -364,7 +371,7 @@
                                     DataSourceID="SqlDataSource1" AppendDataBoundItems="True" 
                                     DataTextField="CountryName" DataValueField="CountryName" 
                                     OnSelectedIndexChanged="ddlCountry_SelectedIndexChanged">
-                                    <asp:ListItem Value="0">Select Country</asp:ListItem>
+                                    <asp:ListItem Value="0" style="-moz-appearance: none; -webkit-appearance: none; margin-bottom:10px;">Select Country</asp:ListItem>
                                 </asp:DropDownList>
                                 <asp:SqlDataSource ID="SqlDataSource1" runat="server" 
                                     ConnectionString="<%$ ConnectionStrings:cs %>"
@@ -405,7 +412,7 @@
 
                             <!-- Action Buttons -->
                             <div class="filter-actions">
-                                <asp:LinkButton ID="lbFilter" runat="server" CssClass="btn-filter btn-filter-primary"
+                                <asp:LinkButton ID="lbFilter" runat="server" CssClass="btn btn-post"
                                     OnClick="lbFilter_Click">
                                     <i class="fas fa-search"></i> Apply Filters
                                 </asp:LinkButton>
@@ -433,11 +440,11 @@
                                 <!-- Local Jobs -->
                                 <asp:DataList ID="DataList1" runat="server" RepeatLayout="Flow">
                                     <ItemTemplate>
-                                        <div class="single-job-items mb-30" style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                                        <div class="single-job-items mb-30" style="border: 1px solid #ddd; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
                                             <div class="job-items">
                                                 <div class="company-img">
                                                     <a href="JobDetails.aspx?id=<%# Eval("JobId") %>">
-                                                        <img width="80" src="<%# GetImageUrl( Eval("CompanyImage")) %>" alt="">
+                                                        <img width="80" src="<%# GetImageUrl(Eval("DisplayImage")) %>" alt="Company logo">
                                                     </a>
                                                 </div>
                                                 <div class="job-tittle job-tittle2">
@@ -451,6 +458,9 @@
                                                     </ul>
                                                 </div>
                                             </div>
+                                 <%--           <div class="col-md text-right">
+    <a href='ApplicationDetails.aspx?id=<%# Eval("JobId") %>">' class="btn-action">View Details</a>
+</div>--%>
                                             <div class="items-link items-link2 f-right">
                                                 <a href="JobDetails.aspx?id=<%# Eval("JobId") %>"><%# Eval("JobType") %></a>
                                                 <span class="text-secondary">
@@ -458,6 +468,7 @@
                                                     <%# RelativeDate(Convert.ToDateTime(Eval("CreateDate"))) %>
                                                 </span>
                                             </div>
+                                            
                                         </div>
                                     </ItemTemplate>
                                 </asp:DataList>

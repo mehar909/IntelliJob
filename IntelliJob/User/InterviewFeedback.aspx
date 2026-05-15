@@ -297,6 +297,7 @@
                             <a href="InterviewHistory.aspx" class="btn-back">
                                 <i class="fas fa-history"></i> View History
                             </a>
+                            <asp:Literal ID="litEnhanceResumeAction" runat="server" />
                             <asp:Panel ID="pnlRetake" runat="server" Visible="false" style="display:inline;">
                                 <a href="javascript:void(0)" onclick="retakeInterview()" class="btn-retake" id="btnRetakeLink">
                                     <i class="fas fa-redo"></i> Retake Interview

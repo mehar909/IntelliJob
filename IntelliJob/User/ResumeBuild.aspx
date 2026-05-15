@@ -1,6 +1,21 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/User/UserMaster.Master" AutoEventWireup="true" CodeBehind="ResumeBuild.aspx.cs" Inherits="IntelliJob.User.ResumeBuild" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+    <style>
+        .resume-builder-form textarea.form-control {
+            height: 120px !important;
+            min-height: 120px !important;
+            max-height: 220px !important;
+            overflow-y: auto !important;
+            resize: vertical;
+        }
+
+        .resume-builder-actions {
+            clear: both;
+            margin-top: 24px;
+            margin-bottom: 72px;
+        }
+    </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
     <section>
@@ -13,7 +28,7 @@
                     <h2 class="contact-title text-center">Build Resume</h2>
                 </div>
                 <div class="col-lg-6 mx-auto">
-                    <div class="form-contact contact_form">
+                    <div class="form-contact contact_form resume-builder-form">
                         <div class="row">
                             <div class="col-12">
                                 <h6>Personal Information</h6>
@@ -132,13 +147,76 @@
                                 <label>Resume</label>
                                 <asp:FileUpload ID="fuResume" runat="server"
                                 CssClass="form-control pt-2" ToolTip=".doc , .docx, .pdf extension only" />
+                                <small class="text-muted d-block mt-2">Upload a resume to populate the structured profile sections below.</small>
+                            </div>
+                        </div>
+
+                        <div class="col-12 pt-4">
+                            <h6>Structured Resume Sections</h6>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label>Headline</label>
+                                <asp:TextBox ID="txtResumeHeadline" runat="server" CssClass="form-control" placeholder="Resume headline / title"></asp:TextBox>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label>Summary</label>
+                                <asp:TextBox ID="txtResumeSummary" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="4" placeholder="Professional summary"></asp:TextBox>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label>Skills</label>
+                                <asp:TextBox ID="txtResumeSkills" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="4" placeholder="One skill per line"></asp:TextBox>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label>Education Details</label>
+                                <asp:TextBox ID="txtResumeEducation" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="4" placeholder="Education entries"></asp:TextBox>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label>Experience Details</label>
+                                <asp:TextBox ID="txtResumeExperienceDetails" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="5" placeholder="Experience entries"></asp:TextBox>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label>Projects</label>
+                                <asp:TextBox ID="txtResumeProjects" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="4" placeholder="Project entries"></asp:TextBox>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label>Certifications</label>
+                                <asp:TextBox ID="txtResumeCertifications" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="3" placeholder="Certification entries"></asp:TextBox>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label>Languages</label>
+                                <asp:TextBox ID="txtResumeLanguages" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="3" placeholder="Language entries"></asp:TextBox>
                             </div>
                         </div>
 
 
-                        <div class="form-group mt-3">
-                            <asp:Button ID="btnUpdate" runat="server" Text="Update" 
-                                CssClass="button button-contactForm boxed-btn" OnClick="btnUpdate_Click" />                      
+                        <div class="row resume-builder-actions">
+                            <div class="col-12 text-center">
+                                <asp:Button ID="btnUpdate" runat="server" Text="Update" 
+                                    CssClass="button button-contactForm boxed-btn" OnClick="btnUpdate_Click" CausesValidation="false" />                      
+                            </div>
                         </div>
                     </div>
                 </div>

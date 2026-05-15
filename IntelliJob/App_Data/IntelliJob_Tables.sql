@@ -39,6 +39,51 @@ CREATE TABLE JobSeekers (
         FOREIGN KEY (ProfileId) REFERENCES Users(UserId)
 );
 
+IF COL_LENGTH('JobSeekers', 'ResumeOriginalFileName') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeOriginalFileName NVARCHAR(255) NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeParseStatus') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeParseStatus NVARCHAR(20) NOT NULL CONSTRAINT DF_JobSeekers_ResumeParseStatus DEFAULT('none');
+
+IF COL_LENGTH('JobSeekers', 'ResumeValidationMessage') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeValidationMessage NVARCHAR(MAX) NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeUploadedAt') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeUploadedAt DATETIME NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeParsedAt') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeParsedAt DATETIME NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeStructuredJson') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeStructuredJson NVARCHAR(MAX) NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeRawText') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeRawText NVARCHAR(MAX) NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeHeadline') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeHeadline NVARCHAR(200) NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeSummary') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeSummary NVARCHAR(MAX) NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeSkills') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeSkills NVARCHAR(MAX) NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeEducation') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeEducation NVARCHAR(MAX) NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeExperienceDetails') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeExperienceDetails NVARCHAR(MAX) NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeProjects') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeProjects NVARCHAR(MAX) NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeCertifications') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeCertifications NVARCHAR(MAX) NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeLanguages') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeLanguages NVARCHAR(MAX) NULL;
+
 CREATE TABLE Companies (
     CompanyId INT PRIMARY KEY,            -- FK to Users.UserId
     CompanyName VARCHAR(200) NOT NULL,

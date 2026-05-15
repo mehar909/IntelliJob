@@ -7,11 +7,16 @@ An AI-powered job portal built with **ASP.NET Web Forms (.NET Framework 4.7.2)**
 ## Features
 
 - **Job Seekers** – Register, build profiles, upload resumes, search & apply for jobs, save favorites
+- **Job Applications** – Track submitted applications, view application details, and download saved reports
 - **Companies** – Register, post jobs, view applicants, shortlist candidates
 - **Admin Panel** – Manage users, jobs, contacts, and view dashboard analytics
 - **AI Mock Interviews** – Take voice-based mock interviews with AI-generated questions (Gemini + Vapi)
 - **Interview Feedback** – AI-generated scoring on communication, technical skills, problem-solving, and more
-- **Resume Builder** – Build and download resumes from within the platform
+- **Interview History** – Filter past interviews by job and revisit feedback from previous sessions
+- **Resume Builder** – Build, edit, and download resumes from within the platform
+- **Resume Enhancer** – Improve resume content with editable structured output and saved reports
+- **Profile Resume Tools** – Import, update, or remove stored resumes from the user profile
+- **Application Resume Uploads** – Upload a resume while applying for a job or during registration
 - **Contact Form** – Users can submit queries; admin can view and reply
 
 ---
@@ -135,7 +140,25 @@ Open `IntelliJob/AppSettings.config` and add your API keys:
 
 > **Note:** The AI interview features will not work without valid API keys. The rest of the application (job posting, applying, admin panel) works without them.
 
-### 7. Build and Run
+### 7. Configure SMTP Accounts
+
+Open `IntelliJob/AppSettings.config` and update the SMTP settings for your email provider:
+
+```xml
+<!-- SMTP (for interview invitation emails): For SmtpPass use a Gmail App Password (not your real password). Generate one at https://myaccount.google.com > Security > App Passwords. -->
+<add key="SmtpHost" value="smtp.gmail.com" />
+<add key="SmtpPort" value="587" />
+<add key="SmtpUser" value="user-gmail@gmail.com" />
+<add key="SmtpPass" value="your-app-password" />
+<add key="SmtpFrom" value="organization-gmail@gmail.com" />
+```
+
+- Use the SMTP host and port from your provider if you are not using Gmail.
+- Set `SmtpUser` to the mailbox that will send interview invitation emails.
+- Set `SmtpPass` to an app password or SMTP password, not your personal login password.
+- Set `SmtpFrom` to the sender address that recipients should see.
+
+### 8. Build and Run
 
 1. Press **Ctrl + Shift + B** to build the solution
 2. Press **F5** (or click the green play button) to run with debugging
@@ -168,8 +191,8 @@ IntelliJob/
 ├── Images/             # Uploaded company logos/images
 ├── GeminiService.cs    # Google Gemini API integration
 ├── Utils.cs            # Utility/helper functions
-├── Web.config          # Main configuration (connection string, etc.)
-├── AppSettings.config  # API keys and app settings
+├── Web.config          # Main configuration (connection string and appSettings source)
+├── AppSettings.config  # API keys, SMTP credentials, and app settings
 └── Global.asax         # Application lifecycle events
 ```
 

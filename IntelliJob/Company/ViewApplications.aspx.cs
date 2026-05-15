@@ -63,9 +63,9 @@ namespace IntelliJob.Company
                     js.Name AS UserName,
                     u.Email,
                     js.Resume,
-                                        (SELECT TOP 1 i.InterviewId
-                                         FROM Interviews i
-                                         WHERE i.AppliedJobId = aj.AppliedJobId
+                    (SELECT TOP 1 i.InterviewId 
+                     FROM Interviews i 
+                     WHERE i.AppliedJobId = aj.AppliedJobId 
                        AND i.Status = 'completed'
                      ORDER BY i.CreatedAt DESC) AS InterviewId
                 FROM AppliedJobs aj
@@ -95,30 +95,80 @@ namespace IntelliJob.Company
         {
             try
             {
-                GridViewRow row = GridView1.Rows[e.RowIndex];
                 int AppliedjobId = Convert.ToInt32(GridView1.DataKeys[e.RowIndex].Values[0]);
                 con = new SqlConnection(str);
-                cmd = new SqlCommand("Delete from AppliedJobs where AppliedJobId = @id", con);
-                cmd.Parameters.AddWithValue("@id", AppliedjobId);
                 con.Open();
-                int r = cmd.ExecuteNonQuery();
-                if (r > 0)
+                using (SqlTransaction tran = con.BeginTransaction())
                 {
-                    lblMsg.Text = "Resume delete successfully!";
-                    lblMsg.CssClass = "alert alter-success";
-                    // Auto-hide message after 7 seconds
-                    ClientScript.RegisterStartupScript(this.GetType(), "hideMessage",
-                        "setTimeout(function() { var msg = document.getElementById('" + lblMsg.ClientID + "'); if(msg) msg.style.display='none'; }, 7000);", true);
+                    using (SqlCommand deleteInvitations = new SqlCommand("DELETE FROM InterviewInvitations WHERE AppliedJobId = @id", con, tran))
+                    {
+                        deleteInvitations.Parameters.AddWithValue("@id", AppliedjobId);
+                        deleteInvitations.ExecuteNonQuery();
+                    }
 
-                }
-                else
-                {
-                    lblMsg.Text = "Cannot delete this record!";
-                    lblMsg.CssClass = "alert alter-success";
-                    // Auto-hide message after 7 seconds
-                    ClientScript.RegisterStartupScript(this.GetType(), "hideMessage",
-                        "setTimeout(function() { var msg = document.getElementById('" + lblMsg.ClientID + "'); if(msg) msg.style.display='none'; }, 7000);", true);
+                    int interviewId = 0;
+                    using (SqlCommand interviewIdCmd = new SqlCommand("SELECT TOP 1 InterviewId FROM Interviews WHERE AppliedJobId = @id ORDER BY InterviewId DESC", con, tran))
+                    {
+                        interviewIdCmd.Parameters.AddWithValue("@id", AppliedjobId);
+                        object interviewResult = interviewIdCmd.ExecuteScalar();
+                        if (interviewResult != null && interviewResult != DBNull.Value)
+                        {
+                            interviewId = Convert.ToInt32(interviewResult);
+                        }
+                    }
 
+                    if (interviewId > 0)
+                    {
+                        using (SqlCommand deleteTranscript = new SqlCommand("DELETE FROM InterviewTranscripts WHERE InterviewId = @InterviewId", con, tran))
+                        {
+                            deleteTranscript.Parameters.AddWithValue("@InterviewId", interviewId);
+                            deleteTranscript.ExecuteNonQuery();
+                        }
+
+                        using (SqlCommand deleteFeedback = new SqlCommand("DELETE FROM InterviewFeedback WHERE InterviewId = @InterviewId", con, tran))
+                        {
+                            deleteFeedback.Parameters.AddWithValue("@InterviewId", interviewId);
+                            deleteFeedback.ExecuteNonQuery();
+                        }
+
+                        using (SqlCommand deleteQuestions = new SqlCommand("DELETE FROM InterviewQuestions WHERE InterviewId = @InterviewId", con, tran))
+                        {
+                            deleteQuestions.Parameters.AddWithValue("@InterviewId", interviewId);
+                            deleteQuestions.ExecuteNonQuery();
+                        }
+
+                        using (SqlCommand deleteInterview = new SqlCommand("DELETE FROM Interviews WHERE InterviewId = @InterviewId", con, tran))
+                        {
+                            deleteInterview.Parameters.AddWithValue("@InterviewId", interviewId);
+                            deleteInterview.ExecuteNonQuery();
+                        }
+                    }
+
+                    using (SqlCommand deleteAppliedJob = new SqlCommand("DELETE FROM AppliedJobs WHERE AppliedJobId = @id", con, tran))
+                    {
+                        deleteAppliedJob.Parameters.AddWithValue("@id", AppliedjobId);
+                        int r = deleteAppliedJob.ExecuteNonQuery();
+                        if (r > 0)
+                        {
+                            tran.Commit();
+                            lblMsg.Text = "Application deleted successfully!";
+                            lblMsg.CssClass = "alert alert-success";
+                            // Auto-hide message after 7 seconds
+                            ClientScript.RegisterStartupScript(this.GetType(), "hideMessage",
+                                "setTimeout(function() { var msg = document.getElementById('" + lblMsg.ClientID + "'); if(msg) msg.style.display='none'; }, 7000);", true);
+
+                        }
+                        else
+                        {
+                            tran.Rollback();
+                            lblMsg.Text = "Cannot delete this record!";
+                            lblMsg.CssClass = "alert alter-success";
+                            // Auto-hide message after 7 seconds
+                            ClientScript.RegisterStartupScript(this.GetType(), "hideMessage",
+                                "setTimeout(function() { var msg = document.getElementById('" + lblMsg.ClientID + "'); if(msg) msg.style.display='none'; }, 7000);", true);
+
+                        }
+                    }
                 }
                 GridView1.EditIndex = -1;
                 ShowAppliedJob();
@@ -129,7 +179,10 @@ namespace IntelliJob.Company
             }
             finally
             {
-                con.Close();
+                if (con != null && con.State == ConnectionState.Open)
+                {
+                    con.Close();
+                }
             }
         }
 

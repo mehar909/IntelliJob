@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
+using IntelliJob;
 
 namespace IntelliJob.User
 {
@@ -39,7 +40,7 @@ namespace IntelliJob.User
             using (SqlConnection con = new SqlConnection(str))
             {
                 // Load interview + feedback
-                string query = @"SELECT mi.Role, mi.Level, mi.InterviewType, mi.TechStack, mi.CreatedAt,
+                string query = @"SELECT mi.Role, mi.Level, mi.InterviewType, mi.TechStack, mi.CreatedAt, mi.AppliedJobId,
                                  mf.TotalScore, mf.CommunicationScore, mf.CommunicationComment,
                                  mf.TechnicalScore, mf.TechnicalComment,
                                  mf.ProblemSolvingScore, mf.ProblemSolvingComment,
@@ -88,6 +89,18 @@ namespace IntelliJob.User
 
                         // Set interview ID for retake
                         hdnInterviewId.Value = interviewId.ToString();
+
+                        int appliedJobId = row["AppliedJobId"] != DBNull.Value ? Convert.ToInt32(row["AppliedJobId"]) : 0;
+                        ResumeEnhancementReportRecord savedReport;
+                        bool hasResumeHistory = appliedJobId > 0 && ApplicationDataStore.TryGetResumeEnhancementReport(userId, appliedJobId, out savedReport) && savedReport != null;
+                        if (hasResumeHistory)
+                        {
+                            litEnhanceResumeAction.Text = "<a href='ResumeEnhancer.aspx?applicationId=" + appliedJobId + "&history=1' class='btn-back'><i class='fas fa-file-alt'></i> Resume Feedback</a>";
+                        }
+                        else
+                        {
+                            litEnhanceResumeAction.Text = "<a href='ResumeEnhancer.aspx?id=" + interviewId + "' class='btn-back'><i class='fas fa-file-alt'></i> Enhance Resume</a>";
+                        }
 
                         // Score cards
                         litScoreCards.Text = BuildScoreCards(row);

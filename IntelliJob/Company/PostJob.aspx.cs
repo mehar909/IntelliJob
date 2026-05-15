@@ -165,12 +165,6 @@
                             fuCompanyLogo.PostedFile.SaveAs(Server.MapPath("~/Images/") + obj.ToString() + fuCompanyLogo.FileName);
                             companyImageParamValue = imagePath;
                             isValidToExecute = true; // Set to true here only if everything succeeds
-
-                            // For update query, we need to include the CompanyImage column
-                            if (isUpdate)
-                            {
-                                concatQuery = "CompanyImage= @CompanyImage,";
-                            }
                         }
                         else
                         {
@@ -182,17 +176,14 @@
                     }
                     else // No file uploaded
                     {
-                        // Since the INSERT query and the refactored UPDATE query always expect @CompanyImage,
-                        // we must supply the current/default logo path.
-                        companyImageParamValue = GetCompanyLogo(); // Use existing logo path
+                        companyImageParamValue = GetCompanyLogo();
 
-                        // For both insert and update, we proceed with the current image
                         isValidToExecute = true;
+                    }
 
-                        if (isUpdate)
-                        {
-                            concatQuery = "CompanyImage= @CompanyImage,";
-                        }
+                    if (isUpdate)
+                    {
+                        concatQuery = "CompanyImage= @CompanyImage,";
                     }
 
                     // Note: The original INSERT query always expected @CompanyImage, so no changes needed for INSERT's query string.
@@ -318,7 +309,12 @@
                     cmd.Parameters.AddWithValue("@id", Session["userId"]);
                     con.Open();
                     var logo = cmd.ExecuteScalar()?.ToString();
-                    return string.IsNullOrEmpty(logo) ? "company_logo.png" : logo;
+                    if (string.IsNullOrWhiteSpace(logo))
+                    {
+                        return "Images/No_image.png";
+                    }
+
+                    return logo.Trim();
                 }
             }
 

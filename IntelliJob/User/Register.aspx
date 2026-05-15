@@ -78,6 +78,14 @@
                             </div>
                             <div class="col-12">
                                 <div class="form-group">
+                                    <label>Upload Resume</label>
+                                    <asp:FileUpload ID="fuResume" runat="server"
+                                        CssClass="form-control" ToolTip=".doc, .docx, .pdf extension only" />
+                                    <small class="text-muted d-block mt-2">You can upload a resume now so your first job application is ready immediately.</small>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
                                     <label>Country</label>
                                     <asp:DropDownList ID="ddlCountry" runat="server" DataSourceID="SqlDataSource1" CssClass="form-control w-100" AppendDataBoundItems="true" DataTextField="CountryName" DataValueField="CountryName">
                                         <asp:ListItem Value="0">Select Country</asp:ListItem>
