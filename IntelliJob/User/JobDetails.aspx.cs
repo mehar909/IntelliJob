@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -493,7 +493,16 @@ namespace IntelliJob.User
                 return;
 
             List<string> prevQ = LoadPreviousQuestions(userId, ctx.JobTitle);
-            List<string> questions = GenerateInterviewQuestions(ctx, prevQ);
+            string resumeText = null;
+            ApplicationResumeSelection selection;
+            if (ApplicationDataStore.TryGetApplicationResumeSelection(ctx.UserId, ctx.AppliedJobId, out selection))
+            {
+                if (System.IO.File.Exists(selection.StoredResumePath))
+                {
+                    resumeText = ResumeTextExtractor.ExtractText(selection.StoredResumePath);
+                }
+            }
+            List<string> questions = GenerateInterviewQuestions(ctx, prevQ, resumeText);
             if (questions == null || questions.Count == 0)
                 questions = BuildFallbackQuestions(ctx.JobTitle, ctx.JobType, ctx.QuestionCount);
 
@@ -644,7 +653,7 @@ namespace IntelliJob.User
             return questions;
         }
 
-        private List<string> GenerateInterviewQuestions(JobApplicationContext ctx, List<string> prevQ)
+        private List<string> GenerateInterviewQuestions(JobApplicationContext ctx, List<string> prevQ, string resumeText)
         {
             try
             {
@@ -652,7 +661,7 @@ namespace IntelliJob.User
                 using (var cts = new System.Threading.CancellationTokenSource(System.TimeSpan.FromSeconds(25)))
                 {
                     var task = System.Threading.Tasks.Task.Run(async () =>
-                        await gemini.GenerateQuestionsAsync(ctx.JobTitle, ctx.JobLevel, ctx.JobType, ctx.TechStack, ctx.QuestionCount, prevQ).ConfigureAwait(false), cts.Token);
+                        await gemini.GenerateQuestionsAsync(ctx.JobTitle, ctx.JobLevel, ctx.JobType, ctx.TechStack, ctx.QuestionCount, prevQ, resumeText).ConfigureAwait(false), cts.Token);
                     if (task.Wait(System.TimeSpan.FromSeconds(25))) return task.Result;
                     cts.Cancel(); return null;
                 }

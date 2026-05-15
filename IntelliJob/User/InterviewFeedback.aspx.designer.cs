@@ -15,24 +15,6 @@ namespace IntelliJob.User
     {
 
         /// <summary>
-        /// litRole control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litRole;
-
-        /// <summary>
-        /// litTotalScore control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litTotalScore;
-
-        /// <summary>
         /// litDate control.
         /// </summary>
         /// <remarks>
@@ -40,6 +22,24 @@ namespace IntelliJob.User
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal litDate;
+
+        /// <summary>
+        /// litCompany control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litCompany;
+
+        /// <summary>
+        /// litRole control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litRole;
 
         /// <summary>
         /// litLevel control.
@@ -58,6 +58,24 @@ namespace IntelliJob.User
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal litType;
+
+        /// <summary>
+        /// litEnhanceResumeAction control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litEnhanceResumeAction;
+
+        /// <summary>
+        /// litVisualScore control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litVisualScore;
 
         /// <summary>
         /// litFinalAssessment control.
@@ -96,13 +114,13 @@ namespace IntelliJob.User
         protected global::System.Web.UI.WebControls.Literal litAreas;
 
         /// <summary>
-        /// litEnhanceResumeAction control.
+        /// litFinalNote control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litEnhanceResumeAction;
+        protected global::System.Web.UI.WebControls.Literal litFinalNote;
 
         /// <summary>
         /// pnlRetake control.

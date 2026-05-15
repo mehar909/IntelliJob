@@ -1,14 +1,88 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/User/UserMaster.Master" AutoEventWireup="true" CodeBehind="JobDetails.aspx.cs" Inherits="IntelliJob.User.JobDetails" %>
+<%@ Page Title="" Language="C#" MasterPageFile="~/User/UserMaster.Master" AutoEventWireup="true" CodeBehind="JobDetails.aspx.cs" Inherits="IntelliJob.User.JobDetails" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <style>
+        .job-container {
+    background-color: #f8f9fa;
+}
+/*JOB DETAILS SECTION*/
+        .job-card {
+            background: #fff;
+            border-radius: 18px;
+            border: 1px solid #ececec;
+            box-shadow: 0 8px 26px rgba(15, 23, 42, 0.06);
+            padding: 22px;
+            margin-bottom: 18px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+         .job-card:hover {
+             transform: translateY(-2px);
+             box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+         }
+
+        .job-logo img {
+            width: 80px;
+            height: 80px;
+/*            object-fit: cover;*/
+            border-radius: 14px;
+            border: 1px solid #eef2f7;
+/*            margin-top:0px;*/
+        }
+
+        .job-title h4 {
+            margin: 0 0 6px;
+            /*font-size: 20px;*/
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .job-title h4 a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .job-title h4 a:hover {
+            color: #FF4357;
+        }
+
+        .job-meta {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .job-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .job-pill {
+            background: #f9fafb;
+            border: 1px solid #e8edf3;
+            color: #374151;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+/*JOB OVERVIEW SECTION*/
         .job-overview-card {
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid #e9ecef;
+            background: #fff;
+            border-radius: 18px;
+            border: 1px solid #ececec;
+            box-shadow: 0 8px 26px rgba(15, 23, 42, 0.06);
+            padding: 22px;
+            margin-bottom: 18px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .job-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
         }
 
         .job-overview-header {
@@ -26,9 +100,18 @@
             align-items: center;
         }
 
-        .job-overview-header h4:before {
+        /*.job-overview-header h4:before {
             content: "\f0b1";
             font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: #FF4357;
+            margin-right: 12px;
+            font-size: 20px;
+        }*/
+
+        .h4-icon {
+            /*content: "\f0b1";*/
+            /*font-family: "Font Awesome 6 Free";*/
             font-weight: 900;
             color: #FF4357;
             margin-right: 12px;
@@ -129,16 +212,16 @@
             margin-bottom: 18px;
         }
 
-        .apply-btn-container .btn {
+        .apply-btn-container .btn-action {
             width: 100%;
             padding: 16px 24px;
-            background: linear-gradient(135deg, #FF4357 0%, #ff6b7a 100%);
+             background-color: #fb246a;
             color: white !important;
             border: none;
             border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
-            text-transform: uppercase;
+/*            text-transform: uppercase;*/
             letter-spacing: 0.5px;
             transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(255, 67, 87, 0.3);
@@ -147,18 +230,18 @@
             text-align: center;
         }
 
-        .apply-btn-container .btn:hover {
+        .apply-btn-container .btn-action:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(255, 67, 87, 0.4);
             text-decoration: none;
             color: white !important;
         }
 
-        .apply-btn-container .btn:active {
+        .apply-btn-container .btn-action:active {
             transform: translateY(0);
         }
 
-        .apply-btn-container .btn:disabled {
+        .apply-btn-container .btn-action:disabled {
             background: #6c757d;
             cursor: not-allowed;
             opacity: 0.7;
@@ -188,14 +271,14 @@
             align-items: center;
         }
 
-        .company-info-header h4:before {
+/*        .company-info-header h4:before {
             content: "\f1ad";
-            font-family: "Font Awesome 6 Free";
+            font-family: "Font Awesome 6";
             font-weight: 900;
             color: #FF4357;
             margin-right: 12px;
             font-size: 20px;
-        }
+        }*/
 
         .company-info-list {
             list-style: none;
@@ -255,34 +338,34 @@
             <asp:Label ID="lblMsg" runat="server" Visible="false"></asp:Label>
         </div>
         <!-- job post company Start -->
-        <div class="job-post-company pt-120 pb-120">
+        <div class="job-post-company pt-120 pb-120 job-container">
             <div class="container">
                 <asp:DataList ID="DataList1" runat="server" OnItemCommand="DataList1_ItemCommand" OnItemDataBound="DataList1_ItemDataBound">
 
                     <ItemTemplate>
-
                         <div class="row justify-content-between">
                             <!-- Left Content -->
                             <div class="col-xl-7 col-lg-8">
                                 <!-- job single -->
-                                <div class="single-job-items mb-50">
-                                    <div class="job-items">
-                                        <div class="company-img company-img-details">
-                                            <a href="#">
-                                                <img width="80" src="<%# GetImageUrl(Eval("DisplayImage")) %>" alt="Company logo"></a>
-                                        </div>
-                                        <div class="job-tittle">
-                                            <a href="#">
-                                                <h4><%# Eval("Title") %> </h4>
-                                            </a>
-                                            <ul>
-                                                <li><%# Eval("CompanyName") %> </li>
-                                                <li><i class="fas fa-map-marker-alt"></i><%# Eval("State") %>, <%# Eval("Country") %> </li>
-                                                <li><%# Eval("Salary") %> </li>
-                                            </ul>
-                                        </div>
-                                    </div>
+                                                        <div class="job-card">
+                            <div class="row align-items-center">
+                                <div class="col-md-2 text-center job-logo">
+                                    <img width="80" src="<%# GetImageUrl(Eval("DisplayImage")) %>" alt="Company logo">
                                 </div>
+                                <div class="col-md">
+                                    <div class="job-title">
+                                         <h4><%# Eval("Title") %></h4>
+                                    </div>
+                                    <div class="job-meta">
+                                        <i class="fas fa-building" style="margin-right: 4px;"></i><%# Eval("CompanyName") %></br>
+                                        <i class="fas fa-solid fa-map-marker-alt" style="margin-right: 4px;"></i><%# Server.HtmlEncode(Eval("State") as string) %>, <%# Server.HtmlEncode(Eval("Country") as string).Replace("Â", "") %>
+                                    </div>
+
+                                </div>
+                                <a href="JobDetails.aspx?id=<%# Eval("JobId") %>" class="btn-action" style="margin-left: 10px; margin-right: 20px;">View Details</a>
+
+                            </div>
+                        </div>
                                 <!-- job single End -->
 
                                 <div class="job-post-details">
@@ -324,16 +407,18 @@
                             </div>
                             <!-- Right Content -->
                             <div class="col-xl-4 col-lg-4">
-                                <div class="job-overview-card">
+                                <div class="job-card">
                                     <!-- Job Overview Header -->
                                     <div class="job-overview-header">
-                                        <h4>Job Overview</h4>
+                                        <h4>
+                                         <i class="fas fa-briefcase h4-icon"></i>
+                                            Job Overview</h4>
                                     </div>
                                     <!-- Job Overview List -->
                                     <ul class="job-overview-list">
                                         <li>
                                             <span class="job-overview-label">
-                                                <i class="fas fa-calendar-alt"></i>Posted date
+                                                <i class="fas fa-calendar-alt"></i>Posted Date
                                             </span>
                                             <span class="job-overview-value">
                                                 <%# DataBinder.Eval(Container.DataItem, "CreateDate", "{0:dd MMMM yyyy}") %>
@@ -341,7 +426,7 @@
                                         </li>
                                         <li>
                                             <span class="job-overview-label">
-                                                <i class="fas fa-map-marker-alt"></i>Location
+                                                <i class="fas fa-building" style="margin-right:4px;"></i>Location
                                             </span>
                                             <span class="job-overview-value">
                                                 <%# Eval("State") %>
@@ -349,7 +434,7 @@
                                         </li>
                                         <li>
                                             <span class="job-overview-label">
-                                                <i class="fas fa-briefcase"></i>Vacancy
+                                                <i class="fas fa-users"></i> Vacancies
                                             </span>
                                             <span class="job-overview-value">
                                                 <%# Eval("NoOfPost") %>
@@ -357,7 +442,7 @@
                                         </li>
                                         <li>
                                             <span class="job-overview-label">
-                                                <i class="fas fa-clock"></i>Job nature
+                                                <i class="fas fa-briefcase" style="margin-right:4px;"></i>Job Type
                                             </span>
                                             <span class="job-overview-value">
                                                 <%# Eval("JobType") %>
@@ -382,23 +467,23 @@
                                     </ul>
                                     <!-- Apply Button -->
                                     <div class="apply-btn-container">
-                                        <asp:LinkButton ID="lbApplyJob" runat="server" CssClass="btn" Text="Apply Now" CommandName="ApplyJob" OnClientClick="if(!confirm('Are you sure you want to apply for this job?')) return false; this.style.pointerEvents='none'; this.innerHTML='Applying...';"></asp:LinkButton>
+                                        <asp:LinkButton ID="lbApplyJob" runat="server" CssClass="btn-action" Text="Apply Now" CommandName="ApplyJob" OnClientClick="if(!confirm('Are you sure you want to apply for this job?')) return false; this.style.pointerEvents='none'; this.innerHTML='Applying...';"></asp:LinkButton>
                                         <asp:Panel ID="pnlApplicationResumeUpload" runat="server" CssClass="application-resume-block mt-3 text-left" Visible='<%# Eval("ShowApplicationResumeUpload") != DBNull.Value && Convert.ToBoolean(Eval("ShowApplicationResumeUpload")) %>'>
                                             <label class="d-block mb-2" style="font-weight:600; color:#495057;">Optional resume for this application</label>
                                             <asp:FileUpload ID="fuApplicationResume" runat="server" CssClass="form-control pt-2" ToolTip=".doc, .docx, .pdf extension only" />
                                             <small class="text-muted d-block mt-2">If you do not upload a resume here, IntelliJob will use the resume from your profile.</small>
-                                            <asp:LinkButton ID="lbSaveApplicationResume" runat="server" CssClass="btn btn-post mt-3" CommandName="SaveApplicationResume">Upload Resume</asp:LinkButton>
+                                            <asp:LinkButton ID="lbSaveApplicationResume" runat="server" CssClass="btn-action" CommandName="SaveApplicationResume">Upload Resume</asp:LinkButton>
                                         </asp:Panel>
                                         <asp:Panel ID="pnlApplicationResumeEdit" runat="server" CssClass="application-resume-block mt-3 text-left" Visible='<%# Eval("HasApplicationResumeDraft") != DBNull.Value && Convert.ToBoolean(Eval("HasApplicationResumeDraft")) %>'>
                                             <label class="d-block mb-2" style="font-weight:600; color:#495057;">Application resume draft</label>
-                                            <asp:HyperLink ID="lnkEditApplicationResume" runat="server" CssClass="btn btn-post" NavigateUrl='<%# Eval("ApplicationResumeEditUrl") %>'>
+                                            <asp:HyperLink ID="lnkEditApplicationResume" runat="server" CssClass="btn-action" NavigateUrl='<%# Eval("ApplicationResumeEditUrl") %>'>
                                                 <i class="fas fa-pen"></i> Edit Resume
                                             </asp:HyperLink>
                                             <small class="text-muted d-block mt-2"><%# Eval("ApplicationResumeNote") %></small>
                                         </asp:Panel>
                                         <asp:Panel ID="pnlAppliedResumeEdit" runat="server" CssClass="application-resume-block mt-3 text-left" Visible='<%# Eval("ShowAppliedResumeEdit") != DBNull.Value && Convert.ToBoolean(Eval("ShowAppliedResumeEdit")) %>'>
                                             <label class="d-block mb-2" style="font-weight:600; color:#495057;">Applied resume</label>
-                                            <asp:HyperLink ID="lnkAppliedResumeEdit" runat="server" CssClass="btn btn-post" NavigateUrl='<%# Eval("AppliedResumeEditUrl") %>'>
+                                            <asp:HyperLink ID="lnkAppliedResumeEdit" runat="server" CssClass="btn-action" NavigateUrl='<%# Eval("AppliedResumeEditUrl") %>'>
                                                 <i class="fas fa-pen"></i> Edit Resume
                                             </asp:HyperLink>
                                             <small class="text-muted d-block mt-2"><%# Eval("AppliedResumeNote") %></small>
@@ -411,10 +496,12 @@
 
 
 
-                                <div class="company-info-card">
+                                <div class="job-card">
                                     <!-- Company Information Header -->
                                     <div class="company-info-header">
-                                        <h4>Company Information</h4>
+                                        <h4>
+                                         <i class="fas fa-building h4-icon"></i>
+                                            Company Information</h4>
                                     </div>
                                     <!-- Company Information List -->
                                     <ul class="company-info-list">

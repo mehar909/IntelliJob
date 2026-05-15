@@ -2,32 +2,66 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <style>
+        /* Edit mode: hide everything except the editor section-card */
+        #resumeReportBody.enhancer-editing > *:not(.editor-section) { display: none !important; }
+        #resumeReportBody.enhancer-editing > .editor-section { display: block !important; }
+
         .enhancer-shell {
             padding: 45px 0 80px;
             background: linear-gradient(180deg, #fff7f8 0%, #ffffff 100%);
         }
 
-        .enhancer-hero {
-            background: linear-gradient(135deg, #111827 0%, #1f2937 50%, #FF4357 100%);
-            color: #fff;
-            border-radius: 24px;
-            padding: 28px 30px;
-            box-shadow: 0 16px 40px rgba(17, 24, 39, 0.18);
-            margin-bottom: 22px;
+        .enhancer-preview-form textarea {
+            resize: none;
+            overflow: hidden;
+            min-height: 40px;
         }
 
-        .enhancer-hero h2 {
-            font-size: 30px;
-            font-weight: 800;
-            margin-bottom: 8px;
+        .page-header-section {
+            background: linear-gradient(100deg, #da2461 10%, #011B43  90%);
+            padding: 54px 0 28px;
+            min-height:450px;
+        }
+
+        .page-header-section .container {
+            padding: 50px 32px 0 32px;
+        }
+
+        .page-header-section h2 {
+            font-size: 40px;
+            font-weight: 700;
+            text-transform: capitalize;
+            font-family: "Muli", sans-serif;
             color: #ffffff;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            margin-bottom: 10px;
         }
 
-        .enhancer-hero p {
-            margin: 0;
-            color: rgba(255, 255, 255, 0.85);
-            line-height: 1.7;
+        .page-header-section p {
+            color: #ffffff;
+            font-size: 20px;
+            max-width: 600px;
+        }
+
+        .btn-header-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 999px;
+            color: #fff !important;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-header-action:hover {
+            background-color: #da2461;
+            border-color: #da2461;
+            color: #fff !important;
+            text-decoration: none;
+            transform: translateY(-1px);
         }
 
         .hero-chips {
@@ -37,42 +71,6 @@
             margin-top: 18px;
         }
 
-        .hero-actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 18px;
-        }
-
-        .hero-action-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 12px 18px;
-            border-radius: 999px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 700;
-            border: 1px solid rgba(255,255,255,0.2);
-            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-        }
-
-        .hero-action-btn.primary {
-            background: #ffffff;
-            color: #111827;
-        }
-
-        .hero-action-btn.secondary {
-            background: rgba(255,255,255,0.12);
-            color: #ffffff;
-        }
-
-        .hero-action-btn:hover {
-            transform: translateY(-1px);
-            text-decoration: none;
-        }
-
         .hero-chip {
             background: rgba(255, 255, 255, 0.12);
             border: 1px solid rgba(255, 255, 255, 0.18);
@@ -80,6 +78,7 @@
             border-radius: 999px;
             font-size: 13px;
             font-weight: 600;
+            color: #fff;
         }
 
         .score-grid {
@@ -240,6 +239,30 @@
             line-height: 1.75;
         }
 
+        /* View resume-preview header button */
+        .btn-resume-preview {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #fb246a;
+            border: 2px solid #fb246a;
+            color: #ffffff !important;
+            border-radius: 12px;
+            padding: 12px 28px;
+            font-weight: 600;
+            font-size: 15px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-resume-preview:hover {
+            background-color: #da2461;
+            border-color: #da2461;
+            color: #fff !important;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
         .enhancer-preview-form textarea.form-control,
         .enhancer-preview-form input.form-control {
             border-radius: 14px;
@@ -290,6 +313,7 @@
             font-size: 14px;
             line-height: 1.6;
             margin-bottom: 18px;
+            margin-top: 18px;
         }
 
         .muted-box {
@@ -305,6 +329,50 @@
         .report-body {
             display: none;
         }
+
+        .visual-score-circle {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 10px;
+        }
+
+        .visual-score-circle svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .visual-score-circle .circle-bg {
+            fill: none;
+            stroke: #e5e7eb;
+            stroke-width: 8;
+        }
+
+        .visual-score-circle .circle-progress {
+            fill: none;
+            stroke: url(#grad);
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s ease-in-out;
+        }
+
+        .visual-score-circle .score-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .metric-card.overall-card {
+            background: linear-gradient(180deg, #fff7f8 0%, #ffffff 100%);
+            border: 1px solid #ffd6db;
+        }
+
 
         @media (max-width: 992px) {
             .score-grid,
@@ -328,28 +396,34 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
     <main>
-        <div class="enhancer-shell">
+        <!-- Page Header -->
+        <div class="page-header-section">
             <div class="container">
-                <div class="enhancer-hero">
-                    <h2>Resume Enhancer</h2>
-                    <p>
-                        A job-specific review built from the uploaded resume, the target role, the job description, and the interview feedback already collected inside IntelliJob.
-                    </p>
-                    <div class="hero-chips">
-                        <span class="hero-chip"><asp:Literal ID="litRole" runat="server" /></span>
-                        <span class="hero-chip"><asp:Literal ID="litCompany" runat="server" /></span>
-                        <span class="hero-chip"><asp:Literal ID="litLevel" runat="server" /></span>
-                        <span class="hero-chip"><asp:Literal ID="litInterviewType" runat="server" /></span>
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h2>Resume Enhancer</h2>
+                        <p>A job-specific review built from the uploaded resume, the target role, the job description, and the interview feedback already collected inside IntelliJob.</p>
+                        <div class="hero-chips" style="margin-top: 15px;">
+                            <span class="hero-chip"><asp:Literal ID="litRole" runat="server" /></span>
+                            <span class="hero-chip"><asp:Literal ID="litCompany" runat="server" /></span>
+                            <span class="hero-chip"><asp:Literal ID="litLevel" runat="server" /></span>
+                            <span class="hero-chip"><asp:Literal ID="litInterviewType" runat="server" /></span>
+                            <span class="hero-chip"><i class="fas fa-file-alt" style="margin-right:4px;"></i><asp:Literal ID="litResumeSource" runat="server" /></span>
+                        </div>
                     </div>
-                    <div class="hero-actions">
-                        <a href='ResumeBuild.aspx?id=<%= Session["userId"] %>' class="hero-action-btn primary">
-                            <i class="fas fa-file-upload"></i> Update Resume
-                        </a>
-                        <a href="JobApplications.aspx" class="hero-action-btn secondary">
+                    <div class="col-lg-4 text-right pt-3 d-flex flex-column align-items-end justify-content-center gap-2" style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+                        <%--<a href="JobApplications.aspx" class="btn-header-action">
                             <i class="fas fa-briefcase"></i> My Applications
-                        </a>
+                        </a>--%>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="enhancer-shell" style="padding-top: 0;">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-xl-8 col-lg-10">
 
                 <asp:Literal ID="litStatus" runat="server" />
                 <asp:HiddenField ID="hfLoadedAppliedJobId" runat="server" />
@@ -360,25 +434,37 @@
 
                 <div id="resumeReportBody" class="report-body">
                     <div class="score-grid">
-                        <div class="metric-card">
-                            <div class="label">Overall Match</div>
-                            <div class="value"><asp:Literal ID="litOverallScore" runat="server" />%</div>
-                            <div class="hint">How strongly the resume fits the job</div>
+                        <div class="metric-card overall-card" style="grid-column: 1 / -1; text-align: center;">
+                            <div class="label" style="font-size: 16px;">Overall Match</div>
+                            <%--<div class="value" style="font-size: 42px; color: #FF4357;"><asp:Literal ID="litOverallScore" runat="server" />/100</div>--%>
+                            <div style="margin-top: 15px; display: flex; justify-content: center;">
+                                <asp:Literal ID="litOverallVisual" runat="server" />
+                            </div>
+                            <div class="hint" style="font-size: 14px; margin-top:0;">How strongly the resume fits the job</div>
                         </div>
-                        <div class="metric-card">
+                        <div class="metric-card" style="text-align: center;">
                             <div class="label">ATS Fit</div>
-                            <div class="value"><asp:Literal ID="litAtsScore" runat="server" />%</div>
-                            <div class="hint">Formatting and recruiter-system friendliness</div>
+                            <%--<div class="value"><asp:Literal ID="litAtsScore" runat="server" />/100</div>--%>
+                            <div style="margin-top: 15px;">
+                                <asp:Literal ID="litAtsVisual" runat="server" />
+                            </div>
+                            <div class="hint">Formatting & parsing</div>
                         </div>
-                        <div class="metric-card">
+                        <div class="metric-card" style="text-align: center;">
                             <div class="label">Semantic Fit</div>
-                            <div class="value"><asp:Literal ID="litSemanticScore" runat="server" />%</div>
-                            <div class="hint">Meaning match with the role and feedback</div>
+                            <%--<div class="value"><asp:Literal ID="litSemanticScore" runat="server" />/100</div>--%>
+                            <div style="margin-top: 15px;">
+                                <asp:Literal ID="litSemanticVisual" runat="server" />
+                            </div>
+                            <div class="hint">Meaning & context match</div>
                         </div>
-                        <div class="metric-card">
+                        <div class="metric-card" style="text-align: center;">
                             <div class="label">Keyword Fit</div>
-                            <div class="value"><asp:Literal ID="litKeywordScore" runat="server" />%</div>
-                            <div class="hint">Soft keyword alignment, not a strict rejection rule</div>
+                            <%--<div class="value"><asp:Literal ID="litKeywordScore" runat="server" />/100</div>--%>
+                            <div style="margin-top: 15px;">
+                                <asp:Literal ID="litKeywordVisual" runat="server" />
+                            </div>
+                            <div class="hint">Soft keyword alignment</div>
                         </div>
                     </div>
 
@@ -387,29 +473,47 @@
                         <p><asp:Literal ID="litResumeSummary" runat="server" /></p>
                     </div>
 
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="section-card">
-                                <h3>Strengths</h3>
-                                <ul class="bullet-list">
-                                    <asp:Literal ID="litStrengths" runat="server" />
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="section-card">
-                                <h3>Gaps To Improve</h3>
-                                <ul class="bullet-list">
-                                    <asp:Literal ID="litGaps" runat="server" />
-                                </ul>
-                            </div>
-                        </div>
+                    <div class="section-card">
+                        <h3>Strengths</h3>
+                        <ul class="bullet-list">
+                            <asp:Literal ID="litStrengths" runat="server" />
+                        </ul>
                     </div>
 
                     <div class="section-card">
-                        <h3>Enhanced Resume Preview</h3>
+                        <h3>Gaps To Improve</h3>
+                        <ul class="bullet-list">
+                            <asp:Literal ID="litGaps" runat="server" />
+                        </ul>
+                    </div>
+
+                    <div class="section-card">
+                        <h3>Suggested Rewrites</h3>
+                        <asp:Literal ID="litRewriteSuggestions" runat="server" />
+                    </div>
+
+                    <div class="section-card">
+                        <h3>Priority Keywords</h3>
+                        <ul class="pill-list">
+                            <asp:Literal ID="litPriorityKeywords" runat="server" />
+                        </ul>
+                    </div>
+
+                    <div class="section-card">
+                        <h3>Final Assessment</h3>
+                        <p><asp:Literal ID="litFinalAssessment" runat="server" /></p>
+                    </div>
+
+                    <div class="section-card editor-section">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                            <h3 style="margin: 0;">Enhanced Resume Preview</h3>
+                            <div class="enhancer-preview-actions" style="margin: 0;">
+                                <asp:Button ID="btnToggleEnhPreviewEdit" runat="server" CssClass="btn-resume-preview" Text="Edit Preview" OnClick="btnToggleEnhPreviewEdit_Click" CausesValidation="false" />
+                                <asp:Button ID="btnExportResumePdf" runat="server" CssClass="btn-resume-preview" Text="Export PDF" OnClick="btnExportResumePdf_Click" CausesValidation="false" style="margin-left:8px;" />
+                            </div>
+                        </div>
                         <div class="muted-box" style="margin-bottom:14px;">
-                            Click Edit Preview to unlock the boxes below. Save as a job resume or profile resume when you are done.
+                            Click <strong>Edit Preview</strong> to edit the resume fields below, then click <strong>Update</strong> to save changes to your applied resume.
                         </div>
                         <div class="enhancer-preview-form">
                             <div class="row">
@@ -485,49 +589,47 @@
                                         <asp:TextBox ID="txtEnhLanguages" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="3" ReadOnly="true"></asp:TextBox>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="enhancer-preview-actions">
-                                <asp:Button ID="btnToggleEnhPreviewEdit" runat="server" CssClass="btn btn-post" Text="Edit Preview" OnClick="btnToggleEnhPreviewEdit_Click" CausesValidation="false" />
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>LinkedIn URL <small style="color:#9ca3af;">(optional)</small></label>
+                                        <asp:TextBox ID="txtEnhLinkedIn" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Portfolio / GitHub URL <small style="color:#9ca3af;">(optional)</small></label>
+                                        <asp:TextBox ID="txtEnhPortfolio" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox>
+                                    </div>
+                                </div>
                             </div>
 
                             <asp:Panel ID="pnlEnhSaveOptions" runat="server" CssClass="enhancer-save-panel" Visible="false">
-                                <h4 style="font-size:18px; font-weight:800; color:#111827; margin-bottom:6px;">Save Enhanced Resume</h4>
-                                <div class="muted-box" style="margin-bottom:14px;">Choose where this edited version should be saved.</div>
-                                <asp:RadioButtonList ID="rblEnhSaveTarget" runat="server" CssClass="radio-list-inline" RepeatDirection="Horizontal" RepeatLayout="Flow">
-                                    <asp:ListItem Text="Save as Job Resume" Value="job" Selected="True"></asp:ListItem>
-                                    <asp:ListItem Text="Save as Profile Resume" Value="profile"></asp:ListItem>
-                                </asp:RadioButtonList>
-                                <asp:Button ID="btnSaveEnhancedResume" runat="server" CssClass="button button-contactForm boxed-btn" Text="Save Enhanced Resume" OnClick="btnSaveEnhancedResume_Click" CausesValidation="false" />
+                                <asp:Button ID="btnSaveEnhancedResume" runat="server" CssClass="btn-resume-preview" Text="Update" OnClick="btnSaveEnhancedResume_Click" CausesValidation="false" />
                             </asp:Panel>
 
                             <div class="resume-preview" style="display:none;"><asp:Literal ID="litResumePreview" runat="server" /></div>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="section-card">
-                                <h3>Suggested Rewrites</h3>
-                                <asp:Literal ID="litRewriteSuggestions" runat="server" />
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="section-card">
-                                <h3>Priority Keywords</h3>
-                                <ul class="pill-list">
-                                    <asp:Literal ID="litPriorityKeywords" runat="server" />
-                                </ul>
-                            </div>
-
-                            <div class="section-card">
-                                <h3>Final Assessment</h3>
-                                <p><asp:Literal ID="litFinalAssessment" runat="server" /></p>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+
+    <script>
+        function resizeTextareas() {
+            document.querySelectorAll('.enhancer-preview-form textarea').forEach(function(el) {
+                el.style.height = 'auto';
+                el.style.height = (el.scrollHeight + 5) + 'px';
+            });
+        }
+        window.addEventListener('load', resizeTextareas);
+        document.addEventListener('input', function (e) {
+            if (e.target.tagName.toLowerCase() === 'textarea') {
+                e.target.style.height = 'auto';
+                e.target.style.height = (e.target.scrollHeight + 5) + 'px';
+            }
+        }, false);
+    </script>
 </asp:Content>

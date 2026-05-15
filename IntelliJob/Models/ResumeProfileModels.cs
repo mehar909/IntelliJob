@@ -10,6 +10,8 @@ namespace IntelliJob
         public string Mobile { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
         public string Headline { get; set; } = string.Empty;
+        public string LinkedInUrl { get; set; } = string.Empty;
+        public string PortfolioUrl { get; set; } = string.Empty;
         public string Summary { get; set; } = string.Empty;
         public List<string> Skills { get; set; } = new List<string>();
         public List<string> Education { get; set; } = new List<string>();

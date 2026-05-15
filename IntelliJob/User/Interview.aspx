@@ -7,29 +7,33 @@
         }
 
         .page-header-section {
+            background: linear-gradient(100deg, #da2461 10%, #011B43  90%);
             padding: 54px 0 28px;
+            min-height:450px;
+
+
         }
 
         .page-header-section .container {
-            background: #f8d7da;
-                /*#7200cf;*/
-                /*linear-gradient(135deg, #7200cf 0%, #1f2937 55%, #fb246a 100%);*/
-            border-radius: 24px;
-            padding: 28px 32px;
-            box-shadow: 0 16px 40px rgba(17, 24, 39, 0.18);
+
+            padding: 100px 32px;
+
+
         }
 
         .page-header-section h2 {
-            font-size: 34px;
-            font-weight: 800;
-            color: #da2461 !important;
+            font-size: 40px;
+            font-weight: 700;
+            text-transform: capitalize;
+            font-family: "Muli", sans-serif;
+            color: #ffffff;
             margin-bottom: 10px;
         }
 
         .page-header-section p {
-            color: #000000 !important;
-            font-size: 16px;
-            max-width: 700px;
+            color: #ffffff;
+            font-size: 20px;
+            max-width: 600px;
         }
 
         .interview-setup-card {
@@ -65,41 +69,42 @@
             margin-top: 25px;
         }
 
-        /*.interview-setup-card .form-control {
+        .interview-setup-card .form-control {
             border-radius: 12px;
             border: 1px solid #dee2e6;
             padding: 12px 15px;
             font-size: 15px;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
             background: #fff;
-        }*/
+        }
 
-        /* Make dropdown menus larger and more prominent */
-        /*.interview-setup-card select.form-control {
+        .interview-setup-card select.form-control {
             padding: 14px 18px;
             font-size: 16px;
             font-weight: 500;
             min-height: 50px;
-        }*/
+        }
 
-        /*.interview-setup-card .form-control:focus {
+        .interview-setup-card .form-control:focus {
             border-color: #FF4357;
             box-shadow: 0 0 0 0.2rem rgba(255, 67, 87, 0.15);
-        }*/
+        }
 
-        /*.interview-setup-card label {
+        .interview-setup-card label {
             font-weight: 600;
             color: #374151;
             margin-bottom: 6px;
             font-size: 14px;
-        }*/
+        }
 
         .btn-start-interview-placeholder { display: none; }
 
         .create-mock-wrap {
             display: flex;
             justify-content: center;
-            margin: 18px 0 0;
+            padding: 38px 0 0;
+
+
         }
 
         .btn-create-mock {
@@ -222,19 +227,21 @@
 
         /* Unified card buttons - same size, same style */
         .btn-card-primary {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+
+             display: inline-flex;
+             align-items: center;
+             background-color: #fb246a;
+             border: 2px solid #fb246a;
+             color: #ffffff !important;
+             border-radius: 12px;
+             padding: 12px 28px;
+             font-weight: 600;
+             white-space: nowrap;
+
             gap: 5px;
             padding: 10px 22px;
             min-width: 140px;
             font-size: 14px;
-            font-weight: 600;
-            border-radius: 12px;
-            border: 2px solid #FF4357;
-            background-color: #FF4357;
-            color: #fff !important;
-            white-space: nowrap;
             text-decoration: none;
             transition: all 0.2s ease;
             cursor: pointer;
@@ -493,7 +500,7 @@
                             </div>
 
                             <div style="margin-top: 35px; display: flex; justify-content: center;">
-                                <asp:Button ID="btnStartInterview" runat="server" Text="Generate Interview" 
+                                <asp:Button ID="btnStartInterview" runat="server" Text="Generate Interview"
                                     CssClass="btn-start-interview" OnClick="btnStartInterview_Click" ValidationGroup="interview" />
                             </div>
                         </div>
@@ -509,7 +516,7 @@
                    <h4 style="font-weight: 700; color: #2d3436; margin-bottom: 20px;">
                        <i class="fas fa-clock" style="color: #FF4357;"></i> Your Recent Interviews
                    </h4>
-                   
+
                    <asp:Repeater ID="rptRecentInterviews" runat="server">
                        <ItemTemplate>
                            <div class="history-card">
@@ -531,7 +538,7 @@
                                        <%# GetScoreBadge(Eval("TotalScore")) %>
                                    </div>
                                    <div class="col-md-4" style="display:flex; flex-direction:column; align-items:flex-end; justify-content:center; gap:6px; padding-right:15px;">
-                                       <a href='<%# GetInterviewLink(Eval("InterviewId"), Eval("Status"), Eval("IsCompanyInterview"), Eval("IsPasswordUsed"), Eval("AccessToken")) %>' 
+                                       <a href='<%# GetInterviewLink(Eval("InterviewId"), Eval("Status"), Eval("IsCompanyInterview"), Eval("IsPasswordUsed"), Eval("AccessToken")) %>'
                                           class='btn-card-primary <%# (Eval("DisplayStatus").ToString().ToLower() == "access-revoked" || Eval("Status").ToString().ToLower() == "cancelled") ? "disabled" : "" %>'>
                                            <%# GetActionText(Eval("Status"), Eval("IsCompanyInterview"), Eval("IsPasswordUsed")) %>
                                        </a>
@@ -544,7 +551,7 @@
                    <asp:Literal ID="litNoInterviews" runat="server" Visible="false" />
                </div>
            </div>
-            
+
             </section>
     </main>
 

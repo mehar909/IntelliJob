@@ -58,7 +58,8 @@ namespace IntelliJob.User
                 // Phase 2: Generate questions using Gemini AI
                 // Load previously asked questions for this user to avoid repetition
                 var previousQuestions = LoadPreviousQuestions(Convert.ToInt32(Session["userId"]), role);
-                bool generated = GenerateQuestionsWithGemini(interviewId, role, level, interviewType, techStack, questionCount, previousQuestions);
+                string resumeText = GetProfileResumeText(userId);
+                bool generated = GenerateQuestionsWithGemini(interviewId, role, level, interviewType, techStack, questionCount, previousQuestions, resumeText);
                 if (!generated)
                 {
                     // Fallback to dummy questions if Gemini fails
@@ -86,14 +87,14 @@ namespace IntelliJob.User
             }
         }
 
-        private bool GenerateQuestionsWithGemini(int interviewId, string role, string level, string type, string techStack, int count, List<string> previousQuestions = null)
+        private bool GenerateQuestionsWithGemini(int interviewId, string role, string level, string type, string techStack, int count, List<string> previousQuestions = null, string resumeText = null)
         {
             try
             {
                 var gemini = new GeminiService();
                 // Use Task.Run to avoid ASP.NET synchronization context deadlock
                 List<string> questions = System.Threading.Tasks.Task.Run(
-                    () => gemini.GenerateQuestionsAsync(role, level, type, techStack, count, previousQuestions)
+                    () => gemini.GenerateQuestionsAsync(role, level, type, techStack, count, previousQuestions, resumeText)
                 ).GetAwaiter().GetResult();
 
                 if (questions == null || questions.Count == 0)
@@ -284,6 +285,33 @@ namespace IntelliJob.User
                 }
             }
             return questions;
+        }
+
+        private string GetProfileResumeText(int userId)
+        {
+            try
+            {
+                using (SqlConnection con = new SqlConnection(str))
+                {
+                    string query = "SELECT Resume FROM JobSeekers WHERE ProfileId = @UserId";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@UserId", userId);
+                        con.Open();
+                        object result = cmd.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            string resumePath = result.ToString();
+                            if (!string.IsNullOrWhiteSpace(resumePath))
+                            {
+                                return ResumeTextExtractor.ExtractText(resumePath);
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+            return null;
         }
 
         public string GetTimeAgo(object date)
