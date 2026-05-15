@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
+using IntelliJob;
 
 namespace IntelliJob.User
 {
@@ -39,15 +40,19 @@ namespace IntelliJob.User
             using (SqlConnection con = new SqlConnection(str))
             {
                 // Load interview + feedback
-                string query = @"SELECT mi.Role, mi.Level, mi.InterviewType, mi.TechStack, mi.CreatedAt,
+                string query = @"SELECT mi.Role, mi.Level, mi.InterviewType, mi.TechStack, mi.CreatedAt, mi.AppliedJobId,
+                                 j.CompanyName,
                                  mf.TotalScore, mf.CommunicationScore, mf.CommunicationComment,
                                  mf.TechnicalScore, mf.TechnicalComment,
                                  mf.ProblemSolvingScore, mf.ProblemSolvingComment,
                                  mf.CulturalFitScore, mf.CulturalFitComment,
                                  mf.ConfidenceScore, mf.ConfidenceComment,
+                                 mf.ExperienceValidityScore, mf.ExperienceValidityComment,
                                  mf.Strengths, mf.AreasForImprovement, mf.FinalAssessment
                                  FROM Interviews mi
                                  INNER JOIN InterviewFeedback mf ON mi.InterviewId = mf.InterviewId
+                                 LEFT JOIN AppliedJobs aj ON mi.AppliedJobId = aj.AppliedJobId
+                                 LEFT JOIN Jobs j ON aj.JobId = j.JobId
                                  WHERE mi.InterviewId = @InterviewId AND mi.UserId = @UserId";
 
                 using (SqlCommand cmd = new SqlCommand(query, con))
@@ -69,8 +74,9 @@ namespace IntelliJob.User
 
                         // Header info
                         litRole.Text = row["Role"].ToString();
-                        litTotalScore.Text = row["TotalScore"].ToString();
+                        //litTotalScore.Text = row["TotalScore"].ToString();
                         litDate.Text = Convert.ToDateTime(row["CreatedAt"]).ToString("MMM d, yyyy h:mm tt");
+                        litCompany.Text = row.Table.Columns.Contains("CompanyName") && row["CompanyName"] != DBNull.Value ? row["CompanyName"].ToString() : "IntelliJob";
                         litLevel.Text = row["Level"].ToString();
                         litType.Text = row["InterviewType"].ToString();
                         litFinalAssessment.Text = row["FinalAssessment"].ToString();
@@ -88,6 +94,18 @@ namespace IntelliJob.User
 
                         // Set interview ID for retake
                         hdnInterviewId.Value = interviewId.ToString();
+
+                        int appliedJobId = row["AppliedJobId"] != DBNull.Value ? Convert.ToInt32(row["AppliedJobId"]) : 0;
+                        ResumeEnhancementReportRecord savedReport;
+                        bool hasResumeHistory = appliedJobId > 0 && ApplicationDataStore.TryGetResumeEnhancementReport(userId, appliedJobId, out savedReport) && savedReport != null;
+                        if (hasResumeHistory)
+                        {
+                            litEnhanceResumeAction.Text = "<a href='ResumeEnhancer.aspx?applicationId=" + appliedJobId + "&history=1' class='btn-header-action'><i class='fas fa-file-alt'></i> Resume Feedback</a>";
+                        }
+                        else
+                        {
+                            litEnhanceResumeAction.Text = "<a href='ResumeEnhancer.aspx?id=" + interviewId + "' class='btn-header-action'><i class='fas fa-file-alt'></i> Enhance Resume</a>";
+                        }
 
                         // Score cards
                         litScoreCards.Text = BuildScoreCards(row);
@@ -118,11 +136,51 @@ namespace IntelliJob.User
                             litAreas.Text = sb.ToString();
                         }
 
+                        // Final Note logic based on total score
+                        if (totalScore >= 70)
+                        {
+                            litFinalNote.Text = "You performed well during the interview. We will review your application and contact you shortly for the next phase.";
+                        }
+                        else
+                        {
+                            litFinalNote.Text = "We encourage you to continue improving your skills and prepare more for future opportunities.";
+                        }
+
+                        // Overall Visual Circle
+                        litVisualScore.Text = GenerateScoreCircleHtml(totalScore);
+
                         // Set interview ID for retake
                         hdnInterviewId.Value = interviewId.ToString();
                     }
                 }
             }
+        }
+
+        private string GenerateScoreCircleHtml(int score)
+        {
+            double radius = 40;
+            double stroke = 6;
+            double normalizedRadius = radius - stroke / 2.0;
+            double circumference = 2 * Math.PI * normalizedRadius;
+            double progress = score / 100.0;
+            double strokeDashoffset = circumference * (1 - progress);
+            string gradId = "grad-" + Guid.NewGuid().ToString("N");
+
+            return $@"
+                <div class='visual-score-circle'>
+                    <svg viewBox='0 0 100 100'>
+                        <defs>
+                            <linearGradient id='{gradId}' x1='1' y1='0' x2='0' y2='1'>
+                                <stop offset='0%' stop-color='#00b894' />
+                                <stop offset='100%' stop-color='#55efc4' />
+                            </linearGradient>
+                        </defs>
+                        <circle class='circle-bg' cx='50' cy='50' r='{normalizedRadius}' style='stroke-width: {stroke}px;' />
+                        <circle class='circle-progress' cx='50' cy='50' r='{normalizedRadius}'
+                                style='stroke: url(#{gradId}); stroke-width: {stroke}px; stroke-dasharray: {circumference}; stroke-dashoffset: {strokeDashoffset};' />
+                    </svg>
+                    <div class='score-text'>{score}%</div>
+                </div>";
         }
 
         protected void btnRegenerate_Click(object sender, EventArgs e)
@@ -240,6 +298,7 @@ namespace IntelliJob.User
                      ProblemSolvingScore, ProblemSolvingComment,
                      CulturalFitScore, CulturalFitComment,
                      ConfidenceScore, ConfidenceComment,
+                     ExperienceValidityScore, ExperienceValidityComment,
                      Strengths, AreasForImprovement, FinalAssessment)
                     VALUES 
                     (@InterviewId, @UserId, @TotalScore,
@@ -248,6 +307,7 @@ namespace IntelliJob.User
                      @ProblemScore, @ProblemComment,
                      @CulturalScore, @CulturalComment,
                      @ConfidenceScore, @ConfidenceComment,
+                     @ExperienceValidityScore, @ExperienceValidityComment,
                      @Strengths, @Areas, @FinalAssessment)";
 
                 using (SqlCommand cmd = new SqlCommand(query, con))
@@ -265,6 +325,8 @@ namespace IntelliJob.User
                     cmd.Parameters.AddWithValue("@CulturalComment", fb.CulturalFitComment ?? "");
                     cmd.Parameters.AddWithValue("@ConfidenceScore", fb.ConfidenceScore);
                     cmd.Parameters.AddWithValue("@ConfidenceComment", fb.ConfidenceComment ?? "");
+                    cmd.Parameters.AddWithValue("@ExperienceValidityScore", fb.ExperienceValidityScore);
+                    cmd.Parameters.AddWithValue("@ExperienceValidityComment", fb.ExperienceValidityComment ?? "");
                     cmd.Parameters.AddWithValue("@Strengths", fb.Strengths != null ? string.Join("|", fb.Strengths) : "");
                     cmd.Parameters.AddWithValue("@Areas", fb.AreasForImprovement != null ? string.Join("|", fb.AreasForImprovement) : "");
                     cmd.Parameters.AddWithValue("@FinalAssessment", fb.FinalAssessment ?? "");
@@ -281,30 +343,33 @@ namespace IntelliJob.User
 
             var categories = new[]
             {
-                new { Name = "Communication Skills", Score = "CommunicationScore", Comment = "CommunicationComment", Index = 1 },
-                new { Name = "Technical Knowledge", Score = "TechnicalScore", Comment = "TechnicalComment", Index = 2 },
-                new { Name = "Problem Solving", Score = "ProblemSolvingScore", Comment = "ProblemSolvingComment", Index = 3 },
-                new { Name = "Cultural & Role Fit", Score = "CulturalFitScore", Comment = "CulturalFitComment", Index = 4 },
-                new { Name = "Confidence & Clarity", Score = "ConfidenceScore", Comment = "ConfidenceComment", Index = 5 },
+                new { Name = "Communication Skills", Score = "CommunicationScore", Comment = "CommunicationComment", Index = 1, Max = 100 },
+                new { Name = "Technical Knowledge", Score = "TechnicalScore", Comment = "TechnicalComment", Index = 2, Max = 100 },
+                new { Name = "Problem Solving", Score = "ProblemSolvingScore", Comment = "ProblemSolvingComment", Index = 3, Max = 100 },
+                new { Name = "Cultural & Role Fit", Score = "CulturalFitScore", Comment = "CulturalFitComment", Index = 4, Max = 100 },
+                new { Name = "Confidence & Clarity", Score = "ConfidenceScore", Comment = "ConfidenceComment", Index = 5, Max = 100 },
+                new { Name = "Experience Validity", Score = "ExperienceValidityScore", Comment = "ExperienceValidityComment", Index = 6, Max = 10 }
             };
 
             foreach (var cat in categories)
             {
-                int score = Convert.ToInt32(row[cat.Score]);
-                string comment = row[cat.Comment].ToString();
-                string level = score >= 70 ? "high" : score >= 40 ? "mid" : "low";
+                int score = row.Table.Columns.Contains(cat.Score) && row[cat.Score] != DBNull.Value ? Convert.ToInt32(row[cat.Score]) : 0;
+                string comment = row.Table.Columns.Contains(cat.Comment) ? row[cat.Comment].ToString() : "";
+                
+                double percentage = cat.Max == 100 ? score : (score * 100.0 / cat.Max);
+                string level = percentage >= 70 ? "high" : percentage >= 40 ? "mid" : "low";
 
                 sb.AppendFormat(@"
                 <div class='score-card'>
                     <div class='score-header'>
                         <h5>{0}. {1}</h5>
-                        <span class='score-value {2}'>{3}/100</span>
+                        <span class='score-value {2}'>{3}/{4}</span>
                     </div>
                     <div class='score-bar'>
-                        <div class='fill {2}' data-score='{3}' style='width: 0%;'></div>
+                        <div class='fill {2}' data-score='{5}' style='width: 0%;'></div>
                     </div>
-                    <p class='score-comment'>{4}</p>
-                </div>", cat.Index, cat.Name, level, score, comment);
+                    <p class='score-comment'>{6}</p>
+                </div>", cat.Index, cat.Name, level, score, cat.Max, percentage, comment);
             }
 
             return sb.ToString();

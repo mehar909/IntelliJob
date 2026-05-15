@@ -42,8 +42,7 @@ namespace IntelliJob.Admin
             {
                 con = new SqlConnection(str);
                 query = @"SELECT u.UserId, u.Username, u.Email, u.Address, u.Country, u.Role,
-                                 js.Name, js.Mobile, js.TenthGrade, js.TwelfthGrade, js.GraduationGrade, 
-                                 js.PostGraduationGrade, js.Phd, js.WorksOn, js.Experience, 
+                                 js.Name, js.Mobile,
                                  js.Photo, js.Resume,
                                  c.CompanyName, c.Website, c.Description, c.CompanyLogo, c.CompanySize
                           FROM Users u
@@ -99,70 +98,7 @@ namespace IntelliJob.Admin
                             lblName.Text = sdr["Name"] != DBNull.Value ? sdr["Name"].ToString() : "Not provided";
                             lblMobile.Text = sdr["Mobile"] != DBNull.Value ? sdr["Mobile"].ToString() : "Not provided";
 
-                        // Educational Qualifications
-                        if (sdr["TenthGrade"] != DBNull.Value && !string.IsNullOrWhiteSpace(sdr["TenthGrade"].ToString()))
-                        {
-                            lblTenthGrade.Text = sdr["TenthGrade"].ToString();
-                        }
-                        else
-                        {
-                            lblTenthGrade.Text = "Not provided";
-                        }
 
-                        if (sdr["TwelfthGrade"] != DBNull.Value && !string.IsNullOrWhiteSpace(sdr["TwelfthGrade"].ToString()))
-                        {
-                            lblTwelfthGrade.Text = sdr["TwelfthGrade"].ToString();
-                        }
-                        else
-                        {
-                            lblTwelfthGrade.Text = "Not provided";
-                        }
-
-                        if (sdr["GraduationGrade"] != DBNull.Value && !string.IsNullOrWhiteSpace(sdr["GraduationGrade"].ToString()))
-                        {
-                            lblGraduationGrade.Text = sdr["GraduationGrade"].ToString();
-                        }
-                        else
-                        {
-                            lblGraduationGrade.Text = "Not provided";
-                        }
-
-                        if (sdr["PostGraduationGrade"] != DBNull.Value && !string.IsNullOrWhiteSpace(sdr["PostGraduationGrade"].ToString()))
-                        {
-                            lblPostGraduationGrade.Text = sdr["PostGraduationGrade"].ToString();
-                        }
-                        else
-                        {
-                            lblPostGraduationGrade.Text = "Not provided";
-                        }
-
-                        if (sdr["Phd"] != DBNull.Value && !string.IsNullOrWhiteSpace(sdr["Phd"].ToString()))
-                        {
-                            lblPhd.Text = sdr["Phd"].ToString();
-                        }
-                        else
-                        {
-                            lblPhd.Text = "Not provided";
-                        }
-
-                        // Professional Information
-                        if (sdr["WorksOn"] != DBNull.Value && !string.IsNullOrWhiteSpace(sdr["WorksOn"].ToString()))
-                        {
-                            lblWorksOn.Text = sdr["WorksOn"].ToString();
-                        }
-                        else
-                        {
-                            lblWorksOn.Text = "Not provided";
-                        }
-
-                        if (sdr["Experience"] != DBNull.Value && !string.IsNullOrWhiteSpace(sdr["Experience"].ToString()))
-                        {
-                            lblExperience.Text = sdr["Experience"].ToString();
-                        }
-                        else
-                        {
-                            lblExperience.Text = "Not provided";
-                        }
 
                         // Display user photo if available
                             if (sdr["Photo"] != DBNull.Value && !string.IsNullOrEmpty(sdr["Photo"].ToString()))

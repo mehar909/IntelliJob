@@ -31,18 +31,15 @@
         </div>
         <!-- slider Area End-->
 
-
-
-        <!-- Our Services End -->
         <!-- Online CV Area Start -->
         <div class="online-cv cv-bg section-overly pt-90 pb-120" data-background="../assets/img/gallery/cv_bg.jpg">
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-xl-10">
                         <div class="cv-caption text-center">
-                            <p class="pera1">FEATURED TOURS Packages</p>
+                            <p class="pera1">FEATURED RESUME ENHANCER</p>
                             <p class="pera2">Make a Difference with Your Online Resume!</p>
-                            <%--                            <a href="#" class="border-btn2 border-btn4">Upload your cv</a>--%>
+                                                        <a href="Profile.aspx" class="border-btn2 border-btn4">Upload your cv</a>
 
                             <%--                            <div class="main-body">
                                 <asp:DataList ID="lbRegisterOrResume" runat="server" Width="100%" OnItemCommand="lbRegisterOrResume_ItemCommand">
@@ -67,14 +64,23 @@
             </div>
         </div>
         <!-- Online CV Area End-->
+        <div class="container pb-20">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <a href="JobApplications.aspx" class="border-btn2" style="display:inline-block; margin-top: 80px;">
+                        View My Job Applications
+                    </a>
+                </div>
+            </div>
+        </div>
         <!-- Featured_job_start -->
-        <section class="featured-job-area feature-padding">
+        <section class="featured-job-area" style="margin-top: 80px;">
             <div class="container">
                 <!-- Section Tittle -->
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="section-tittle text-center">
-                            <span>Recent Job</span>
+                            <%--<span>Recent Job</span>--%>
                             <h2>Featured Jobs</h2>
                         </div>
                     </div>
@@ -87,7 +93,7 @@
                                 <div class="job-items">
                                     <div class="company-img">
                                         <a href='JobDetails.aspx?id=<%# Eval("JobId") %>'>
-                                            <img src='../Images/CompanyLogo/<%# Eval("CompanyImage") %>' 
+                                            <img src='<%# GetImageUrl(Eval("CompanyImage")) %>' 
                                                  alt='<%# Eval("CompanyName") %>' 
                                                  style="max-width: 60px; max-height: 60px;">
                                         </a>
@@ -299,7 +305,7 @@
                             </div>
                             <div class="support-caption">
                                 <p class="pera-top">
-                                    Welcome to Online Job Portal, where we connect talented job seekers with leading employers for a seamless career journey. Discover your dream job with us today!
+                                    Welcome to IntelliJob, where we connect talented job seekers with leading employers for a seamless career journey. Discover your dream job with us today!
                                     <p>At this portal, we offer a comprehensive platform with the latest job listings and company profiles to help you find the perfect match. Whether you're advancing your career or starting fresh, our resources and support are here to guide you every step of the way. Join us and unlock your potential!</p>
                                     <a href="JobListing.aspx" class="btn post-btn">Search for job</a>
                             </div>
@@ -310,7 +316,7 @@
                             <img src="../assets/img/service/support-img.jpg" alt="">
                             <div class="support-img-cap text-center">
                                 <p>Since</p>
-                                <span>1994</span>
+                                <span>2025</span>
                             </div>
                         </div>
                     </div>

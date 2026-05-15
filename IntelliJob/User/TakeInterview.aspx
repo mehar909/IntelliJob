@@ -64,14 +64,19 @@
             width: 100px;
             height: 100px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #FF4357, #ff6b7a);
+            background: #ffffff;
             margin: 0 auto 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 40px;
-            color: #fff;
+            color: #ff4357;
             position: relative;
+            border: 4px solid #ff4357;
+        }
+
+        .card-interviewer .avatar i {
+            color: #ff4357;
         }
 
         .card-interviewer .avatar .speaking-indicator {
@@ -79,7 +84,7 @@
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            border: 3px solid #FF4357;
+            border: 3px solid #00b894;
             animation: pulse-ring 1.5s ease-out infinite;
             display: none;
         }
@@ -188,7 +193,7 @@
         }
 
         .btn-call {
-            background: linear-gradient(135deg, #00b894, #00cec9);
+            background: linear-gradient(135deg, #ff4357, #e74c3c);
             color: #fff !important;
             border: none;
             border-radius: 50%;
@@ -196,13 +201,13 @@
             height: 80px;
             font-size: 28px;
             cursor: pointer;
-            box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
+            box-shadow: 0 6px 20px rgba(255, 67, 87, 0.4);
             transition: all 0.3s ease;
         }
 
         .btn-call:hover {
             transform: scale(1.1);
-            box-shadow: 0 8px 28px rgba(0, 184, 148, 0.5);
+            box-shadow: 0 8px 28px rgba(255, 67, 87, 0.5);
         }
 
         .btn-call.connecting {
@@ -489,7 +494,7 @@
             padding: 10px 25px;
             border: none;
             border-radius: 8px;
-            background: linear-gradient(135deg, #FF4357 0%, #ff6b7a 100%);
+            background: #fb246a;
             color: #fff;
             font-weight: 600;
             cursor: pointer;
@@ -591,6 +596,8 @@
                     </div>
                 </div>
 
+                <!-- Text mode removed. Voice interview only. -->
+
                 <asp:HiddenField ID="hdnInterviewId" runat="server" />
                 <asp:HiddenField ID="hdnQuestionsJson" runat="server" />
                 <asp:HiddenField ID="hdnVapiToken" runat="server" />
@@ -662,11 +669,14 @@
             console.log('[TakeInterview] ' + msg);
         }
 
+        // Text mode removed. Voice interview only.
+
         // === Voice Mode: Vapi Integration ===
         var vapiInstance = null;
         var voiceTranscript = [];
         var callActive = false;
         var micMuted = false;
+        var accessConsumed = false;
 
         // === Timers ===
         var totalInterviewTime = 0;
@@ -809,6 +819,7 @@
 
             voiceTranscript = [];
             micMuted = false;
+            accessConsumed = false;
 
             if (!vapiInstance) {
                 alert('Vapi SDK is still loading. Please try again in a moment.');
@@ -972,6 +983,7 @@
                 document.getElementById('speakingIndicator').classList.add('active');
                 // AI is speaking → start a new question timer
                 startQuestionTimer();
+                consumeInterviewAccessOnce();
             });
 
             vapiInstance.on('speech-end', function () {
@@ -983,6 +995,23 @@
                 feedbackLog('Vapi error: ' + JSON.stringify(err));
                 console.error('Vapi error:', err);
             });
+        }
+
+        function consumeInterviewAccessOnce() {
+            if (accessConsumed) return;
+            accessConsumed = true;
+
+            var interviewId = document.getElementById('<%= hdnInterviewId.ClientID %>').value;
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'ConsumeInterviewAccess.ashx', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status !== 200) {
+                    feedbackLog('Failed to consume interview access: ' + xhr.responseText);
+                    accessConsumed = false;
+                }
+            };
+            xhr.send('InterviewId=' + encodeURIComponent(interviewId));
         }
 
         function appendTranscriptMessage(role, content) {

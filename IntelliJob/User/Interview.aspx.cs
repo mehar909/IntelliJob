@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Web.UI.WebControls;
 
 namespace IntelliJob.User
@@ -58,7 +59,8 @@ namespace IntelliJob.User
                 // Phase 2: Generate questions using Gemini AI
                 // Load previously asked questions for this user to avoid repetition
                 var previousQuestions = LoadPreviousQuestions(Convert.ToInt32(Session["userId"]), role);
-                bool generated = GenerateQuestionsWithGemini(interviewId, role, level, interviewType, techStack, questionCount, previousQuestions);
+                string resumeText = GetProfileResumeText(userId);
+                bool generated = GenerateQuestionsWithGemini(interviewId, role, level, interviewType, techStack, questionCount, previousQuestions, resumeText);
                 if (!generated)
                 {
                     // Fallback to dummy questions if Gemini fails
@@ -86,14 +88,14 @@ namespace IntelliJob.User
             }
         }
 
-        private bool GenerateQuestionsWithGemini(int interviewId, string role, string level, string type, string techStack, int count, List<string> previousQuestions = null)
+        private bool GenerateQuestionsWithGemini(int interviewId, string role, string level, string type, string techStack, int count, List<string> previousQuestions = null, string resumeText = null)
         {
             try
             {
                 var gemini = new GeminiService();
                 // Use Task.Run to avoid ASP.NET synchronization context deadlock
                 List<string> questions = System.Threading.Tasks.Task.Run(
-                    () => gemini.GenerateQuestionsAsync(role, level, type, techStack, count, previousQuestions)
+                    () => gemini.GenerateQuestionsAsync(role, level, type, techStack, count, previousQuestions, resumeText)
                 ).GetAwaiter().GetResult();
 
                 if (questions == null || questions.Count == 0)
@@ -220,6 +222,9 @@ namespace IntelliJob.User
                                  LEFT JOIN InterviewInvitations ii ON mi.InterviewId = ii.InterviewId
                                  WHERE mi.UserId = @UserId
                                    AND (
+                                                                                 -- Interviews created from job applications should always be shown.
+                                                                                 mi.AppliedJobId IS NOT NULL
+                                                                                 OR
                                          -- Always include company interviews
                                          ii.InterviewId IS NOT NULL
                                          OR
@@ -286,6 +291,41 @@ namespace IntelliJob.User
             return questions;
         }
 
+        private string GetProfileResumeText(int userId)
+        {
+            try
+            {
+                using (SqlConnection con = new SqlConnection(str))
+                {
+                    string query = "SELECT ResumeStructuredJson, Resume FROM JobSeekers WHERE ProfileId = @UserId";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@UserId", userId);
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                string structuredJson = reader["ResumeStructuredJson"] != DBNull.Value ? reader["ResumeStructuredJson"].ToString() : string.Empty;
+                                if (!string.IsNullOrWhiteSpace(structuredJson))
+                                {
+                                    ResumeProfileDocument document = ResumeProfileService.DeserializeDocument(structuredJson);
+                                    if (document != null)
+                                        return ResumeProfileService.BuildResumeText(document);
+                                }
+
+                                string resumePath = reader["Resume"] != DBNull.Value ? reader["Resume"].ToString() : string.Empty;
+                                if (!string.IsNullOrWhiteSpace(resumePath) && File.Exists(resumePath))
+                                    return ResumeTextExtractor.ExtractText(resumePath);
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+            return null;
+        }
+
         public string GetTimeAgo(object date)
         {
             if (date == DBNull.Value || date == null) return string.Empty;
@@ -333,16 +373,16 @@ namespace IntelliJob.User
         public string GetActionText(object status, object isCompanyInterview, object isPasswordUsed)
         {
             string s = status.ToString().ToLower();
-            if (s == "completed") return "View Feedback";
-            if (s == "cancelled") return "Cancelled";
-            if (s == "access-revoked") return "Access Revoked";
+            if (s == "completed") return "<i class='fas fa-chart-bar'></i> View Feedback";
+            if (s == "cancelled") return "<i class='fas fa-times'></i>  Cancelled";
+            if (s == "access-revoked") return "<i class='fas fa-times'></i> Access Revoked";
 
             bool isCompany = Convert.ToInt32(isCompanyInterview) == 1;
             bool pwdUsed = Convert.ToBoolean(isPasswordUsed);
 
             if (isCompany && pwdUsed) return "Access Revoked";
-            if (s == "in-progress") return "Continue";
-            return "Start";
+            if (s == "in-progress") return "<i class='fas fa-play'></i> Continue";
+            return "<i class='fas fa-play'></i> Start";
         }
 
         public string GetRetakeButton(object interviewId, object status, object isCompanyInterview)

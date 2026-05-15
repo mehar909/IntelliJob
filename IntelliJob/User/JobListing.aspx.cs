@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Web.UI.WebControls;
 
 namespace IntelliJob.User
@@ -32,7 +33,10 @@ namespace IntelliJob.User
             if (dt == null)
             {
                 con = new SqlConnection(str);
-                string query = @"Select JobId,Title,Salary,JobType,CompanyName,CompanyImage,Country,State,CreateDate from Jobs";
+                string query = @"SELECT JobId,Title,Salary,JobType,CompanyName,
+                                        COALESCE(NULLIF(LTRIM(RTRIM(CompanyImage)), ''), 'Images/No_image.png') AS DisplayImage,
+                                        Country,State,CreateDate
+                                 FROM Jobs";
                 cmd = new SqlCommand(query, con);
                 sda = new SqlDataAdapter(cmd);
                 dt = new DataTable();
@@ -74,7 +78,9 @@ namespace IntelliJob.User
                 string selectedCountryLower = ddlCountry.SelectedValue.ToLower().Trim();
                 con = new SqlConnection(str);
 
-                string query = @"Select JobId,Title,Salary,JobType,CompanyName,CompanyImage,Country,State,CreateDate from Jobs
+                string query = @"SELECT JobId,Title,Salary,JobType,CompanyName,
+                                        COALESCE(NULLIF(LTRIM(RTRIM(CompanyImage)), ''), 'Images/No_image.png') AS DisplayImage,
+                                        Country,State,CreateDate FROM Jobs
             where LOWER(Country) LIKE '%" + selectedCountryLower + "%' ";
 
                 cmd = new SqlCommand(query, con);
@@ -93,33 +99,48 @@ namespace IntelliJob.User
 
         protected string GetImageUrl(Object url)
         {
-            string url1 = "";
-            string logoPath = url.ToString();
-
-            if (string.IsNullOrEmpty(logoPath) || url == DBNull.Value)
+            if (url == null || url == DBNull.Value)
             {
-                // Case 1: Logo is null/empty. Use placeholder.
-                url1 = "~/Images/No_image.png";
-            }
-            else
-            {
-                // Check if the logoPath already contains a folder separator (like "Images/guid_file.jpg").
-                // This handles files uploaded directly, which include the "Images/" prefix in PostJob.aspx.cs.
-                if (logoPath.IndexOf('/') == -1 && logoPath.IndexOf('\\') == -1)
-                {
-                    // Case 2: It's just a filename (e.g., "company_logo.jpg"). 
-                    // We assume this file is in the Images folder.
-                    url1 = string.Format("~/Images/{0}", logoPath);
-                }
-                else
-                {
-                    // Case 3: It's a full path (e.g., "Images/guid_file.jpg"). Use it directly.
-                    url1 = string.Format("~/{0}", logoPath);
-                }
+                return ResolveUrl("~/Images/No_image.png");
             }
 
-            // ResolveUrl ensures the path is correct relative to the application root
-            return ResolveUrl(url1);
+            string logoPath = url.ToString().Trim();
+            if (string.IsNullOrWhiteSpace(logoPath))
+            {
+                return ResolveUrl("~/Images/No_image.png");
+            }
+
+            if (logoPath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || logoPath.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                return logoPath;
+            }
+
+            string normalizedPath = logoPath.StartsWith("~/", StringComparison.OrdinalIgnoreCase)
+                ? logoPath
+                : "~/" + logoPath.TrimStart('~', '/');
+
+            string[] candidates = new[]
+            {
+                normalizedPath,
+                "~/Images/" + logoPath.TrimStart('~', '/'),
+                "~/photos/" + logoPath.TrimStart('~', '/')
+            };
+
+            foreach (string candidate in candidates)
+            {
+                try
+                {
+                    if (File.Exists(Server.MapPath(candidate)))
+                    {
+                        return ResolveUrl(candidate);
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            return ResolveUrl("~/Images/No_image.png");
         }
 
         public static string RelativeDate(DateTime theDate)
@@ -156,7 +177,9 @@ namespace IntelliJob.User
             if (jobType != "")
             {
                 con = new SqlConnection(str);
-                string query = @"Select Jobid,Title,Salary,JobType,CompanyName,CompanyImage,Country,State,CreateDate from Jobs
+                string query = @"SELECT Jobid,Title,Salary,JobType,CompanyName,
+                                        COALESCE(NULLIF(LTRIM(RTRIM(CompanyImage)), ''), 'Images/No_image.png') AS DisplayImage,
+                                        Country,State,CreateDate FROM Jobs
                     where JobType IN (" + jobType + ")";
                 cmd = new SqlCommand(query, con);
                 sda = new SqlDataAdapter(cmd);
@@ -268,11 +291,15 @@ namespace IntelliJob.User
                         subquery += a + " and ";
                     }
                     subquery = subquery.Remove(subquery.LastIndexOf("and"), 3);
-                    query = @"Select JobId,Title,Salary,JobType,CompanyName,CompanyImage,Country,State,CreateDate from Jobs where " + subquery + " ";
+                    query = @"SELECT JobId,Title,Salary,JobType,CompanyName,
+                                     COALESCE(NULLIF(LTRIM(RTRIM(CompanyImage)), ''), 'Images/No_image.png') AS DisplayImage,
+                                     Country,State,CreateDate FROM Jobs where " + subquery + " ";
                 }
                 else
                 {
-                    query = @"Select JobId,Title,Salary,JobType,CompanyName,CompanyImage,Country,State,CreateDate from Jobs ";
+                    query = @"SELECT JobId,Title,Salary,JobType,CompanyName,
+                                     COALESCE(NULLIF(LTRIM(RTRIM(CompanyImage)), ''), 'Images/No_image.png') AS DisplayImage,
+                                     Country,State,CreateDate FROM Jobs ";
                 }
 
                 SqlDataAdapter sda = new SqlDataAdapter(query, con);

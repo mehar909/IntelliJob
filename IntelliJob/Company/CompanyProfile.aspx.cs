@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.IO;
 
 namespace IntelliJob.Company
 {
@@ -53,9 +54,10 @@ namespace IntelliJob.Company
                     txtAddress.Text = dr["Address"].ToString();
                     ddlCountry.SelectedValue = dr["Country"].ToString();
 
-                    string logo = dr["CompanyLogo"].ToString();
-                    imgLogo.ImageUrl = "~/photos/" + logo;
-                    Image1.ImageUrl = "~/photos/" + logo;
+                    string logo = dr["CompanyLogo"] == DBNull.Value ? string.Empty : dr["CompanyLogo"].ToString().Trim();
+                    string logoUrl = ResolveLogoUrl(logo);
+                    imgLogo.ImageUrl = logoUrl;
+                    Image1.ImageUrl = logoUrl;
                 }
             }
         }
@@ -73,7 +75,7 @@ namespace IntelliJob.Company
             }
             else
             {
-                logoName = imgLogo.ImageUrl.Replace("~/photos/", "");
+                logoName = GetCurrentLogoName(companyId);
             }
 
             using (SqlConnection con = new SqlConnection(cs))
@@ -116,6 +118,54 @@ namespace IntelliJob.Company
                     "setTimeout(function() { var msg = document.getElementById('" + lblMsg.ClientID + "'); if(msg) msg.style.display='none'; }, 7000);", true);
 
             }
+        }
+
+        private string GetCurrentLogoName(int companyId)
+        {
+            using (SqlConnection con = new SqlConnection(cs))
+            using (SqlCommand cmd = new SqlCommand("SELECT CompanyLogo FROM Companies WHERE CompanyId = @CompanyId", con))
+            {
+                cmd.Parameters.AddWithValue("@CompanyId", companyId);
+                con.Open();
+                object result = cmd.ExecuteScalar();
+                string logo = result == null || result == DBNull.Value ? string.Empty : result.ToString().Trim();
+                return string.IsNullOrWhiteSpace(logo) ? "Images/No_image.png" : logo;
+            }
+        }
+
+        private string ResolveLogoUrl(string logo)
+        {
+            if (string.IsNullOrWhiteSpace(logo))
+            {
+                return "~/Images/No_image.png";
+            }
+
+            if (logo.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || logo.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                return logo;
+            }
+
+            string[] candidates = new[]
+            {
+                "~/photos/" + logo.TrimStart('~', '/'),
+                "~/Images/" + logo.TrimStart('~', '/')
+            };
+
+            foreach (string candidate in candidates)
+            {
+                try
+                {
+                    if (File.Exists(Server.MapPath(candidate)))
+                    {
+                        return candidate;
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            return "~/Images/No_image.png";
         }
     }
 }

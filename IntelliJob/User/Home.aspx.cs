@@ -106,6 +106,56 @@ namespace IntelliJob.User
 
             return postDate.ToString("MMM dd, yyyy");
         }
+
+        // ADDED: Method to resolve company logo image paths
+        protected string GetImageUrl(object url)
+        {
+            if (url == null || url == DBNull.Value || string.IsNullOrEmpty(url.ToString()))
+            {
+                return ResolveUrl("~/Images/No_image.png");
+            }
+
+            string logoPath = url.ToString().Trim();
+            if (string.IsNullOrWhiteSpace(logoPath))
+            {
+                return ResolveUrl("~/Images/No_image.png");
+            }
+
+            // If it's a full URL, return as-is
+            if (logoPath.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || logoPath.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                return logoPath;
+            }
+
+            // Normalize the path
+            string normalizedPath = logoPath.StartsWith("~/", StringComparison.OrdinalIgnoreCase)
+                ? logoPath
+                : "~/" + logoPath.TrimStart('~', '/');
+
+            // Try multiple path candidates to find the file
+            string[] candidates = new[]
+            {
+                normalizedPath,
+                "~/Images/" + logoPath.TrimStart('~', '/'),
+                "~/photos/" + logoPath.TrimStart('~', '/')
+            };
+
+            foreach (string candidate in candidates)
+            {
+                try
+                {
+                    if (System.IO.File.Exists(Server.MapPath(candidate)))
+                    {
+                        return ResolveUrl(candidate);
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            return ResolveUrl("~/Images/No_image.png");
+        }
         private void showUserProfile()
         {
             con = new SqlConnection(str);
@@ -126,7 +176,8 @@ namespace IntelliJob.User
         {
             if (e.CommandName == "EditUserProfile")
             {
-                Response.Redirect("ResumeBuild.aspx?id=" + e.CommandArgument.ToString());
+                Response.Redirect("Profile.aspx");
+                //Response.Redirect("ResumeBuild.aspx?id=" + e.CommandArgument.ToString());
             }
         }
     }

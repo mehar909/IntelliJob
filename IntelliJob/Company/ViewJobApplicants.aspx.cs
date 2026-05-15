@@ -229,15 +229,15 @@ namespace IntelliJob.Company
         }
         protected string GetInviteStatus(object pwd, object used, object sentAt)
 	{
-            bool hasPwd = pwd != DBNull.Value && !string.IsNullOrEmpty(pwd?.ToString());
-            bool isUsed = used != DBNull.Value && Convert.ToBoolean(used);
+    	    bool hasPwd = pwd != DBNull.Value && !string.IsNullOrEmpty(pwd?.ToString());
+    	    bool isUsed = used != DBNull.Value && Convert.ToBoolean(used);
             string sentDate = sentAt != DBNull.Value && sentAt != null ? Convert.ToDateTime(sentAt).ToString("MMM d, HH:mm") : "";
-
-            if (isUsed)
-                return "<span class='status-used'><i class='fas fa-check-circle'></i> Interview Completed</span>";
-            if (hasPwd)
-                return $"<span class='status-sent'><i class='fas fa-paper-plane'></i> Invited {sentDate}</span>";
-            return "<span class='status-none'>Not Sent</span>";
+        	
+    	    if (isUsed)
+        	return "<span class='status-used'><i class='fas fa-check-circle'></i> Interview Completed</span>";
+    	    if (hasPwd)
+        	return $"<span class='status-sent'><i class='fas fa-paper-plane'></i> Invited {sentDate}</span>";
+    	    return "<span class='status-none'>Not Sent</span>";
 	}
     }
 }

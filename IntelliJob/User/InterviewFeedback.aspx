@@ -65,6 +65,80 @@
             margin-bottom: 30px;
         }
 
+        .page-header-section {
+            background: linear-gradient(100deg, #da2461 10%, #011B43  90%);
+            padding: 54px 0 28px;
+            min-height:450px;
+        }
+
+        .page-header-section .container {
+            padding: 80px 32px 0 32px;
+        }
+
+        .page-header-section h2 {
+            font-size: 40px;
+            font-weight: 700;
+            text-transform: capitalize;
+            font-family: "Muli", sans-serif;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .page-header-section p {
+            color: #ffffff;
+            font-size: 20px;
+            max-width: 600px;
+        }
+
+        .hero-chips {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .hero-chip {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .btn-header-action {
+             display: inline-flex;
+             align-items: center;
+             gap: 8px;
+             background-color: #fb246a;
+             border: 2px solid #fb246a;
+             color: #ffffff !important;
+             border-radius: 12px;
+             padding: 12px 28px;
+             font-weight: 600;
+             font-size: 15px;
+             text-decoration: none;
+             transition: all 0.2s ease;
+             white-space: nowrap;
+        }
+        .btn-header-action:hover {
+            background-color: #da2461;
+            border-color: #da2461;
+            color: #fff !important;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+        .hero-chip {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
         /* Score cards */
         .score-breakdown h3 {
             font-size: 20px;
@@ -128,6 +202,50 @@
             font-size: 14px;
             line-height: 1.6;
             margin: 0;
+        }
+
+        .visual-score-gauge {
+            position: relative;
+            width: 140px;
+            height: 70px;
+            margin: 0 auto 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .visual-score-gauge svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .visual-score-gauge .gauge-bg {
+            fill: none;
+            stroke: #e5e7eb;
+            stroke-width: 10;
+            stroke-linecap: round;
+        }
+
+        .visual-score-gauge .gauge-progress {
+            fill: none;
+            stroke-width: 10;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1.5s ease-in-out;
+        }
+
+        .visual-score-gauge .gauge-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: 20px;
+        }
+
+        .visual-score-gauge .gauge-text .score {
+            font-size: 20px;
+            font-weight: 600;
         }
 
         /* Strengths & Areas */
@@ -208,7 +326,7 @@
         }
 
         .action-buttons .btn-retake {
-            background: linear-gradient(135deg, #FF4357 0%, #ff6b7a 100%);
+            background: #fb246a;
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -225,37 +343,80 @@
             box-shadow: 0 6px 16px rgba(255, 67, 87, 0.4);
             color: #fff;
         }
+
+        .visual-score-circle {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            margin: 0;
+        }
+        .visual-score-circle svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+        .visual-score-circle .circle-bg {
+            fill: none;
+            stroke: #e5e7eb;
+        }
+        .visual-score-circle .circle-progress {
+            fill: none;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s ease-in-out;
+        }
+        .visual-score-circle .score-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 800;
+            color: #111827;
+        }
     </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
     <main>
+        <!-- Page Header -->
+        <div class="page-header-section">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h2>Interview Feedback</h2>
+                        <p>A comprehensive AI review of your interview performance for this specific job role.</p>
+                        <div class="hero-chips" style="margin-top: 15px;">
+                            <span class="hero-chip"><i class="fas fa-calendar-alt" style="margin-right:4px;"></i><asp:Literal ID="litDate" runat="server" /></span>
+                            <span class="hero-chip"><i class="fas fa-building" style="margin-right:4px;"></i><asp:Literal ID="litCompany" runat="server" /></span>
+                            <span class="hero-chip"><asp:Literal ID="litRole" runat="server" /></span>
+                            <span class="hero-chip"><asp:Literal ID="litLevel" runat="server" /></span>
+                            <span class="hero-chip"><asp:Literal ID="litType" runat="server" /></span>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 text-right pt-3 d-flex flex-column align-items-end justify-content-center gap-2" style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+                        <asp:Literal ID="litEnhanceResumeAction" runat="server" />
+                        <%--<a href="InterviewHistory.aspx" class="btn-header-action">
+                            <i class="fas fa-history"></i> View Past Interviews
+                        </a>--%>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="feedback-container">
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-xl-8 col-lg-10">
 
-                        <!-- Header -->
-                        <div class="feedback-header">
-                            <h2>Feedback on the Interview &mdash; <span><asp:Literal ID="litRole" runat="server" /></span></h2>
-                        </div>
-
-                        <!-- Meta: Score + Date -->
-                        <div class="feedback-meta">
-                            <div class="meta-item">
-                                <i class="fas fa-star"></i>
-                                <span>Overall Impression: <span class="total-score"><asp:Literal ID="litTotalScore" runat="server" /></span>/100</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-calendar-alt"></i>
-                                <span><asp:Literal ID="litDate" runat="server" /></span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-layer-group"></i>
-                                <span><asp:Literal ID="litLevel" runat="server" /></span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-tag"></i>
-                                <span><asp:Literal ID="litType" runat="server" /></span>
+                        <!-- Overall Impression -->
+                        <div class="score-card" style="display: flex; align-items: center; justify-content: center; gap: 30px; margin-bottom: 25px; padding: 20px;">
+                            
+                            <div class="feedback-meta" style="margin-bottom: 0;">
+                                <div class="meta-item" style="font-size: 18px;">
+                                    <i class="fas fa-star" style="color: #FF4357; font-size: 20px; margin-right: 8px;"></i>
+                                    <span>Overall Impression:</span>
+                                    <asp:Literal ID="litVisualScore" runat="server" />
+                                </div>
                             </div>
                         </div>
 
@@ -263,6 +424,7 @@
 
                         <!-- Final Assessment -->
                         <div class="final-assessment">
+                            <h4 style="margin-bottom: 15px; font-weight: 700; color: #2d3436;">Interview Summary</h4>
                             <asp:Literal ID="litFinalAssessment" runat="server" />
                         </div>
 
@@ -289,13 +451,18 @@
                             </ul>
                         </div>
 
+                        <!-- Final Note -->
+                        <div class="final-assessment" style="border-left-color: #0984e3; background: #e3f2fd;">
+                            <h4><i class="fas fa-envelope icon-envelope" style="color: #0984e3; margin-right: 10px;"></i> Final Note</h4>
+                            <p style="margin-top: 10px; margin-bottom: 0;">
+                                <asp:Literal ID="litFinalNote" runat="server" />
+                            </p>
+                        </div>
+
                         <!-- Action Buttons -->
                         <div class="action-buttons">
                             <a href="Interview.aspx" class="btn-back">
-                                <i class="fas fa-arrow-left"></i> Back to Dashboard
-                            </a>
-                            <a href="InterviewHistory.aspx" class="btn-back">
-                                <i class="fas fa-history"></i> View History
+                                <i class="fas fa-arrow-left"></i> Back to Interviews
                             </a>
                             <asp:Panel ID="pnlRetake" runat="server" Visible="false" style="display:inline;">
                                 <a href="javascript:void(0)" onclick="retakeInterview()" class="btn-retake" id="btnRetakeLink">
@@ -308,7 +475,7 @@
                         <div style="text-align:center; margin-top:20px;">
                             <asp:Button ID="btnReEvaluate" runat="server" Text="Re-evaluate Interview" 
                                 OnClick="btnRegenerate_Click" 
-                                CssClass="btn-back" style="display:inline-block; cursor:pointer;" 
+                                CssClass="btn-action primary" style="display:inline-block; cursor:pointer; padding: 12px 24px; border-radius: 8px; background: #2d3436; color: #fff; border: none; font-weight: 600;" 
                                 OnClientClick="this.disabled=true;this.value='Re-evaluating... please wait up to 60s';" 
                                 UseSubmitBehavior="false" />
                             <p style="color:#b2bec3; font-size:12px; margin-top:6px;">Resubmit the same transcript for a fresh AI evaluation</p>

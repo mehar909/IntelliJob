@@ -1,6 +1,9 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Company/CompanyMaster.Master" AutoEventWireup="true" CodeBehind="JobList.aspx.cs" Inherits="IntelliJob.Company.JobList" %>
 
+
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" />
+
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
             var backButton = document.getElementById('<%= linkBack.ClientID %>');

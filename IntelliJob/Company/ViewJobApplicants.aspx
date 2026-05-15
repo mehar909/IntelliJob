@@ -85,7 +85,7 @@
                                 <asp:Button ID="btnSendInvite" runat="server"
                                     Text="Send Invite"
                                     CssClass="btn btn-sm btn-invite"
-                                    OnClientClick=`<%# "sendInvite(" + Eval("AppliedJobId") + "); return false;" %>` />
+                                    OnClientClick='<%# "sendInvite(" + Eval("AppliedJobId") + "); return false;" %>' />
 
                                 <%-- Status line --%>
                                 <div class="mt-1">

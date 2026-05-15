@@ -42,7 +42,7 @@
         .stat-card .stat-number {
             font-size: 32px;
             font-weight: 700;
-            color: #FF4357;
+            color: #fb246a;
         }
 
         .stat-card .stat-label {
@@ -95,7 +95,7 @@
         }
 
         .interview-row .meta i {
-            color: #FF4357;
+            color: #fb246a;
             margin-right: 4px;
         }
 
@@ -124,8 +124,8 @@
         .score-low { background: #f8d7da; color: #721c24; }
 
         .btn-action {
-            border: 1px solid #FF4357;
-            color: #FF4357;
+            border: 1px solid #fb246a;
+            color: #fb246a;
             border-radius: 6px;
             padding: 6px 16px;
             font-size: 13px;
@@ -135,7 +135,7 @@
         }
 
         .btn-action:hover {
-            background: #FF4357;
+            background: #fb246a;
             color: #fff;
             text-decoration: none;
         }
@@ -159,7 +159,7 @@
         }
 
         .empty-state a {
-            background: linear-gradient(135deg, #FF4357 0%, #ff6b7a 100%);
+            background: #fb246a;
             color: #fff;
             border-radius: 8px;
             padding: 12px 30px;
@@ -177,12 +177,12 @@
                 <div class="row">
                     <div class="col-lg-8">
                         <div class="history-header">
-                            <h2><i class="fas fa-history" style="color: #FF4357;"></i> Interview History</h2>
+                            <h2><i class="fas fa-history" style="color: #fb246a;"></i> Interview History</h2>
                             <p>View all your past interviews and their results.</p>
                         </div>
                     </div>
                     <div class="col-lg-4 text-right pt-3">
-                        <a href="Interview.aspx" class="btn" style="background: linear-gradient(135deg, #FF4357, #ff6b7a); color: #fff; border-radius: 8px; padding: 10px 25px; font-weight: 600;">
+                        <a href="Interview.aspx" class="btn" style="background:  #fb246a; color: #fff; border-radius: 8px; padding: 10px 25px; font-weight: 600;">
                             <i class="fas fa-plus"></i> New Interview
                         </a>
                     </div>
@@ -237,7 +237,7 @@
                                     <div class="col-md-2 text-center">
                                         <%# GetScoreBadge(Eval("TotalScore")) %>
                                     </div>
-                                    <div class="col-md-2 text-right">
+                                    <div class="col-md-2 text-center">
                                         <a href='<%# GetActionLink(Eval("InterviewId"), Eval("Status")) %>' class="btn-action">
                                             <%# GetActionText(Eval("Status")) %>
                                         </a>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
@@ -266,7 +266,24 @@ namespace IntelliJob.Company
             }
 
             List<string> previousQuestions = LoadPreviousQuestions(context.UserId, context.JobTitle);
-            List<string> questions = GenerateInterviewQuestions(context, previousQuestions);
+            
+            string resumeText = null;
+            ApplicationResumeSelection selection;
+            if (ApplicationDataStore.TryGetApplicationResumeSelection(context.UserId, context.AppliedJobId, out selection))
+            {
+                if (!string.IsNullOrWhiteSpace(selection.StructuredJson))
+                {
+                    ResumeProfileDocument document = ResumeProfileService.DeserializeDocument(selection.StructuredJson);
+                    if (document != null)
+                        resumeText = ResumeProfileService.BuildResumeText(document);
+                }
+                else if (System.IO.File.Exists(selection.StoredResumePath))
+                {
+                    resumeText = ResumeTextExtractor.ExtractText(selection.StoredResumePath);
+                }
+            }
+
+            List<string> questions = GenerateInterviewQuestions(context, previousQuestions, resumeText);
             if (questions == null || questions.Count == 0)
             {
                 questions = BuildFallbackQuestions(context.JobTitle, context.JobType, context.QuestionCount);
@@ -297,8 +314,7 @@ namespace IntelliJob.Company
                 string query = @"SELECT aj.AppliedJobId, aj.JobId, aj.UserId,
                                         j.Title, j.Experience AS JobExperience, j.Specialization, j.Description, j.Qualification, j.JobType, j.CompanyName,
                                         u.Email, u.Username,
-                                        js.Name, js.WorksOn, js.Experience AS CandidateExperience, js.TenthGrade, js.TwelfthGrade,
-                                        js.GraduationGrade, js.PostGraduationGrade, js.Phd, js.Resume
+                                        js.Name, js.Resume
                                  FROM AppliedJobs aj
                                  INNER JOIN Jobs j ON aj.JobId = j.JobId
                                  INNER JOIN Users u ON aj.UserId = u.UserId
@@ -341,9 +357,6 @@ namespace IntelliJob.Company
                                 "Job Description: " + row["Description"],
                             ResumeSummary =
                                 "Candidate Name: " + (string.IsNullOrWhiteSpace(row["Name"].ToString()) ? row["Username"].ToString() : row["Name"].ToString()) + "\n" +
-                                "Works On: " + row["WorksOn"] + "\n" +
-                                "Experience: " + row["CandidateExperience"] + "\n" +
-                                "Education (10th/12th/Grad/PostGrad/PhD): " + row["TenthGrade"] + "/" + row["TwelfthGrade"] + "/" + row["GraduationGrade"] + "/" + row["PostGraduationGrade"] + "/" + row["Phd"] + "\n" +
                                 "Uploaded Resume Path: " + row["Resume"],
                             CompanyName = row["CompanyName"].ToString(),
                             CandidateName = string.IsNullOrWhiteSpace(row["Name"].ToString()) ? row["Username"].ToString() : row["Name"].ToString(),
@@ -355,7 +368,7 @@ namespace IntelliJob.Company
             }
         }
 
-        private List<string> GenerateInterviewQuestions(ApplicationInterviewContext context, List<string> previousQuestions)
+        private List<string> GenerateInterviewQuestions(ApplicationInterviewContext context, List<string> previousQuestions, string resumeText)
         {
             try
             {
@@ -373,7 +386,8 @@ namespace IntelliJob.Company
                             context.JobType,
                             context.TechStack,
                             context.QuestionCount,
-                            previousQuestions).ConfigureAwait(false),
+                            previousQuestions,
+                            resumeText).ConfigureAwait(false),
                         cts.Token);
 
                     if (task.Wait(System.TimeSpan.FromSeconds(25)))

@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -56,7 +59,7 @@ namespace IntelliJob
         /// <summary>
         /// Generates interview questions using Gemini API based on role, level, type, tech stack, and count.
         /// </summary>
-        public async Task<List<string>> GenerateQuestionsAsync(string role, string level, string interviewType, string techStack, int questionCount, List<string> previousQuestions = null)
+        public async Task<List<string>> GenerateQuestionsAsync(string role, string level, string interviewType, string techStack, int questionCount, List<string> previousQuestions = null, string resumeText = null)
         {
             string avoidSection = "";
             if (previousQuestions != null && previousQuestions.Count > 0)
@@ -67,17 +70,35 @@ namespace IntelliJob
                 avoidSection += "\nGenerate fresh, unique questions that cover different aspects of the role and skills.";
             }
 
+            string resumeContext = "";
+            if (!string.IsNullOrWhiteSpace(resumeText))
+            {
+                resumeContext = $"\n\nCANDIDATE RESUME:\n{resumeText}\n\nIf the resume contains clearly separated sections such as Professional Summary, Education, Experience, Projects, Skills, Certifications, or Languages, treat them as structured data. Base the most personalized questions on the strongest and most relevant experience and project entries, not on duplicate or weaker entries.\n";
+            }
+
             string prompt = $@"Prepare questions for a job interview.
 The job role is {role}.
 The job experience level is {level}.
 The tech stack used in the job is: {(string.IsNullOrEmpty(techStack) ? "General" : techStack)}.
 The focus between behavioural and technical questions should lean towards: {interviewType}.
 The amount of questions required is: {questionCount}.
+
+CRITICAL CRITERIA:
+Note: The candidate has APPLIED for this job, they are not currently working there. Frame questions appropriately.
+Distribute the questions exactly as follows (or as close as possible given the question count):
+- 15% from skills, projects, tools, and certifications mentioned in their resume.
+- 50% related to the role and job description to judge what they can do for the role.
+- 10% from their past experiences to evaluate if they have a valid experience level.
+- 10% scenario-based questions (tailored to the role, resume, and tech stack).
+- 10% technical questions (about the tech stack, OOP, DB, DSA, algorithms, etc.).
+- The remaining questions (approx 5%) should be about personal interests, future goals, or general industry thought-provoking questions (e.g., ""AI is taking our jobs. What do you think about this?"").
+If no resume is provided, distribute the resume-specific percentages into the role-specific questions.
+
 Be creative and vary your questions. Each time this prompt is called, generate a different set of questions covering different angles, scenarios, and depths of the topic.
 Please return only the questions, without any additional text.
 The questions are going to be read by a voice assistant so do not use special characters like / or * which might break the voice assistant.
 Return the questions formatted as a JSON array like this:
-[""Question 1"", ""Question 2"", ""Question 3""]{avoidSection}";
+[""Question 1"", ""Question 2"", ""Question 3""]{avoidSection}{resumeContext}";
 
             string responseText = await CallGeminiAsync(prompt, temperature: 1.0);
 
@@ -166,7 +187,7 @@ Return the questions formatted as a JSON array like this:
 - Strong, well-explained answers should score 70-100";
             }
 
-            string prompt = $@"You are an AI interviewer analyzing an interview transcript. Your job is to provide ACCURATE and STRICT scoring based on what the candidate ACTUALLY said.
+            string prompt = $@"You are an AI interviewer analyzing an interview transcript. Your job is to provide ACCURATE scoring STRICTLY based on what the candidate ACTUALLY said.
 
 CRITICAL SCORING RULES - READ CAREFULLY:
 1. If a candidate does NOT answer a question (says 'ok', 'let's start', 'I don't know', ends call, or gives irrelevant responses), that question receives a score of 0-5 for all categories.
@@ -192,6 +213,8 @@ Please score the candidate from 0 to 100 in the following areas. Do not add cate
 - Cultural & Role Fit: Alignment with company values and job role. (0 if no substantive interaction)
 - Confidence & Clarity: Confidence in responses, engagement, and clarity. (0 if candidate disengaged or didn't participate)
 
+- Experience Validity: Based on their answers, do they demonstrate genuine past experience? (Score 1 to 10, where 1 is no real experience and 10 is highly validated experience)
+
 Return your response as a JSON object with this exact structure (no markdown, no extra text):
 {{
   ""totalScore"": 75,
@@ -200,7 +223,8 @@ Return your response as a JSON object with this exact structure (no markdown, no
     {{ ""name"": ""Technical Knowledge"", ""score"": 70, ""comment"": ""Your comment here"" }},
     {{ ""name"": ""Problem Solving"", ""score"": 75, ""comment"": ""Your comment here"" }},
     {{ ""name"": ""Cultural Fit"", ""score"": 78, ""comment"": ""Your comment here"" }},
-    {{ ""name"": ""Confidence and Clarity"", ""score"": 72, ""comment"": ""Your comment here"" }}
+    {{ ""name"": ""Confidence and Clarity"", ""score"": 72, ""comment"": ""Your comment here"" }},
+    {{ ""name"": ""Experience Validity"", ""score"": 8, ""comment"": ""Your comment here"" }}
   ],
   ""strengths"": [""Strength 1"", ""Strength 2"", ""Strength 3""],
   ""areasForImprovement"": [""Area 1"", ""Area 2"", ""Area 3""],
@@ -265,6 +289,11 @@ Return your response as a JSON object with this exact structure (no markdown, no
                             result.ConfidenceScore = score;
                             result.ConfidenceComment = comment;
                         }
+                        else if (name.Contains("Experience") || name.Contains("Validity"))
+                        {
+                            result.ExperienceValidityScore = score;
+                            result.ExperienceValidityComment = comment;
+                        }
                     }
                 }
 
@@ -312,8 +341,362 @@ Return your response as a JSON object with this exact structure (no markdown, no
         }
 
         #endregion
+        
+        #region Resume Enhancement
+
+        public async Task<ResumeProfileDocument> ClassifyResumeTextToStructuredJsonAsync(string resumeText, string originalFileName, string storedFilePath)
+        {
+            if (string.IsNullOrWhiteSpace(resumeText))
+                return null;
+
+            string prompt = $@"You are a strict resume field classifier.
+Extract fields from the provided resume text into the exact JSON schema below.
+
+CRITICAL RULES:
+1) Do not rewrite, summarize, translate, or correct facts.
+2) Keep the same words and numbers from the resume text. Do not add, remove, or replace words/tokens.
+3) Allowed formatting cleanup only: remove unnecessary extra spaces and apply smart sentence case.
+4) Do not change names, emails, phone numbers, usernames, IDs, dates, company names, school names, degree titles, or numeric values.
+5) If a value does not exist, return empty string for text fields, [] for arrays, and null for nullable month/year fields.
+6) Return JSON only, no markdown.
+
+JSON schema:
+{{
+  ""personalInfo"": {{
+    ""fullName"": """",
+    ""email"": """",
+    ""mobile"": """",
+    ""address"": """",
+    ""country"": """",
+    ""linkedinUrl"": """",
+    ""portfolioUrl"": """"
+  }},
+  ""professionalSummary"": """",
+  ""education"": [
+    {{
+      ""schoolName"": """",
+      ""location"": """",
+      ""degree"": """",
+      ""startMonth"": null,
+      ""startYear"": null,
+      ""endMonth"": null,
+      ""endYear"": null,
+      ""grade"": """",
+      ""coursework"": """"
+    }}
+  ],
+  ""experience"": [
+    {{
+      ""jobTitle"": """",
+      ""company"": """",
+      ""location"": """",
+      ""startMonth"": null,
+      ""startYear"": null,
+      ""endMonth"": null,
+      ""endYear"": null,
+      ""isCurrent"": false,
+      ""bullets"": []
+    }}
+  ],
+  ""projects"": [
+    {{
+      ""projectTitle"": """",
+      ""techStack"": [],
+      ""description"": """"
+    }}
+  ],
+  ""skills"": {{
+    ""programmingLanguages"": [],
+    ""frameworksLibraries"": [],
+    ""toolsCloudDatabase"": [],
+    ""softSkillsLanguages"": [],
+    ""customSection"": {{
+      ""heading"": """",
+      ""items"": []
+    }}
+  }},
+  ""metadata"": {{
+    ""resumeType"": ""profile"",
+    ""originalFileName"": ""{EscapeForPrompt(originalFileName)}"",
+    ""storedFilePath"": ""{EscapeForPrompt(storedFilePath)}"",
+    ""parsedAt"": null,
+    ""updatedAt"": null,
+    ""isValid"": true,
+    ""validationMessages"": []
+  }}
+}}
+
+Resume text:
+{resumeText}";
+
+            string response = await CallGeminiAsync(prompt, "You are a deterministic JSON extractor. Keep words and numbers unchanged, but normalize spacing and sentence case. Output valid JSON only.", 0.0).ConfigureAwait(false);
+            string cleaned = CleanJsonPayload(response);
+            ResumeProfileDocument parsed = ResumeProfileService.DeserializeDocument(cleaned);
+            if (parsed == null)
+                return null;
+
+            parsed.OriginalFileName = string.IsNullOrWhiteSpace(originalFileName) ? parsed.OriginalFileName : originalFileName;
+            parsed.StoredFilePath = string.IsNullOrWhiteSpace(storedFilePath) ? parsed.StoredFilePath : storedFilePath;
+            parsed.RawText = resumeText;
+            return parsed;
+        }
+
+        public async Task<ResumeEnhancementResult> GenerateResumeEnhancementAsync(
+            string resumeText,
+            string jobTitle,
+            string jobDescription,
+            string interviewFeedback,
+            string mandatoryKeywords)
+        {
+            string prompt = $@"You are an AI resume enhancer for job seekers.
+
+Your task: produce an optimized, one-page-friendly resume by analysing the candidate's resume against the target role, job description, interview feedback, and keyword hints.
+
+RULES:
+- Do NOT invent facts. Only use details already present in the resume.
+- When there are multiple Experience entries, select the best-fitting 1 to 3 only (strongest, most relevant to the role, measurable impact preferred).
+- When there are multiple Projects, select the best-fitting 1 to 2 only.
+- Skills: provide a SINGLE comma-separated list of all relevant skills (no category headers).
+- For bullets in Experience and Projects: To make a word bold wrap it like *word*. To make it italic wrap it like _word_ (no spaces inside markers).
+- Keep contact details (email, address, LinkedIn, portfolio) exactly as provided, but if a URL is very long shorten it to its display form (e.g. linkedin.com/in/username rather than full https URL).
+- Address should be kept concise (should be city/country only if full address is long).
+- Preserve section boundaries. Do not merge or skip sections that have content.
+
+Target role: {jobTitle}
+Soft keyword hints: {mandatoryKeywords}
+
+Job description:
+{jobDescription}
+
+Interview feedback:
+{interviewFeedback}
+
+Resume text:
+{resumeText}
+
+Return ONLY valid JSON with this EXACT structure. No markdown, no extra keys:
+{{
+  ""overallScore"": 78,
+  ""atsScore"": 74,
+  ""semanticScore"": 80,
+  ""keywordScore"": 68,
+  ""resumeSummary"": ""Short summary of the resume fit for this role."",
+  ""enhancedResumeDocument"": {{
+     ""personalInfo"": {{
+        ""fullName"": ""Candidate's full name unchanged"",
+        ""email"": ""Candidate's email address unchanged"",
+        ""mobile"": ""Candidate's mobile number unchanged"",
+        ""address"": ""Candidate's address (shortened if too long but do not invent or change)"",
+        ""country"": ""Candidate's country unchanged"",
+        ""linkedinUrl"": ""Shortened LinkedIn URL but the username must be preserved exactly as in the original resume"",
+        ""portfolioUrl"": ""Shortened portfolio URL but the username must be preserved exactly as in the original resume""
+      }},
+      ""professionalSummary"": ""A concise professional summary tailored to the job description and interview feedback."",
+      ""education"": [
+        {{
+          ""schoolName"": ""Name of the educational institution unchanged"",
+          ""location"": ""City, Country unchanged"",
+          ""degree"": ""Degree information unchanged"",
+          ""startMonth"": 1 (unchanged),
+          ""startYear"": 2020 (unchanged),
+          ""endMonth"": 12 (unchanged),
+          ""endYear"": 2024 (unchanged),
+          ""grade"": ""Grade or GPA if available, unchanged"",
+          ""coursework"": ""Relevant coursework or achievements (concise, tailored to the role, and only if present in the original resume)""
+        }},
+        {{
+          ""schoolName"": ""Name of the second educational institution unchanged (add if multiple entries are present, otherwise omit this object)"",
+          ""location"": ""City, Country unchanged"",
+          ""degree"": ""Degree information unchanged"",
+          ""startMonth"": 1 (unchanged),
+          ""startYear"": 2020 (unchanged),
+          ""endMonth"": 12 (unchanged),
+          ""endYear"": 2024 (unchanged),
+          ""grade"": ""Grade or GPA if available, unchanged"",
+          ""coursework"": ""Relevant coursework or achievements (concise, tailored to the role, and only if present in the original resume)""
+        }}
+      ],
+      ""experience"": [
+        {{
+          ""jobTitle"": ""Title of the job experience unchanged (add similar other objects but only for the top 1 to 3 most relevant/strongest experiences if multiple are present)"",
+          ""company"": ""Company name unchanged"",
+          ""location"": ""City, Country unchanged"",
+          ''startMonth'': 1 (unchanged),
+          ''startYear'': 2020 (unchanged),
+          ''endMonth'': 12 (unchanged),
+          ''endYear'': 2024 (unchanged),
+          ''isCurrent'': false (unchanged),
+          ''bullets'': [
+            ''*Key achievement or responsibility #1 with measurable impact*'',
+            ''_Key achievement_ or responsibility #2 with relevance to the role'',
+            ''Add up to 3 concise, tailored bullet points per experience, but only if they are present in the original resume. Focus on measurable achievements and relevance to the target role. Do not add bullets that are not in the original resume._'' 
+          ]
+        }}
+      ],
+      ''projects'': [
+        {{
+          ''projectTitle'': ''Title of the project unchanged (add similar more objects only if there are multiple projects and the chosen ones must also strong and relevant, 1 to 3 max)''',
+          ''techStack'': [''Tech1'', ''Tech2'', ''Tech3''],
+          ''description'': ''A concise description of the project with emphasis on achievements and relevance to the role.''
+        }}
+      ],
+      ''skills'': {{
+        ''programmingLanguages'': [''Skill1'', ''Skill2'', ''Skill3'', ''add upto 5 max, only if they are present in the original resume and relevant to the role. Similarly for all skill categories, only include if they are present in the original resume and relevant to the role. Do not add skills that are not in the original resume.''],
+        ''frameworksLibraries'': [''Skill1'', ''Skill2'', ''Skill3''],
+        ''toolsCloudDatabase'': [''Skill1'', ''Skill2'', ''Skill3''],
+        ''softSkillsLanguages'': [''Skill1'', ''Skill2'', ''Skill3''],
+        ''customSection'': {{
+            ''Custom Heading'',
+           ''items'': [''Item1'', ''Item2'', ''Item3'']
+        }}
+    }},
+  }},
+}},
+
+  ""strengths"": [""Strength 1"", ""Strength 2""],
+  ""gaps"": [""Gap 1"", ""Gap 2""],
+  ""priorityKeywords"": [""Keyword 1"", ""Keyword 2""],
+  ""rewriteSuggestions"": [
+    {{
+      ""sectionName"": ""Professional Summary"",
+      ""currentObservation"": ""What is currently weak or missing"",
+      ""suggestedRewrite"": ""A concise rewrite suggestion the user can apply""
+    }},
+    {{
+      ""sectionName"": ""Experience, and similarly add Projects or other sections if suggested (focus on entries which are provided in this JSON only)"",
+      ""currentObservation"": ""What is currently weak or missing in this experience entry"",
+      ""suggestedRewrite"": ""A concise rewrite suggestion for this experience entry that the user can apply""
+    }}
+  ],
+  ""finalAssessment"": ""A detailed but concise overall assessment.""
+}}";
+
+            string responseText = await CallGeminiAsync(prompt, "You are a resume optimization assistant. Always respond with valid JSON only.", 0.35);
+            return ParseResumeEnhancementResponse(responseText);
+        }
+
+        private ResumeEnhancementResult ParseResumeEnhancementResponse(string responseText)
+        {
+            string cleaned = responseText.Trim();
+            if (cleaned.StartsWith("```json"))
+                cleaned = cleaned.Substring(7);
+            else if (cleaned.StartsWith("```"))
+                cleaned = cleaned.Substring(3);
+            if (cleaned.EndsWith("```"))
+                cleaned = cleaned.Substring(0, cleaned.Length - 3);
+            cleaned = cleaned.Trim();
+
+            try
+            {
+                JObject json = JObject.Parse(cleaned);
+                var result = new ResumeEnhancementResult();
+                result.RawGeminiJson = cleaned;
+
+                result.OverallScore = json["overallScore"]?.Value<int>() ?? 0;
+                result.AtsScore = json["atsScore"]?.Value<int>() ?? result.OverallScore;
+                result.SemanticScore = json["semanticScore"]?.Value<int>() ?? result.OverallScore;
+                result.KeywordScore = json["keywordScore"]?.Value<int>() ?? result.OverallScore;
+                result.ResumeSummary = json["resumeSummary"]?.Value<string>() ?? string.Empty;
+                result.FinalAssessment = json["finalAssessment"]?.Value<string>() ?? string.Empty;
+
+                var strengths = json["strengths"] as JArray;
+                if (strengths != null)
+                {
+                    result.Strengths = new List<string>();
+                    foreach (var item in strengths)
+                        result.Strengths.Add(item.Value<string>());
+                }
+
+                var gaps = json["gaps"] as JArray;
+                if (gaps != null)
+                {
+                    result.Gaps = new List<string>();
+                    foreach (var item in gaps)
+                        result.Gaps.Add(item.Value<string>());
+                }
+
+                var keywords = json["priorityKeywords"] as JArray;
+                if (keywords != null)
+                {
+                    result.PriorityKeywords = new List<string>();
+                    foreach (var item in keywords)
+                        result.PriorityKeywords.Add(item.Value<string>());
+                }
+
+                var rewrites = json["rewriteSuggestions"] as JArray;
+                if (rewrites != null)
+                {
+                    result.RewriteSuggestions = new List<ResumeRewriteSuggestion>();
+                    foreach (JObject item in rewrites)
+                    {
+                        result.RewriteSuggestions.Add(new ResumeRewriteSuggestion
+                        {
+                            SectionName = item["sectionName"]?.Value<string>() ?? string.Empty,
+                            CurrentObservation = item["currentObservation"]?.Value<string>() ?? string.Empty,
+                            SuggestedRewrite = item["suggestedRewrite"]?.Value<string>() ?? string.Empty
+                        });
+                    }
+                }
+
+                // Parse the structured enhanced document (same shape as enhanced-resume-format.json / ResumeProfileService exact JSON)
+                var docToken = json["enhancedResumeDocument"];
+                if (docToken != null && docToken.Type == JTokenType.Object)
+                {
+                    result.EnhancedResumeDocument = ParseEnhancedDocumentJson((JObject)docToken);
+                    if (string.IsNullOrWhiteSpace(result.UpdatedResumeText) && result.EnhancedResumeDocument != null)
+                        result.UpdatedResumeText = ResumeProfileService.BuildResumeText(result.EnhancedResumeDocument);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ResumeEnhancementResult
+                {
+                    OverallScore = 0,
+                    AtsScore = 0,
+                    SemanticScore = 0,
+                    KeywordScore = 0,
+                    RawGeminiJson = string.Empty,
+                    ResumeSummary = "Resume enhancement could not be parsed.",
+                    UpdatedResumeText = string.Empty,
+                    Strengths = new List<string> { "The AI response could not be parsed." },
+                    Gaps = new List<string> { "Please try again after the AI service recovers." },
+                    PriorityKeywords = new List<string>(),
+                    RewriteSuggestions = new List<ResumeRewriteSuggestion>(),
+                    FinalAssessment = "ERROR: The AI resume enhancement response could not be parsed. Exception: " + ex.Message
+                };
+            }
+        }
+
+        private ResumeProfileDocument ParseEnhancedDocumentJson(JObject doc)
+        {
+            if (doc == null)
+                return null;
+            // Delegates to the same path as profile/application structured JSON (personalInfo, education[], experience[], etc.)
+            return ResumeProfileService.DeserializeDocument(doc.ToString());
+        }
+
+        #endregion
 
         #region Gemini API Call
+
+        private static string CleanJsonPayload(string payload)
+        {
+            string cleaned = (payload ?? string.Empty).Trim();
+            if (cleaned.StartsWith("```json"))
+                cleaned = cleaned.Substring(7);
+            else if (cleaned.StartsWith("```"))
+                cleaned = cleaned.Substring(3);
+            if (cleaned.EndsWith("```"))
+                cleaned = cleaned.Substring(0, cleaned.Length - 3);
+            return cleaned.Trim();
+        }
+
+        private static string EscapeForPrompt(string value)
+        {
+            return (value ?? string.Empty).Replace("\\", "\\\\").Replace("\"", "\\\"");
+        }
 
         private async Task<string> CallGeminiAsync(string prompt, string systemInstruction = null, double temperature = 0.7)
         {
@@ -444,6 +827,8 @@ Return your response as a JSON object with this exact structure (no markdown, no
         public string CulturalFitComment { get; set; }
         public int ConfidenceScore { get; set; }
         public string ConfidenceComment { get; set; }
+        public int ExperienceValidityScore { get; set; }
+        public string ExperienceValidityComment { get; set; }
         public List<string> Strengths { get; set; }
         public List<string> AreasForImprovement { get; set; }
         public string FinalAssessment { get; set; }

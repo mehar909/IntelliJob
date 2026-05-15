@@ -4,7 +4,7 @@
 
 <html>
 <head runat="server">
-    <title>Job Portal - Company Panel</title>
+    <title>IntelliJob</title>
     <meta charset="UTF-8">
 
     <!-- SAME CSS as Admin -->
@@ -135,7 +135,7 @@
                         <i class="fas fa-bars"></i>
                     </div>
                     <div class="logo">
-                        <label>Online Job Portal</label>
+                        <label>IntelliJob</label>
                     </div>
                 </div>
 

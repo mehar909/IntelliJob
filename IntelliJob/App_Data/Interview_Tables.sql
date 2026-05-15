@@ -20,9 +20,13 @@ CREATE TABLE Interviews (
     CONSTRAINT FK_Interviews_Users FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
 -- New columns on Interviews table
-ALTER TABLE Interviews ADD JobId INT NULL;
-ALTER TABLE Interviews ADD AppliedJobId INT NULL;
+IF COL_LENGTH('Interviews', 'JobId') IS NULL
+    ALTER TABLE Interviews ADD JobId INT NULL;
 
+IF COL_LENGTH('Interviews', 'AppliedJobId') IS NULL
+    ALTER TABLE Interviews ADD AppliedJobId INT NULL;
+
+    select * from Interviews;
 
 -- 2. InterviewQuestions: Questions generated for each interview
 CREATE TABLE InterviewQuestions (
@@ -59,6 +63,8 @@ CREATE TABLE InterviewFeedback (
     CulturalFitComment  NVARCHAR(MAX) NULL,
     ConfidenceScore     INT NOT NULL DEFAULT 0,
     ConfidenceComment   NVARCHAR(MAX) NULL,
+    ExperienceValidityScore INT NOT NULL DEFAULT 0,
+    ExperienceValidityComment NVARCHAR(MAX) NULL,
     Strengths           NVARCHAR(MAX) NULL,              -- Pipe-separated: "Clear speech|Good examples"
     AreasForImprovement NVARCHAR(MAX) NULL,              -- Pipe-separated
     FinalAssessment     NVARCHAR(MAX) NULL,
@@ -68,8 +74,23 @@ CREATE TABLE InterviewFeedback (
 );
 
 -- New column on InterviewFeedback table
-ALTER TABLE InterviewFeedback ADD JobId INT NULL;
 
+IF COL_LENGTH('dbo.InterviewFeedback', 'JobId') IS NULL
+    ALTER TABLE dbo.InterviewFeedback
+    ADD JobId INT NULL;
+
+IF COL_LENGTH('dbo.InterviewFeedback', 'ExperienceValidityScore') IS NULL
+    ALTER TABLE dbo.InterviewFeedback
+    ADD ExperienceValidityScore INT NOT NULL
+        CONSTRAINT DF_InterviewFeedback_ExperienceValidityScore DEFAULT (0);
+
+IF COL_LENGTH('dbo.InterviewFeedback', 'ExperienceValidityComment') IS NULL
+    ALTER TABLE dbo.InterviewFeedback
+    ADD ExperienceValidityComment NVARCHAR(MAX) NULL;
+
+select * from InterviewFeedback;
+
+update InterviewFeedback set TotalScore = 90 where FeedbackId = 1
 
 -- 5. InterviewInvitations
 CREATE TABLE InterviewInvitations (

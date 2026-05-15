@@ -66,49 +66,7 @@
 
             <!-- JobSeeker Fields Panel -->
             <asp:Panel ID="pnlJobSeekerFields" runat="server">
-            <h4 class="text-center mt-4 mb-3">Educational Qualifications</h4>
 
-            <div class="row mr-lg-5 ml-lg-5 mb-3">
-                <div class="col-md-6 pt-3">
-                    <label for="lblTenthGrade" style="font-weight: 600">10th Grade</label>
-                    <asp:Label ID="lblTenthGrade" runat="server" CssClass="form-control" style="background-color: #f8f9fa; border: 1px solid #dee2e6;"></asp:Label>
-                </div>
-                <div class="col-md-6 pt-3">
-                    <label for="lblTwelfthGrade" style="font-weight: 600">12th Grade</label>
-                    <asp:Label ID="lblTwelfthGrade" runat="server" CssClass="form-control" style="background-color: #f8f9fa; border: 1px solid #dee2e6;"></asp:Label>
-                </div>
-            </div>
-
-            <div class="row mr-lg-5 ml-lg-5 mb-3">
-                <div class="col-md-6 pt-3">
-                    <label for="lblGraduationGrade" style="font-weight: 600">Graduation Grade</label>
-                    <asp:Label ID="lblGraduationGrade" runat="server" CssClass="form-control" style="background-color: #f8f9fa; border: 1px solid #dee2e6;"></asp:Label>
-                </div>
-                <div class="col-md-6 pt-3">
-                    <label for="lblPostGraduationGrade" style="font-weight: 600">Post Graduation Grade</label>
-                    <asp:Label ID="lblPostGraduationGrade" runat="server" CssClass="form-control" style="background-color: #f8f9fa; border: 1px solid #dee2e6;"></asp:Label>
-                </div>
-            </div>
-
-            <div class="row mr-lg-5 ml-lg-5 mb-3">
-                <div class="col-md-6 pt-3">
-                    <label for="lblPhd" style="font-weight: 600">Ph.D.</label>
-                    <asp:Label ID="lblPhd" runat="server" CssClass="form-control" style="background-color: #f8f9fa; border: 1px solid #dee2e6;"></asp:Label>
-                </div>
-            </div>
-
-            <h4 class="text-center mt-4 mb-3">Professional Information</h4>
-
-            <div class="row mr-lg-5 ml-lg-5 mb-3">
-                <div class="col-md-6 pt-3">
-                    <label for="lblWorksOn" style="font-weight: 600">Works On</label>
-                    <asp:Label ID="lblWorksOn" runat="server" CssClass="form-control" style="background-color: #f8f9fa; border: 1px solid #dee2e6; min-height: 80px; white-space: pre-wrap;"></asp:Label>
-                </div>
-                <div class="col-md-6 pt-3">
-                    <label for="lblExperience" style="font-weight: 600">Experience</label>
-                    <asp:Label ID="lblExperience" runat="server" CssClass="form-control" style="background-color: #f8f9fa; border: 1px solid #dee2e6; min-height: 80px; white-space: pre-wrap;"></asp:Label>
-                </div>
-            </div>
 
             <div class="row mr-lg-5 ml-lg-5 mb-3">
                 <div class="col-md-12 pt-3">

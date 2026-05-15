@@ -77,6 +77,29 @@
         background: linear-gradient(to right, #8e0e00, #e52e71) !important;
         color: #fff;
     }
+
+    .score-badge {
+        display: inline-block;
+        min-width: 72px;
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .score-high {
+        color: #155724;
+    }
+
+    .score-mid {
+        color: #856404;
+    }
+
+    .score-low {
+        color: #721c24;
+    }
+
+    .score-none {
+        color: #6b7280;
+    }
 </style>
 
 
@@ -145,6 +168,39 @@
                                 <ItemStyle HorizontalAlign="Center" />
                             </asp:TemplateField>
 
+                            <asp:TemplateField HeaderText="Job Details">
+                                <ItemTemplate>
+                                    <asp:ImageButton 
+                                        ID="btnJobDetails" runat="server" Text="Job Details" 
+                                        Width="26px"
+                                        Height="28px"
+                                        ImageUrl="~/assets/img/icon/details.jpg"
+                                        CommandName="ViewJob" CommandArgument='<%# Eval("JobId") %>' />
+                                </ItemTemplate>
+                                <ItemStyle HorizontalAlign="Center" />
+                            </asp:TemplateField>
+
+                            <asp:TemplateField HeaderText="Interview Score">
+                                <ItemTemplate>
+                                    <asp:Literal ID="litInterviewScore" runat="server" Text='<%# GetScoreBadge(Eval("InterviewScoreDisplay")) %>'></asp:Literal>
+                                </ItemTemplate>
+                                <ItemStyle HorizontalAlign="Center" />
+                            </asp:TemplateField>
+
+                            <asp:TemplateField HeaderText="Resume Suitability">
+                                <ItemTemplate>
+                                    <asp:Literal ID="litResumeSuitability" runat="server" Text='<%# GetScoreBadge(Eval("ResumeSuitabilityDisplay")) %>'></asp:Literal>
+                                </ItemTemplate>
+                                <ItemStyle HorizontalAlign="Center" />
+                            </asp:TemplateField>
+
+                            <asp:TemplateField HeaderText="Total Score">
+                                <ItemTemplate>
+                                    <asp:Literal ID="litTotalScore" runat="server" Text='<%# GetScoreBadge(Eval("TotalScoreDisplay")) %>'></asp:Literal>
+                                </ItemTemplate>
+                                <ItemStyle HorizontalAlign="Center" />
+                            </asp:TemplateField>
+
                             <asp:TemplateField HeaderText="Shortlist Candidate">
                                 <ItemTemplate>
                                     <asp:ImageButton
@@ -156,18 +212,6 @@
                                         CommandName="Shortlist"
                                         OnClick="btnShortlist_Click"
                                         ToolTip="Shortlist this candidate" />
-                                </ItemTemplate>
-                                <ItemStyle HorizontalAlign="Center" />
-                            </asp:TemplateField>
-
-                            <asp:TemplateField HeaderText="Job Details">
-                                <ItemTemplate>
-                                    <asp:ImageButton 
-                                        ID="btnJobDetails" runat="server" Text="Job Details" 
-                                        Width="26px"
-                                        Height="28px"
-                                        ImageUrl="~/assets/img/icon/details.jpg"
-                                        CommandName="ViewJob" CommandArgument='<%# Eval("JobId") %>' />
                                 </ItemTemplate>
                                 <ItemStyle HorizontalAlign="Center" />
                             </asp:TemplateField>
@@ -190,7 +234,7 @@
                                 <ItemStyle HorizontalAlign="Center" />
                             </asp:TemplateField>
 
-                            <asp:CommandField CausesValidation="false" HeaderText="Delete" ShowDeleteButton="true"
+                            <asp:CommandField CausesValidation="false" HeaderText="Reject Application" ShowDeleteButton="true"
                                 DeleteImageUrl="../assets/img/icon/trashIcon.jpg" ButtonType="Image">
                                 <ControlStyle Height="25px" Width="25px" />
                                 <ItemStyle HorizontalAlign="Center" />

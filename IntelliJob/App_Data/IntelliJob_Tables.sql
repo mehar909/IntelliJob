@@ -1,6 +1,4 @@
-
 use intellijob
-
 create table Country(
 CountryId int primary key identity(1,1),
 CountryName varchar(50)
@@ -26,18 +24,33 @@ CREATE TABLE JobSeekers (
     ProfileId INT PRIMARY KEY,          -- FK to Users.UserId
     Name VARCHAR(50),
     Mobile VARCHAR(50),
-    TenthGrade VARCHAR(50),
-    TwelfthGrade VARCHAR(50),
-    GraduationGrade VARCHAR(50),
-    PostGraduationGrade VARCHAR(50),
-    Phd VARCHAR(50),
-    WorksOn VARCHAR(50),
     Resume VARCHAR(MAX),
     Photo VARCHAR(MAX) DEFAULT 'avatar.png',
-    Experience VARCHAR(50),
     CONSTRAINT FK_JobSeekers_Users 
         FOREIGN KEY (ProfileId) REFERENCES Users(UserId)
 );
+
+IF COL_LENGTH('JobSeekers', 'ResumeOriginalFileName') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeOriginalFileName NVARCHAR(255) NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeParseStatus') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeParseStatus NVARCHAR(20) NOT NULL CONSTRAINT DF_JobSeekers_ResumeParseStatus DEFAULT('none');
+
+IF COL_LENGTH('JobSeekers', 'ResumeValidationMessage') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeValidationMessage NVARCHAR(MAX) NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeUploadedAt') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeUploadedAt DATETIME NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeParsedAt') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeParsedAt DATETIME NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeStructuredJson') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeStructuredJson NVARCHAR(MAX) NULL;
+
+IF COL_LENGTH('JobSeekers', 'ResumeRawText') IS NULL
+    ALTER TABLE JobSeekers ADD ResumeRawText NVARCHAR(MAX) NULL;
+
 
 CREATE TABLE Companies (
     CompanyId INT PRIMARY KEY,            -- FK to Users.UserId
@@ -79,8 +92,12 @@ Email varchar(50),
 Address varchar(MAX),
 Country varchar(50),
 State varchar(50),
-CreateDate datetime
+CreateDate datetime,
+isFeatured bit not null default 0
 );
+
+IF COL_LENGTH('Jobs', 'isFeatured') IS NULL
+    ALTER TABLE Jobs ADD isFeatured BIT NOT NULL CONSTRAINT DF_Jobs_isFeatured DEFAULT(0);
 
 select* from Jobs;
 
@@ -101,9 +118,14 @@ Shortlisted varchar(3)
 )
 
 -- New columns on AppliedJobs table
-ALTER TABLE AppliedJobs ADD InterviewPassword VARCHAR(20) NULL;
-ALTER TABLE AppliedJobs ADD PasswordUsed BIT NULL DEFAULT 0;
-ALTER TABLE AppliedJobs ADD InterviewSentAt DATETIME NULL;
+IF COL_LENGTH('AppliedJobs', 'InterviewPassword') IS NULL
+    ALTER TABLE AppliedJobs ADD InterviewPassword VARCHAR(20) NULL;
+
+IF COL_LENGTH('AppliedJobs', 'PasswordUsed') IS NULL
+    ALTER TABLE AppliedJobs ADD PasswordUsed BIT NULL DEFAULT 0;
+
+IF COL_LENGTH('AppliedJobs', 'InterviewSentAt') IS NULL
+    ALTER TABLE AppliedJobs ADD InterviewSentAt DATETIME NULL;
 
 
 select* from AppliedJobs
@@ -158,5 +180,3 @@ select * from Companies
 select * from Jobs
 
 select * from AppliedJobs
-
-
