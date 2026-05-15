@@ -38,7 +38,15 @@ namespace IntelliJob.User
 
             BindEnhancerMonthDropdowns();
             if (!IsPostBack)
+            {
                 LoadEnhancement();
+            }
+            else
+            {
+                // After ViewState has been applied, overwrite shifted card values
+                // produced by a delete action detected in Page_Init.
+                ApplyPendingCardData();
+            }
         }
 
         protected void Page_PreRender(object sender, EventArgs e)
@@ -561,10 +569,6 @@ namespace IntelliJob.User
                 litRewriteSuggestions.Text = BuildRewriteHtml(result.RewriteSuggestions);
             }
 
-            string previewText = !string.IsNullOrWhiteSpace(report.UpdatedResumeText)
-                ? report.UpdatedResumeText
-                : (!string.IsNullOrWhiteSpace(result.UpdatedResumeText) ? result.UpdatedResumeText : report.OriginalResumeText);
-            litResumePreview.Text = Server.HtmlEncode(TruncateText(previewText, 5000));
         }
 
         private string GenerateScoreCircleHtml(int score)
@@ -597,6 +601,13 @@ namespace IntelliJob.User
         protected void btnToggleEnhPreviewEdit_Click(object sender, EventArgs e)
         {
             PreviewEditMode = true;
+            ApplyPreviewEditorState();
+        }
+
+        protected void btnCancelEnhancedResume_Click(object sender, EventArgs e)
+        {
+            PreviewEditMode = false;
+            ApplyPreviewEditorState();
         }
 
         protected void btnSaveEnhancedResume_Click(object sender, EventArgs e)
@@ -660,6 +671,7 @@ namespace IntelliJob.User
             report.Result.EnhancedResumeDocument = document;
 
             ApplicationDataStore.SaveResumeEnhancementReport(report);
+            StorePreviewJson(report);
             PersistPreviewDocument(document);
             PreviewEditMode = false;
             ApplyPreviewEditorState();
@@ -794,21 +806,23 @@ namespace IntelliJob.User
                 if (string.IsNullOrWhiteSpace(target.PersonalInfo.PortfolioUrl)) target.PersonalInfo.PortfolioUrl = fallback.PersonalInfo.PortfolioUrl;
             }
 
-            if (target.EducationDetails == null || target.EducationDetails.Count == 0)
-                target.EducationDetails = fallback.EducationDetails != null ? new List<ResumeEducationEntry>(fallback.EducationDetails) : target.EducationDetails;
-            if (target.ExperienceDetails == null || target.ExperienceDetails.Count == 0)
-                target.ExperienceDetails = fallback.ExperienceDetails != null ? new List<ResumeExperienceEntry>(fallback.ExperienceDetails) : target.ExperienceDetails;
-            if (target.ProjectDetails == null || target.ProjectDetails.Count == 0)
-                target.ProjectDetails = fallback.ProjectDetails != null ? new List<ResumeProjectEntry>(fallback.ProjectDetails) : target.ProjectDetails;
-            if (target.SkillGroups == null || IsSkillGroupsEmpty(target.SkillGroups))
+            // Note: empty list (Count == 0) means the user intentionally deleted all
+            // entries — only null means "not provided", so only null falls back.
+            if (target.EducationDetails == null)
+                target.EducationDetails = fallback.EducationDetails != null ? new List<ResumeEducationEntry>(fallback.EducationDetails) : new List<ResumeEducationEntry>();
+            if (target.ExperienceDetails == null)
+                target.ExperienceDetails = fallback.ExperienceDetails != null ? new List<ResumeExperienceEntry>(fallback.ExperienceDetails) : new List<ResumeExperienceEntry>();
+            if (target.ProjectDetails == null)
+                target.ProjectDetails = fallback.ProjectDetails != null ? new List<ResumeProjectEntry>(fallback.ProjectDetails) : new List<ResumeProjectEntry>();
+            if (target.SkillGroups == null)
                 target.SkillGroups = CloneSkillGroups(fallback.SkillGroups);
 
-            if (target.Skills == null || target.Skills.Count == 0) target.Skills = fallback.Skills;
-            if (target.Education == null || target.Education.Count == 0) target.Education = fallback.Education;
-            if (target.Experience == null || target.Experience.Count == 0) target.Experience = fallback.Experience;
-            if (target.Projects == null || target.Projects.Count == 0) target.Projects = fallback.Projects;
-            if (target.Certifications == null || target.Certifications.Count == 0) target.Certifications = fallback.Certifications;
-            if (target.Languages == null || target.Languages.Count == 0) target.Languages = fallback.Languages;
+            if (target.Skills == null) target.Skills = fallback.Skills;
+            if (target.Education == null) target.Education = fallback.Education;
+            if (target.Experience == null) target.Experience = fallback.Experience;
+            if (target.Projects == null) target.Projects = fallback.Projects;
+            if (target.Certifications == null) target.Certifications = fallback.Certifications;
+            if (target.Languages == null) target.Languages = fallback.Languages;
             if (string.IsNullOrWhiteSpace(target.LinkedInUrl)) target.LinkedInUrl = fallback.LinkedInUrl;
             if (string.IsNullOrWhiteSpace(target.PortfolioUrl)) target.PortfolioUrl = fallback.PortfolioUrl;
             if (string.IsNullOrWhiteSpace(target.RawText)) target.RawText = fallback.RawText;
@@ -1074,7 +1088,7 @@ namespace IntelliJob.User
 
             string encoded = HttpUtility.UrlEncode(json).Replace("+", "%20");
             string src = ResolveUrl("~/ResumePreview.html") + "#data=" + encoded;
-            return "<iframe class='html-preview-frame' src='" + System.Web.HttpUtility.HtmlAttributeEncode(src) + "' title='HTML Resume Preview'></iframe>";
+            return "<iframe class='html-preview-frame' src='" + System.Web.HttpUtility.HtmlAttributeEncode(src) + "' title='HTML Resume Preview' onload='resizeHtmlPreviewFrame(this)'></iframe>";
         }
 
         private string BuildInterviewFeedbackText(DataRow row)

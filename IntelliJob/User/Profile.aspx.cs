@@ -286,13 +286,17 @@ namespace IntelliJob.User
                         try
                         {
                             string currentPassword = GetCurrentProfilePassword(userId, profileCon, tran);
+                            string passwordToSave = currentPassword;
                             if (!string.IsNullOrWhiteSpace(txtProfilePassword.Text))
-                                currentPassword = txtProfilePassword.Text.Trim();
+                            {
+                                // Hash new password with salted SHA-256
+                                passwordToSave = IntelliJob.Utils.CreateSaltedHash(txtProfilePassword.Text.Trim());
+                            }
 
                             using (SqlCommand userCmd = new SqlCommand(@"UPDATE Users SET Username=@Username, Password=@Password, Email=@Email, Address=@Address, Country=@Country, UpdatedAt=GETDATE() WHERE UserId=@UserId", profileCon, tran))
                             {
                                 userCmd.Parameters.AddWithValue("@Username", txtProfileUserName.Text.Trim());
-                                userCmd.Parameters.AddWithValue("@Password", currentPassword);
+                                userCmd.Parameters.AddWithValue("@Password", passwordToSave);
                                 userCmd.Parameters.AddWithValue("@Email", txtProfileEmail.Text.Trim());
                                 userCmd.Parameters.AddWithValue("@Address", txtProfileAddress.Text.Trim());
                                 userCmd.Parameters.AddWithValue("@Country", ddlProfileCountry.SelectedValue);

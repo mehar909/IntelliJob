@@ -8,7 +8,6 @@ namespace IntelliJob.User
 {
     public partial class InterviewAccess : System.Web.UI.Page
     {
-        private const string StaticInterviewPassword = "123456";
 
         string str = ConfigurationManager.ConnectionStrings["cs"].ConnectionString;
 
@@ -112,19 +111,6 @@ namespace IntelliJob.User
                     return;
                 }
 
-                // Verify password
-                if (!string.Equals(enteredPwd, StaticInterviewPassword, StringComparison.Ordinal))
-                {
-                    string enteredHash = Utils.ComputeSha256Hash(enteredPwd + salt);
-                    if (!string.Equals(enteredHash, storedHash, StringComparison.OrdinalIgnoreCase))
-                    {
-                        ShowError("Invalid password. Please check your invitation email and try again.");
-                        return;
-                    }
-                }
-
-                /*
-                // Previous implementation:
                 // Verify password using the stored per-invitation hash.
                 string enteredHash = Utils.ComputeSha256Hash(enteredPwd + salt);
                 if (!string.Equals(enteredHash, storedHash, StringComparison.OrdinalIgnoreCase))
@@ -132,7 +118,6 @@ namespace IntelliJob.User
                     ShowError("Invalid password. Please check your invitation email and try again.");
                     return;
                 }
-                */
 
                 Session["AuthorizedInterviewId"] = interviewId;
             }

@@ -104,7 +104,9 @@ namespace IntelliJob.User
 
                         SqlCommand userCmd = new SqlCommand(userSql, con, tran);
                         userCmd.Parameters.AddWithValue("@Username", txtUserName.Text.Trim());
-                        userCmd.Parameters.AddWithValue("@Password", txtConfirmPassword.Text.Trim());
+                        // Hash password using salted SHA-256 before storing
+                        string hashedPassword = Utils.CreateSaltedHash(txtConfirmPassword.Text.Trim());
+                        userCmd.Parameters.AddWithValue("@Password", hashedPassword);
                         userCmd.Parameters.AddWithValue("@Email", txtEmail.Text.Trim());
                         userCmd.Parameters.AddWithValue("@Address", txtAddress.Text.Trim());
                         userCmd.Parameters.AddWithValue("@Country", ddlCountry.SelectedValue);

@@ -475,7 +475,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="User\About.aspx.cs">
       <DependentUpon>About.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -595,6 +594,9 @@
     <Compile Include="User\ResumeBuild.aspx.designer.cs">
       <DependentUpon>ResumeBuild.aspx</DependentUpon>
     </Compile>
+    <Compile Include="User\ResumeEnhancer.aspx.designer.cs">
+      <DependentUpon>ResumeEnhancer.aspx</DependentUpon>
+    </Compile>
     <Compile Include="User\ResumeEnhancer.Structured.partial.cs">
       <DependentUpon>ResumeEnhancer.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -602,9 +604,6 @@
     <Compile Include="User\ResumeEnhancer.aspx.cs">
       <DependentUpon>ResumeEnhancer.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="User\ResumeEnhancer.aspx.designer.cs">
-      <DependentUpon>ResumeEnhancer.aspx</DependentUpon>
     </Compile>
     <Compile Include="User\RetakeInterview.ashx.cs">
       <DependentUpon>RetakeInterview.ashx</DependentUpon>

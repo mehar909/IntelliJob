@@ -73,5 +73,36 @@ namespace IntelliJob
                 return BitConverter.ToString(hash).Replace("-", "").ToLower();
             }
         }
+
+        // Create a salted SHA-256 hash. Stored format: salt:hash (salt is base64, hash is hex)
+        public static string CreateSaltedHash(string password)
+        {
+            if (password == null) return null;
+            string salt = GenerateSalt();
+            // Combine salt and password (salt + password)
+            string hash = ComputeSha256Hash(salt + password);
+            return salt + ":" + hash;
+        }
+
+        // Verify a stored salted hash or legacy plaintext.
+        // If stored contains a ':' it is treated as salt:hash format, otherwise legacy plaintext.
+        public static bool VerifyPassword(string stored, string password)
+        {
+            if (stored == null) return false;
+            if (password == null) return false;
+
+            if (stored.Contains(":"))
+            {
+                var parts = stored.Split(':');
+                if (parts.Length != 2) return false;
+                string salt = parts[0];
+                string expectedHash = parts[1];
+                string actualHash = ComputeSha256Hash(salt + password);
+                return string.Equals(actualHash, expectedHash, StringComparison.OrdinalIgnoreCase);
+            }
+
+            // Legacy plaintext comparison
+            return string.Equals(stored, password, StringComparison.Ordinal);
+        }
     }
 }

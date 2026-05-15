@@ -50,7 +50,7 @@ namespace IntelliJob.User
                     J.CompanyName,
                     J.CompanyImage,
                     J.JobType,
-                    J.Salary, -- Include Salary if you plan to use it (was in the hardcoded example)
+                    J.Salary,
                     J.Address,
                     J.Country,
                     J.State,

@@ -5,18 +5,19 @@
         /* Edit mode: hide everything except the editor section-card */
         #resumeReportBody.enhancer-editing > *:not(.editor-section) { display: none !important; }
         #resumeReportBody.enhancer-editing > .editor-section { display: block !important; }
+        #resumeReportBody.enhancer-editing .resume-preview { display: none !important; }
         #resumeReportBody.enhancer-previewing .resume-empty-preview { display: none !important; }
 
         .html-preview-frame {
             width: 100%;
-            min-height: 980px;
+            min-height: 0;
             border: 1px solid #e5e7eb;
             border-radius: 16px;
             background: #f8fafc;
         }
 
         .enhancer-shell {
-            padding: 45px 0 80px;
+            padding: 45px 0 20px;
             background: linear-gradient(180deg, #fff7f8 0%, #ffffff 100%);
         }
 
@@ -98,11 +99,20 @@
             color: #fff;
         }
 
+        #resumeReportBody {
+            margin: 0;
+            padding: 0;
+        }
+
+        #resumeReportBody > :last-child {
+            margin-bottom: 0 !important;
+        }
+
         .score-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 16px;
-            margin-bottom: 22px;
+            margin-bottom: 18px;
         }
 
         .metric-card {
@@ -148,6 +158,14 @@
             box-shadow: 0 8px 26px rgba(15, 23, 42, 0.06);
             padding: 24px;
             margin-bottom: 18px;
+        }
+
+        .section-card:last-of-type {
+            margin-bottom: 0;
+        }
+
+        #resumeReportBody > :last-child {
+            margin-bottom: 0 !important;
         }
 
         .section-card h3 {
@@ -256,7 +274,6 @@
             line-height: 1.75;
         }
 
-        /* View resume-preview header button */
         .btn-resume-preview {
             display: inline-flex;
             align-items: center;
@@ -315,11 +332,141 @@
             margin-bottom: 10px;
         }
 
+        .resume-builder-form h6,
+        .resume-section-card h6 {
+            font-size: 16px;
+            font-weight: 800;
+            color: #111827;
+            margin-top: 6px;
+            margin-bottom: 12px;
+            display: block;
+            width: 100%;
+            padding-left: 0;
+        }
+
+        .resume-builder-form label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .resume-builder-form .col-12 > h6,
+        .resume-section-card > h6,
+        .resume-preview-card h6 {
+            padding-left: 0;
+            margin-left: 0;
+            text-align: left;
+        }
+
+        .section-card h3 {
+            padding-left: 0;
+            text-align: left;
+        }
+
         .resume-section-help {
             color: #6b7280;
             font-size: 13px;
             line-height: 1.6;
             margin-bottom: 14px;
+        }
+
+        /* ── Dynamic card add / delete ── */
+        .section-heading-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+        .section-heading-row h6 {
+            margin-bottom: 0 !important;
+            flex: 1 1 auto;
+            width: auto;
+        }
+        .section-add-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 14px;
+            background: #fff0f3;
+            border: 1.5px solid #ffd6db;
+            border-radius: 999px;
+            color: #da2461;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            white-space: nowrap;
+            line-height: 1.5;
+            flex-shrink: 0;
+        }
+        .section-add-btn:hover {
+            background: #da2461;
+            color: #fff;
+            border-color: #da2461;
+        }
+        .card-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            gap: 10px;
+        }
+        .card-header-row h6 {
+            margin-bottom: 0 !important;
+            flex: 1;
+        }
+        .card-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .card-add-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 14px;
+            background: linear-gradient(135deg, #da2461 0%, #f0527a 100%);
+            border: none;
+            border-radius: 999px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(218, 36, 97, 0.30);
+        }
+        .card-add-btn:hover {
+            background: linear-gradient(135deg, #b81e52 0%, #da2461 100%);
+            box-shadow: 0 4px 14px rgba(218, 36, 97, 0.42);
+            transform: translateY(-1px);
+            color: #fff;
+        }
+        .card-delete-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            background: #fff;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 999px;
+            color: #6b7280;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            white-space: nowrap;
+        }
+        .card-delete-btn:hover {
+            background: #fff1f2;
+            border-color: #fca5a5;
+            color: #dc2626;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.12);
         }
 
         .resume-builder-form select.form-control {
@@ -340,23 +487,14 @@
 
         .enhancer-save-panel {
             margin-top: 18px;
-            padding: 18px;
-            border-radius: 18px;
-            border: 1px solid #e9eef5;
-            background: #fbfcfe;
-        }
-
-        .enhancer-save-panel .radio-list-inline {
             display: flex;
-            gap: 18px;
-            flex-wrap: wrap;
-            margin: 10px 0 14px;
-        }
-
-        .enhancer-save-panel .radio-list-inline label {
-            margin-left: 6px;
-            font-weight: 600;
-            color: #2d3436;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            box-shadow: none;
         }
 
         .status-note {
@@ -428,7 +566,6 @@
             border: 1px solid #ffd6db;
         }
 
-
         @media (max-width: 992px) {
             .score-grid,
             .content-grid {
@@ -448,6 +585,26 @@
         }
     </style>
     <script type="text/javascript">
+        function resizeHtmlPreviewFrame(frame) {
+            if (!frame) return;
+
+            try {
+                var doc = frame.contentDocument || frame.contentWindow.document;
+                if (!doc || !doc.body) return;
+
+                var height = Math.max(
+                    doc.body.scrollHeight,
+                    doc.documentElement ? doc.documentElement.scrollHeight : 0
+                );
+
+                if (height && height > 0) {
+                    frame.style.height = (height + 8) + 'px';
+                }
+            } catch (e) {
+                // Ignore cross-frame sizing issues and keep the default frame height.
+            }
+        }
+
         function exportHTMLAsPDF() {
             var payload = document.getElementById('<%= hfResumePreviewJson.ClientID %>');
             if (!payload || !payload.value) {
@@ -486,16 +643,11 @@
                             <span class="hero-chip"><i class="fas fa-file-alt" style="margin-right:4px;"></i><asp:Literal ID="litResumeSource" runat="server" /></span>
                         </div>
                     </div>
-<%--                    <div class="col-lg-4 text-right pt-3 d-flex flex-column align-items-end justify-content-center gap-2" style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
-                        <a href="#" class="hero-action-btn secondary-action" onclick="return exportHTMLAsPDF();">
-                            <i class="fas fa-file-code"></i> HTML Preview
-                        </a>
-                    </div>--%>
                 </div>
             </div>
         </div>
 
-        <div class="enhancer-shell" style="padding-top: 0;">
+        <div class="enhancer-shell">
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-xl-8 col-lg-10">
@@ -507,12 +659,15 @@
                 <asp:HiddenField ID="hfLoadedResumeSource" runat="server" />
                 <asp:HiddenField ID="hfLoadedOriginalFileName" runat="server" />
                 <asp:HiddenField ID="hfResumePreviewJson" runat="server" />
+                <%-- Stores serialized card counts so Page_Init can recreate them on postback --%>
+                <asp:HiddenField ID="hfEduCount"  runat="server" Value="1" EnableViewState="false" />
+                <asp:HiddenField ID="hfExpCount"  runat="server" Value="1" EnableViewState="false" />
+                <asp:HiddenField ID="hfProjCount" runat="server" Value="1" EnableViewState="false" />
 
                 <div id="resumeReportBody" class="report-body">
                     <div class="score-grid">
                         <div class="metric-card overall-card" style="grid-column: 1 / -1; text-align: center;">
                             <div class="label" style="font-size: 16px;">Overall Match</div>
-                            <%--<div class="value" style="font-size: 42px; color: #FF4357;"><asp:Literal ID="litOverallScore" runat="server" />/100</div>--%>
                             <div style="margin-top: 15px; display: flex; justify-content: center;">
                                 <asp:Literal ID="litOverallVisual" runat="server" />
                             </div>
@@ -520,23 +675,20 @@
                         </div>
                         <div class="metric-card" style="text-align: center;">
                             <div class="label">ATS Fit</div>
-                            <%--<div class="value"><asp:Literal ID="litAtsScore" runat="server" />/100</div>--%>
                             <div style="margin-top: 15px;">
                                 <asp:Literal ID="litAtsVisual" runat="server" />
                             </div>
-                            <div class="hint">Formatting & parsing</div>
+                            <div class="hint">Formatting &amp; parsing</div>
                         </div>
                         <div class="metric-card" style="text-align: center;">
                             <div class="label">Semantic Fit</div>
-                            <%--<div class="value"><asp:Literal ID="litSemanticScore" runat="server" />/100</div>--%>
                             <div style="margin-top: 15px;">
                                 <asp:Literal ID="litSemanticVisual" runat="server" />
                             </div>
-                            <div class="hint">Meaning & context match</div>
+                            <div class="hint">Meaning &amp; context match</div>
                         </div>
                         <div class="metric-card" style="text-align: center;">
                             <div class="label">Keyword Fit</div>
-                            <%--<div class="value"><asp:Literal ID="litKeywordScore" runat="server" />/100</div>--%>
                             <div style="margin-top: 15px;">
                                 <asp:Literal ID="litKeywordVisual" runat="server" />
                             </div>
@@ -580,20 +732,21 @@
                         <p><asp:Literal ID="litFinalAssessment" runat="server" /></p>
                     </div>
 
+                    <%-- ══════════════════════════════════════════════════
+                         EDITABLE RESUME EDITOR
+                    ══════════════════════════════════════════════════ --%>
                     <div class="section-card editor-section" style="display:none;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                             <h3 style="margin: 0;">Enhanced Resume Editing</h3>
                             <div class="enhancer-preview-actions" style="margin: 0;">
                                 <asp:Button ID="btnToggleEnhPreviewEdit" runat="server" CssClass="btn-resume-preview" Text="Edit Preview" OnClick="btnToggleEnhPreviewEdit_Click" CausesValidation="false" />
-<%--                                <asp:Button ID="btnExportResumePdf" runat="server" CssClass="btn-resume-preview" Text="Export PDF" OnClick="btnExportResumePdf_Click" CausesValidation="false" style="margin-left:8px;" />--%>
-<%--                                <asp:Button ID="btnDeleteEnhancementHistory" runat="server" CssClass="btn-resume-preview" Text="Reset Enhancement" OnClick="btnDeleteEnhancementHistory_Click" CausesValidation="false" OnClientClick="return confirm('This will delete the saved AI enhancement so it can be regenerated. Continue?');" style="margin-left:8px; background:#6b7280; border-color:#6b7280;" />--%>
                             </div>
                         </div>
-                        <div class="muted-box" style="margin-bottom:14px;">
-                            Click <strong>Edit Preview</strong> to edit the resume fields below, then click <strong>Update</strong> to save changes to your applied resume.
-                        </div>
-                                                <div class="enhancer-preview-form resume-builder-form">
-                            <div class="col-12"><h6 style="margin-top:8px;">Personal Information</h6></div>
+
+                        <div class="enhancer-preview-form resume-builder-form">
+
+                            <%-- ── Personal Information ── --%>
+                            <div class="row"><div class="col-12"><h6 style="margin-top:8px;">Personal Information</h6></div></div>
                             <div class="row">
                                 <div class="col-md-6"><div class="form-group"><label>Full Name</label><asp:TextBox ID="txtEnhFullName" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox></div></div>
                                 <div class="col-md-6"><div class="form-group"><label>Email</label><asp:TextBox ID="txtEnhEmail" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox></div></div>
@@ -603,252 +756,86 @@
                                 <div class="col-md-6"><div class="form-group"><label>LinkedIn URL</label><asp:TextBox ID="txtEnhLinkedIn" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox></div></div>
                                 <div class="col-md-6"><div class="form-group"><label>Portfolio URL</label><asp:TextBox ID="txtEnhPortfolio" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox></div></div>
                             </div>
-                            <div class="col-12"><div class="form-group"><label>Professional Summary</label><asp:TextBox ID="txtEnhSummary" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="4" ReadOnly="true"></asp:TextBox></div></div>
-                            <div class="col-12"><h6>Education</h6><div class="resume-section-help">Up to two entries.</div></div>
-                        <div class="col-12 resume-card-slot" data-resume-slot="education-1">
-                            <div class="resume-section-card">
-                                <h6>Education 1</h6>
-                                <div class="row">
-                                    <div class="col-md-4"><div class="form-group"><label>School Name</label><asp:TextBox ID="txtEnhEdu1SchoolName" runat="server" CssClass="form-control" MaxLength="100" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-md-4"><div class="form-group"><label>Location</label><asp:TextBox ID="txtEnhEdu1Location" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-md-4"><div class="form-group"><label>Degree</label><asp:TextBox ID="txtEnhEdu1Degree" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-6 col-md-2"><div class="form-group"><label>Start Month</label><asp:DropDownList ID="ddlEnhEdu1StartMonth" runat="server" CssClass="form-control w-100"></asp:DropDownList></div></div>
-                                    <div class="col-6 col-md-2"><div class="form-group"><label>Start Year</label><asp:TextBox ID="txtEnhEdu1StartYear" runat="server" CssClass="form-control" MaxLength="4" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-6 col-md-2"><div class="form-group"><label>End Month</label><asp:DropDownList ID="ddlEnhEdu1EndMonth" runat="server" CssClass="form-control w-100"></asp:DropDownList></div></div>
-                                    <div class="col-6 col-md-2"><div class="form-group"><label>End Year</label><asp:TextBox ID="txtEnhEdu1EndYear" runat="server" CssClass="form-control" MaxLength="4" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 col-md-4"><div class="form-group"><label>Grade</label><asp:TextBox ID="txtEnhEdu1Grade" runat="server" CssClass="form-control" MaxLength="10" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12 resume-field-span"><div class="form-group mb-0"><label>Coursework</label><asp:TextBox ID="txtEnhEdu1Coursework" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="3" ReadOnly="true"></asp:TextBox></div></div>
+                            <div class="row"><div class="col-12"><div class="form-group"><label>Professional Summary</label><asp:TextBox ID="txtEnhSummary" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="4" ReadOnly="true"></asp:TextBox></div></div></div>
+
+                            <%-- ── Education section heading ── --%>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="section-heading-row">
+                                        <h6>Education</h6>
+                                        <asp:PlaceHolder ID="phEduAddBtn" runat="server" />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-12 resume-card-slot" data-resume-slot="education-2">
-                            <div class="resume-section-card">
-                                <h6>Education 2</h6>
-                                <div class="row">
-                                    <div class="col-md-4"><div class="form-group"><label>School Name</label><asp:TextBox ID="txtEnhEdu2SchoolName" runat="server" CssClass="form-control" MaxLength="100" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-md-4"><div class="form-group"><label>Location</label><asp:TextBox ID="txtEnhEdu2Location" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-md-4"><div class="form-group"><label>Degree</label><asp:TextBox ID="txtEnhEdu2Degree" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-6 col-md-2"><div class="form-group"><label>Start Month</label><asp:DropDownList ID="ddlEnhEdu2StartMonth" runat="server" CssClass="form-control w-100"></asp:DropDownList></div></div>
-                                    <div class="col-6 col-md-2"><div class="form-group"><label>Start Year</label><asp:TextBox ID="txtEnhEdu2StartYear" runat="server" CssClass="form-control" MaxLength="4" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-6 col-md-2"><div class="form-group"><label>End Month</label><asp:DropDownList ID="ddlEnhEdu2EndMonth" runat="server" CssClass="form-control w-100"></asp:DropDownList></div></div>
-                                    <div class="col-6 col-md-2"><div class="form-group"><label>End Year</label><asp:TextBox ID="txtEnhEdu2EndYear" runat="server" CssClass="form-control" MaxLength="4" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 col-md-4"><div class="form-group"><label>Grade</label><asp:TextBox ID="txtEnhEdu2Grade" runat="server" CssClass="form-control" MaxLength="10" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12 resume-field-span"><div class="form-group mb-0"><label>Coursework</label><asp:TextBox ID="txtEnhEdu2Coursework" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="3" ReadOnly="true"></asp:TextBox></div></div>
+                            <%-- Education cards injected dynamically by code-behind into phEduCards --%>
+                            <asp:PlaceHolder ID="phEduCards" runat="server" />
+
+                            <%-- ── Experience section heading ── --%>
+                            <div class="row" style="margin-top:6px;">
+                                <div class="col-12">
+                                    <div class="section-heading-row">
+                                        <h6>Experience</h6>
+                                        <asp:PlaceHolder ID="phExpAddBtn" runat="server" />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                            <div class="col-12"><h6>Experience</h6><div class="resume-section-help">Up to five roles.</div></div>
-                        <div class="col-12 resume-card-slot" data-resume-slot="experience-1">
-                            <div class="resume-section-card">
-                                <h6>Experience 1</h6>
-                                <div class="row">
-                                    <div class="col-md-4"><div class="form-group"><label>Job Title</label><asp:TextBox ID="txtEnhExp1JobTitle" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-md-4"><div class="form-group"><label>Company</label><asp:TextBox ID="txtEnhExp1Company" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-md-4"><div class="form-group"><label>Location</label><asp:TextBox ID="txtEnhExp1Location" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>Start Month</label><asp:DropDownList ID="ddlEnhExp1StartMonth" runat="server" CssClass="form-control w-100"></asp:DropDownList></div></div>
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>Start Year</label><asp:TextBox ID="txtEnhExp1StartYear" runat="server" CssClass="form-control" MaxLength="4" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>End Month</label><asp:DropDownList ID="ddlEnhExp1EndMonth" runat="server" CssClass="form-control w-100"></asp:DropDownList></div></div>
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>End Year</label><asp:TextBox ID="txtEnhExp1EndYear" runat="server" CssClass="form-control" MaxLength="4" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12"><div class="form-group"><label><asp:CheckBox ID="chkEnhExp1Current" runat="server" Enabled="false" /> Currently working here</label></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12 resume-field-span"><div class="form-group mb-0"><label>Bullets (one per line)</label><asp:TextBox ID="txtEnhExp1Description" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="5" ReadOnly="true"></asp:TextBox></div></div>
+                            <%-- Experience cards injected dynamically by code-behind into phExpCards --%>
+                            <asp:PlaceHolder ID="phExpCards" runat="server" />
+
+                            <%-- ── Projects section heading ── --%>
+                            <div class="row" style="margin-top:6px;">
+                                <div class="col-12">
+                                    <div class="section-heading-row">
+                                        <h6>Projects</h6>
+                                        <asp:PlaceHolder ID="phProjAddBtn" runat="server" />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-12 resume-card-slot" data-resume-slot="experience-2">
-                            <div class="resume-section-card">
-                                <h6>Experience 2</h6>
-                                <div class="row">
-                                    <div class="col-md-4"><div class="form-group"><label>Job Title</label><asp:TextBox ID="txtEnhExp2JobTitle" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-md-4"><div class="form-group"><label>Company</label><asp:TextBox ID="txtEnhExp2Company" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-md-4"><div class="form-group"><label>Location</label><asp:TextBox ID="txtEnhExp2Location" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>Start Month</label><asp:DropDownList ID="ddlEnhExp2StartMonth" runat="server" CssClass="form-control w-100"></asp:DropDownList></div></div>
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>Start Year</label><asp:TextBox ID="txtEnhExp2StartYear" runat="server" CssClass="form-control" MaxLength="4" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>End Month</label><asp:DropDownList ID="ddlEnhExp2EndMonth" runat="server" CssClass="form-control w-100"></asp:DropDownList></div></div>
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>End Year</label><asp:TextBox ID="txtEnhExp2EndYear" runat="server" CssClass="form-control" MaxLength="4" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12"><div class="form-group"><label><asp:CheckBox ID="chkEnhExp2Current" runat="server" Enabled="false" /> Currently working here</label></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12 resume-field-span"><div class="form-group mb-0"><label>Bullets (one per line)</label><asp:TextBox ID="txtEnhExp2Description" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="5" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 resume-card-slot" data-resume-slot="experience-3">
-                            <div class="resume-section-card">
-                                <h6>Experience 3</h6>
-                                <div class="row">
-                                    <div class="col-md-4"><div class="form-group"><label>Job Title</label><asp:TextBox ID="txtEnhExp3JobTitle" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-md-4"><div class="form-group"><label>Company</label><asp:TextBox ID="txtEnhExp3Company" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-md-4"><div class="form-group"><label>Location</label><asp:TextBox ID="txtEnhExp3Location" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>Start Month</label><asp:DropDownList ID="ddlEnhExp3StartMonth" runat="server" CssClass="form-control w-100"></asp:DropDownList></div></div>
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>Start Year</label><asp:TextBox ID="txtEnhExp3StartYear" runat="server" CssClass="form-control" MaxLength="4" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>End Month</label><asp:DropDownList ID="ddlEnhExp3EndMonth" runat="server" CssClass="form-control w-100"></asp:DropDownList></div></div>
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>End Year</label><asp:TextBox ID="txtEnhExp3EndYear" runat="server" CssClass="form-control" MaxLength="4" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12"><div class="form-group"><label><asp:CheckBox ID="chkEnhExp3Current" runat="server" Enabled="false" /> Currently working here</label></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12 resume-field-span"><div class="form-group mb-0"><label>Bullets (one per line)</label><asp:TextBox ID="txtEnhExp3Description" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="5" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 resume-card-slot" data-resume-slot="experience-4">
-                            <div class="resume-section-card">
-                                <h6>Experience 4</h6>
-                                <div class="row">
-                                    <div class="col-md-4"><div class="form-group"><label>Job Title</label><asp:TextBox ID="txtEnhExp4JobTitle" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-md-4"><div class="form-group"><label>Company</label><asp:TextBox ID="txtEnhExp4Company" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-md-4"><div class="form-group"><label>Location</label><asp:TextBox ID="txtEnhExp4Location" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>Start Month</label><asp:DropDownList ID="ddlEnhExp4StartMonth" runat="server" CssClass="form-control w-100"></asp:DropDownList></div></div>
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>Start Year</label><asp:TextBox ID="txtEnhExp4StartYear" runat="server" CssClass="form-control" MaxLength="4" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>End Month</label><asp:DropDownList ID="ddlEnhExp4EndMonth" runat="server" CssClass="form-control w-100"></asp:DropDownList></div></div>
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>End Year</label><asp:TextBox ID="txtEnhExp4EndYear" runat="server" CssClass="form-control" MaxLength="4" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12"><div class="form-group"><label><asp:CheckBox ID="chkEnhExp4Current" runat="server" Enabled="false" /> Currently working here</label></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12 resume-field-span"><div class="form-group mb-0"><label>Bullets (one per line)</label><asp:TextBox ID="txtEnhExp4Description" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="5" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 resume-card-slot" data-resume-slot="experience-5">
-                            <div class="resume-section-card">
-                                <h6>Experience 5</h6>
-                                <div class="row">
-                                    <div class="col-md-4"><div class="form-group"><label>Job Title</label><asp:TextBox ID="txtEnhExp5JobTitle" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-md-4"><div class="form-group"><label>Company</label><asp:TextBox ID="txtEnhExp5Company" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-md-4"><div class="form-group"><label>Location</label><asp:TextBox ID="txtEnhExp5Location" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>Start Month</label><asp:DropDownList ID="ddlEnhExp5StartMonth" runat="server" CssClass="form-control w-100"></asp:DropDownList></div></div>
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>Start Year</label><asp:TextBox ID="txtEnhExp5StartYear" runat="server" CssClass="form-control" MaxLength="4" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>End Month</label><asp:DropDownList ID="ddlEnhExp5EndMonth" runat="server" CssClass="form-control w-100"></asp:DropDownList></div></div>
-                                    <div class="col-6 col-md-3"><div class="form-group"><label>End Year</label><asp:TextBox ID="txtEnhExp5EndYear" runat="server" CssClass="form-control" MaxLength="4" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12"><div class="form-group"><label><asp:CheckBox ID="chkEnhExp5Current" runat="server" Enabled="false" /> Currently working here</label></div></div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12 resume-field-span"><div class="form-group mb-0"><label>Bullets (one per line)</label><asp:TextBox ID="txtEnhExp5Description" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="5" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                            </div>
-                        </div>
-                            <div class="col-12"><h6>Projects</h6><div class="resume-section-help">Up to five projects.</div></div>
-                        <div class="col-12 resume-card-slot" data-resume-slot="project-1">
-                            <div class="resume-section-card">
-                                <h6>Project 1</h6>
-                                <div class="row">
-                                    <div class="col-12 resume-field-span"><div class="form-group"><label>Title</label><asp:TextBox ID="txtEnhProj1Title" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 resume-field-span"><div class="form-group"><label>Tech Stack</label><asp:TextBox ID="txtEnhProj1TechStack" runat="server" CssClass="form-control" MaxLength="100" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 resume-field-span"><div class="form-group mb-0"><label>Description</label><asp:TextBox ID="txtEnhProj1Description" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="3" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 resume-card-slot" data-resume-slot="project-2">
-                            <div class="resume-section-card">
-                                <h6>Project 2</h6>
-                                <div class="row">
-                                    <div class="col-12 resume-field-span"><div class="form-group"><label>Title</label><asp:TextBox ID="txtEnhProj2Title" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 resume-field-span"><div class="form-group"><label>Tech Stack</label><asp:TextBox ID="txtEnhProj2TechStack" runat="server" CssClass="form-control" MaxLength="100" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 resume-field-span"><div class="form-group mb-0"><label>Description</label><asp:TextBox ID="txtEnhProj2Description" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="3" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 resume-card-slot" data-resume-slot="project-3">
-                            <div class="resume-section-card">
-                                <h6>Project 3</h6>
-                                <div class="row">
-                                    <div class="col-12 resume-field-span"><div class="form-group"><label>Title</label><asp:TextBox ID="txtEnhProj3Title" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 resume-field-span"><div class="form-group"><label>Tech Stack</label><asp:TextBox ID="txtEnhProj3TechStack" runat="server" CssClass="form-control" MaxLength="100" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 resume-field-span"><div class="form-group mb-0"><label>Description</label><asp:TextBox ID="txtEnhProj3Description" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="3" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 resume-card-slot" data-resume-slot="project-4">
-                            <div class="resume-section-card">
-                                <h6>Project 4</h6>
-                                <div class="row">
-                                    <div class="col-12 resume-field-span"><div class="form-group"><label>Title</label><asp:TextBox ID="txtEnhProj4Title" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 resume-field-span"><div class="form-group"><label>Tech Stack</label><asp:TextBox ID="txtEnhProj4TechStack" runat="server" CssClass="form-control" MaxLength="100" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 resume-field-span"><div class="form-group mb-0"><label>Description</label><asp:TextBox ID="txtEnhProj4Description" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="3" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 resume-card-slot" data-resume-slot="project-5">
-                            <div class="resume-section-card">
-                                <h6>Project 5</h6>
-                                <div class="row">
-                                    <div class="col-12 resume-field-span"><div class="form-group"><label>Title</label><asp:TextBox ID="txtEnhProj5Title" runat="server" CssClass="form-control" MaxLength="50" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 resume-field-span"><div class="form-group"><label>Tech Stack</label><asp:TextBox ID="txtEnhProj5TechStack" runat="server" CssClass="form-control" MaxLength="100" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 resume-field-span"><div class="form-group mb-0"><label>Description</label><asp:TextBox ID="txtEnhProj5Description" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="3" ReadOnly="true"></asp:TextBox></div></div>
-                                </div>
-                            </div>
-                        </div>
-                            <div class="col-12"><h6>Skills</h6></div>
-                        <div class="col-12"><div class="resume-section-card"><div class="row">
-                                    <div class="col-12 resume-field-span"><div class="form-group"><label>Programming Languages</label><asp:TextBox ID="txtEnhSkillProgrammingLanguages" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="2" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 resume-field-span"><div class="form-group"><label>Frameworks / Libraries</label><asp:TextBox ID="txtEnhSkillFrameworksLibraries" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="2" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 resume-field-span"><div class="form-group"><label>Tools / Cloud / Database</label><asp:TextBox ID="txtEnhSkillToolsCloudDatabase" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="2" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 resume-field-span"><div class="form-group"><label>Soft Skills / Languages</label><asp:TextBox ID="txtEnhSkillSoftSkillsLanguages" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="2" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 resume-field-span"><div class="form-group"><label>Custom heading</label><asp:TextBox ID="txtEnhSkillCustomHeading" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox></div></div>
-                                    <div class="col-12 resume-field-span"><div class="form-group"><label>Custom items</label><asp:TextBox ID="txtEnhSkillCustomItems" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="2" ReadOnly="true"></asp:TextBox></div></div>
-                                </div></div></div>                        <div class="col-12 resume-preview-card"><div class="resume-section-card"><h6>Certifications</h6><asp:TextBox ID="txtEnhResumeCertifications" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="3" ReadOnly="true"></asp:TextBox></div></div>
-                            <div class="col-12 resume-preview-card"><div class="resume-section-card"><h6>Languages</h6><asp:TextBox ID="txtEnhResumeLanguages" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="3" ReadOnly="true"></asp:TextBox></div></div>
+                            <%-- Project cards injected dynamically by code-behind into phProjCards --%>
+                            <asp:PlaceHolder ID="phProjCards" runat="server" />
+
+                            <%-- ── Skills ── --%>
+                            <div class="row" style="margin-top:6px;"><div class="col-12"><h6>Skills</h6></div></div>
+                            <div class="row"><div class="col-12"><div class="resume-section-card"><div class="row">
+                                <div class="col-12 resume-field-span"><div class="form-group"><label>Programming Languages</label><asp:TextBox ID="txtEnhSkillProgrammingLanguages" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="2" ReadOnly="true"></asp:TextBox></div></div>
+                                <div class="col-12 resume-field-span"><div class="form-group"><label>Frameworks / Libraries</label><asp:TextBox ID="txtEnhSkillFrameworksLibraries" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="2" ReadOnly="true"></asp:TextBox></div></div>
+                                <div class="col-12 resume-field-span"><div class="form-group"><label>Tools / Cloud / Database</label><asp:TextBox ID="txtEnhSkillToolsCloudDatabase" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="2" ReadOnly="true"></asp:TextBox></div></div>
+                                <div class="col-12 resume-field-span"><div class="form-group"><label>Soft Skills / Languages</label><asp:TextBox ID="txtEnhSkillSoftSkillsLanguages" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="2" ReadOnly="true"></asp:TextBox></div></div>
+                                <div class="col-12 resume-field-span"><div class="form-group"><label>Custom heading</label><asp:TextBox ID="txtEnhSkillCustomHeading" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox></div></div>
+                                <div class="col-12 resume-field-span"><div class="form-group"><label>Custom items</label><asp:TextBox ID="txtEnhSkillCustomItems" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="2" ReadOnly="true"></asp:TextBox></div></div>
+                            </div></div></div></div>
+
+                            <div class="row"><div class="col-12 resume-preview-card"><div class="resume-section-card"><h6>Certifications</h6><asp:TextBox ID="txtEnhResumeCertifications" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="3" ReadOnly="true"></asp:TextBox></div></div></div>
+                            <div class="row"><div class="col-12 resume-preview-card"><div class="resume-section-card"><h6>Languages</h6><asp:TextBox ID="txtEnhResumeLanguages" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="3" ReadOnly="true"></asp:TextBox></div></div></div>
 
                             <asp:Panel ID="pnlEnhSaveOptions" runat="server" CssClass="enhancer-save-panel" Visible="false">
+                                <asp:Button ID="btnCancelEnhancedResume" runat="server" CssClass="btn-resume-preview" Text="Cancel" OnClick="btnCancelEnhancedResume_Click" CausesValidation="false" style="background:#6b7280; border-color:#6b7280;" />
                                 <asp:Button ID="btnSaveEnhancedResume" runat="server" CssClass="btn-resume-preview" Text="Update" OnClick="btnSaveEnhancedResume_Click" CausesValidation="false" />
                             </asp:Panel>
 
-                            <div class="resume-preview" style="display:none;"><asp:Literal ID="litResumePreview" runat="server" /></div>
                         </div>
                     </div>
 
-                    </div>
-                </div>
-
                 <div class="row justify-content-center mt-4">
                     <div class="col-12">
-                        <div class="section-card" style="min-width:900px">
+                        <div class="section-card" style="max-width:900px; width:100%; margin:0 auto;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <h3 style="margin: 0;">Enhanced Resume Preview</h3>
                                 <div class="enhancer-preview-actions" style="margin: 0;">
-                                <asp:Button ID="Button1" runat="server" CssClass="btn-resume-preview" Text="Edit Preview" OnClick="btnToggleEnhPreviewEdit_Click" CausesValidation="false" />
-<%--                                <asp:Button ID="Button2" runat="server" CssClass="btn-resume-preview" Text="Export PDF" OnClick="return exportPDFasHTML();" CausesValidation="false" style="margin-left:8px;" />--%>
-                                                        <%--<div class="col-lg-4 text-right pt-3 d-flex flex-column align-items-end justify-content-center gap-2" style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">--%>
-                        <a href="#" class="btn-resume-preview" onclick="return exportHTMLAsPDF();">
-                            <i class="fas fa-file-code"></i> Preview in New Tab
-                        </a>
-                    <%--</div>--%>
-                            </div>
-                                <%--<div class="muted-box" style="margin: 0; padding: 8px 12px;">Rendered from ResumePreview.html using the same preview data.</div>--%>
+                                    <asp:Button ID="Button1" runat="server" CssClass="btn-resume-preview" Text="Edit Preview" OnClick="btnToggleEnhPreviewEdit_Click" CausesValidation="false" />
+                                    <a href="#" class="btn-resume-preview" onclick="return exportHTMLAsPDF();">
+                                        <i class="fas fa-file-code"></i> Preview in New Tab
+                                    </a>
+                                </div>
                             </div>
                             <asp:Literal ID="litHtmlPreviewFrame" runat="server" />
                         </div>
                     </div>
                 </div>
+
+                    </div>
+                </div>
+
             </div>
         </div>
    </div>
@@ -856,7 +843,7 @@
 
     <script>
         function resizeTextareas() {
-            document.querySelectorAll('.enhancer-preview-form textarea').forEach(function(el) {
+            document.querySelectorAll('.enhancer-preview-form textarea').forEach(function (el) {
                 el.style.height = 'auto';
                 el.style.height = (el.scrollHeight + 5) + 'px';
             });

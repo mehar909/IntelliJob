@@ -72,7 +72,7 @@ namespace IntelliJob.User
 
                     SqlCommand userCmd = new SqlCommand(userSql, con, tran);
                     userCmd.Parameters.AddWithValue("@Username", txtUserName.Text.Trim());
-                    userCmd.Parameters.AddWithValue("@Password", txtCompanyPassword.Text.Trim());
+                    userCmd.Parameters.AddWithValue("@Password", Utils.CreateSaltedHash(txtCompanyPassword.Text.Trim()));
                     userCmd.Parameters.AddWithValue("@Email", txtEmail.Text.Trim());
                     userCmd.Parameters.AddWithValue("@Address", txtAddress.Text.Trim());
                     userCmd.Parameters.AddWithValue("@Country", ddlCountry.SelectedValue);

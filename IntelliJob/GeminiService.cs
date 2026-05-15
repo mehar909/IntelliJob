@@ -187,7 +187,7 @@ Return the questions formatted as a JSON array like this:
 - Strong, well-explained answers should score 70-100";
             }
 
-            string prompt = $@"You are an AI interviewer analyzing an interview transcript. Your job is to provide ACCURATE scoring STRICTLY based on what the candidate ACTUALLY said.
+            string prompt = $@"You are an AI interviewer analyzing an interview transcript. Your job is to provide ACCURATE scoring based on what the candidate ACTUALLY said.
 
 CRITICAL SCORING RULES - READ CAREFULLY:
 1. If a candidate does NOT answer a question (says 'ok', 'let's start', 'I don't know', ends call, or gives irrelevant responses), that question receives a score of 0-5 for all categories.

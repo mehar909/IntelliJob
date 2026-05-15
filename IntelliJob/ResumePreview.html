@@ -179,6 +179,22 @@
             flex-shrink: 0;
         }
 
+        .r-entry-header .eh-subtitle {
+            font-size: 9.5pt;
+            font-style: italic;
+            font-weight: 400;
+            margin: 0;
+            flex: 1;
+        }
+
+        .r-entry-header .eh-loc {
+            font-size: 9.5pt;
+            font-style: italic;
+            white-space: nowrap;
+            padding-left: 12px;
+            flex-shrink: 0;
+        }
+
         /* ---------- BULLETS ---------- */
         ul.r-bullets {
             margin: 3px 0 0 18px;
@@ -304,8 +320,10 @@
     }
 
     function stripBold(str) {
-        return esc(String(str || '')).replace(/\*(.+?)\*/g, '<strong>$1</strong>');
-    }
+    return esc(String(str || ''))
+        .replace(/\*(.+?)\*/g, '<strong>$1</strong>')
+        .replace(/_(.+?)_/g, '<em>$1</em>');
+}
 
     function resolveDoc(payload) {
         if (!payload) return null;
@@ -366,7 +384,7 @@
         /* --- SUMMARY --- */
         if (doc.professionalSummary) {
             html += section('Professional Summary',
-                '<p class="r-summary">' + esc(doc.professionalSummary) + '</p>');
+                '<p class="r-summary">' + stripBold(doc.professionalSummary) + '</p>');
         }
 
         /* --- EDUCATION --- */
@@ -380,9 +398,9 @@
 
                 eduHtml += '<div class="r-subheading">';
                 eduHtml +=   '<div class="r-subheading-left">';
-                eduHtml +=     '<p class="sh-title">'    + esc(e.schoolName || '') + '</p>';
+                eduHtml +=     '<p class="sh-title">'    + stripBold(e.schoolName || '') + '</p>';
                 if (e.degree)
-                    eduHtml += '<p class="sh-subtitle">' + esc(e.degree) + '</p>';
+                    eduHtml += '<p class="sh-subtitle">' + stripBold(e.degree) + '</p>';
                 eduHtml +=   '</div>';
                 eduHtml +=   '<div class="r-subheading-right">';
                 if (dateStr)    eduHtml += '<p class="sh-date">' + esc(dateStr)    + '</p>';
@@ -401,12 +419,19 @@
                 var startStr = formatDate(ex.startMonth, ex.startYear, false);
                 var endStr   = formatDate(ex.endMonth,   ex.endYear,   ex.isCurrent);
                 var dateStr  = startStr && endStr ? startStr + ' - ' + endStr : (startStr || endStr);
-                var titleStr = [ex.jobTitle, ex.company].filter(Boolean).join(' at ');
 
                 expHtml += '<div class="r-entry">';
+
+                /* row 1: bold job title left, bold date right */
                 expHtml +=   '<div class="r-entry-header">';
-                expHtml +=     '<p class="eh-title">' + esc(titleStr) + '</p>';
+                expHtml +=     '<p class="eh-title">' + stripBold(ex.jobTitle || '') + '</p>';
                 if (dateStr) expHtml += '<span class="eh-date">' + esc(dateStr) + '</span>';
+                expHtml +=   '</div>';
+
+                /* row 2: italic company left, italic location right */
+                expHtml +=   '<div class="r-entry-header">';
+                expHtml +=     '<p class="eh-subtitle">' + stripBold(ex.company || '') + '</p>';
+                if (ex.location) expHtml += '<span class="eh-loc">' + esc(ex.location) + '</span>';
                 expHtml +=   '</div>';
 
                 if (ex.bullets && ex.bullets.length) {
@@ -430,7 +455,7 @@
 
                 projHtml += '<div class="r-entry">';
                 projHtml +=   '<div class="r-entry-header">';
-                projHtml +=     '<p class="eh-title">' + esc(pr.projectTitle || '');
+                projHtml +=     '<p class="eh-title">' + stripBold(pr.projectTitle || '');
                 if (tech) projHtml += ' <span class="eh-tech">| ' + esc(tech) + '</span>';
                 projHtml +=     '</p>';
                 if (pr.date) projHtml += '<span class="eh-date">' + esc(pr.date) + '</span>';

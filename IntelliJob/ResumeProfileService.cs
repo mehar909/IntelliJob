@@ -1168,11 +1168,12 @@ namespace IntelliJob
                 Subsections = entries.Select(entry => new ResumeSectionNode
                 {
                     Heading = entry.ProjectTitle,
-                    Body = string.Join(Environment.NewLine, new[]
-                    {
-                        JoinLines(entry.TechStack),
-                        entry.Description
-                    }.Where(item => !string.IsNullOrWhiteSpace(item)))
+                    Body = JoinLines(entry.TechStack),
+                    Items = (entry.Bullets != null && entry.Bullets.Count > 0)
+                        ? entry.Bullets
+                        : (!string.IsNullOrWhiteSpace(entry.Description)
+                            ? new List<string> { entry.Description }
+                            : new List<string>())
                 }).ToList()
             };
         }
@@ -1278,6 +1279,10 @@ namespace IntelliJob
                 {
                     ["projectTitle"] = entry?.ProjectTitle ?? string.Empty,
                     ["techStack"] = new JArray((entry?.TechStack ?? new List<string>()).Where(item => !string.IsNullOrWhiteSpace(item)).Select(item => item.Trim())),
+                    ["bullets"] = new JArray((entry?.Bullets != null && entry.Bullets.Count > 0
+                        ? entry.Bullets
+                        : (!string.IsNullOrWhiteSpace(entry?.Description) ? new List<string> { entry.Description } : new List<string>()))
+                        .Where(item => !string.IsNullOrWhiteSpace(item)).Select(item => item.Trim())),
                     ["description"] = entry?.Description ?? string.Empty
                 })),
                 ["skills"] = new JObject
@@ -1376,6 +1381,7 @@ namespace IntelliJob
             {
                 ProjectTitle = token["projectTitle"]?.Value<string>() ?? string.Empty,
                 TechStack = (token["techStack"] as JArray ?? new JArray()).Select(item => item.Value<string>() ?? string.Empty).Where(item => !string.IsNullOrWhiteSpace(item)).ToList(),
+                Bullets = (token["bullets"] as JArray ?? new JArray()).Select(item => item.Value<string>() ?? string.Empty).Where(item => !string.IsNullOrWhiteSpace(item)).ToList(),
                 Description = token["description"]?.Value<string>() ?? string.Empty
             }).ToList();
 
@@ -1624,6 +1630,7 @@ namespace IntelliJob
             {
                 ProjectTitle = entry.ProjectTitle,
                 TechStack = entry.TechStack ?? new List<string>(),
+                Bullets = entry.Bullets ?? new List<string>(),
                 Description = entry.Description
             };
         }
@@ -1637,6 +1644,7 @@ namespace IntelliJob
             {
                 ProjectTitle = entry.ProjectTitle ?? string.Empty,
                 TechStack = entry.TechStack != null ? entry.TechStack.Where(item => !string.IsNullOrWhiteSpace(item)).Select(item => item.Trim()).ToList() : new List<string>(),
+                Bullets = entry.Bullets != null ? entry.Bullets.Where(item => !string.IsNullOrWhiteSpace(item)).Select(item => item.Trim()).ToList() : new List<string>(),
                 Description = entry.Description ?? string.Empty
             };
         }
@@ -1646,11 +1654,15 @@ namespace IntelliJob
             if (entry == null)
                 return string.Empty;
 
+            string descPart = (entry.Bullets != null && entry.Bullets.Count > 0)
+                ? string.Join("; ", entry.Bullets.Where(item => !string.IsNullOrWhiteSpace(item)).Select(item => item.Trim()))
+                : (entry.Description ?? string.Empty);
+
             return string.Join(" | ", new[]
             {
                 entry.ProjectTitle,
                 entry.TechStack != null ? string.Join(", ", entry.TechStack.Where(item => !string.IsNullOrWhiteSpace(item)).Select(item => item.Trim())) : string.Empty,
-                entry.Description
+                descPart
             }.Where(value => !string.IsNullOrWhiteSpace(value)));
         }
 
@@ -1888,6 +1900,9 @@ namespace IntelliJob
 
             [JsonProperty("techStack")]
             public List<string> TechStack { get; set; } = new List<string>();
+
+            [JsonProperty("bullets")]
+            public List<string> Bullets { get; set; } = new List<string>();
 
             [JsonProperty("description")]
             public string Description { get; set; } = string.Empty;

@@ -20,6 +20,8 @@ CREATE TABLE Users (
     UpdatedAt DATETIME NOT NULL DEFAULT GETDATE()
 );
 
+select * from Users;
+
 CREATE TABLE JobSeekers (
     ProfileId INT PRIMARY KEY,          -- FK to Users.UserId
     Name VARCHAR(50),

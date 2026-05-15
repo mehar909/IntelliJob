@@ -52,6 +52,7 @@ namespace IntelliJob
     {
         public string ProjectTitle { get; set; } = string.Empty;
         public List<string> TechStack { get; set; } = new List<string>();
+        public List<string> Bullets { get; set; } = new List<string>();
         public string Description { get; set; } = string.Empty;
     }
 

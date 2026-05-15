@@ -1,6 +1,91 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/User/UserMaster.Master" AutoEventWireup="true" CodeBehind="Home.aspx.cs" Inherits="IntelliJob.User.Home" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+    <style type="text/css">
+        .btn-action {
+             display: inline-flex;
+             align-items: center;
+             gap: 8px;
+             background-color: #fb246a;
+             border: 2px solid #fb246a;
+             color: #ffffff !important;
+             border-radius: 12px;
+             padding: 12px 28px;
+             font-weight: 600;
+             font-size: 15px;
+             text-decoration: none;
+             transition: all 0.2s ease;
+             white-space: nowrap;
+             box-shadow: 0 4px 12px rgba(255, 67, 87, 0.3);
+        }
+        .btn-action:hover {
+            background-color: #da2461;
+            border-color: #da2461;
+            color: #fff !important;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+         .job-card {
+             background: #fff;
+             border-radius: 18px;
+             border: 1px solid #ececec;
+             box-shadow: 0 8px 26px rgba(15, 23, 42, 0.06);
+             padding: 22px;
+             margin-bottom: 18px;
+             transition: transform 0.2s ease, box-shadow 0.2s ease;
+         }
+
+         .job-card:hover {
+             transform: translateY(-2px);
+             box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+         }
+
+        .job-logo img {
+            width: 80px;
+            height: 80px;
+            border-radius: 14px;
+            border: 1px solid #eef2f7;
+        }
+
+        .job-title h4 {
+            margin: 0 0 6px;
+            font-weight: 800;
+            color: #111827;
+        }
+
+        .job-title h4 a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .job-title h4 a:hover {
+            color: #FF4357;
+        }
+
+        .job-meta {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .job-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .job-pill {
+            background: #f9fafb;
+            border: 1px solid #e8edf3;
+            color: #374151;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+    </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
 
@@ -86,34 +171,43 @@
                     </div>
                 </div>
                 <div class="row justify-content-center">
-                    <div class="col-xl-10">
+                    <div class="col-xl-9">
                         <asp:Repeater ID="RptrFeaturedJobs" runat="server">
                         <ItemTemplate>
-                            <div class="single-job-items mb-30">
-                                <div class="job-items">
-                                    <div class="company-img">
+                            <div class="job-card">
+                                <div class="row align-items-center">
+                                    <div class="col-md-2 text-center job-logo">
                                         <a href='JobDetails.aspx?id=<%# Eval("JobId") %>'>
                                             <img src='<%# GetImageUrl(Eval("CompanyImage")) %>' 
-                                                 alt='<%# Eval("CompanyName") %>' 
-                                                 style="max-width: 60px; max-height: 60px;">
+                                                 alt='<%# Eval("CompanyName") %>'>
                                         </a>
                                     </div>
-                                    <div class="job-tittle">
-                                        <a href='JobDetails.aspx?id=<%# Eval("JobId") %>'>
-                                            <h4><%# Eval("Title") %></h4>
-                                        </a>
-                                        <ul>
-                                            <li><%# Eval("CompanyName") %></li>
-                                            <li><i class="fas fa-map-marker-alt"></i><%# Eval("Address") %>, <%# Eval("Country") %></li>
-                                            <%-- You can add Salary back here if your SQL fetched it, e.g.: <li>$<%# Eval("Salary") %></li> --%>
-                                            <%-- If salary is not needed, remove or replace with another field --%>
-                                        </ul>
+                                    <div class="col-md">
+                                        <div class="job-title">
+                                            <a href='JobDetails.aspx?id=<%# Eval("JobId") %>'>
+                                                <h4><%# Eval("Title") %></h4>
+                                            </a>
+                                        </div>
+                                        <div class="job-meta">
+                                            <i class="fas fa-building" style="margin-right:4px;"></i><%# Eval("CompanyName") %>
+                                            <i class="fas fa-solid fa-map-marker-alt" style="margin-right:4px; margin-left:8px;"></i><%# Eval("Address") %>, <%# Eval("Country") %>
+                                        </div>
+                                        <div class="job-pills">
+                                            <span class="job-pill">
+                                                <i class="fas fa-solid fa-briefcase" style="margin-right:4px;"></i>
+                                                <%# Eval("JobType") %>
+                                            </span>
+                                            <span class="job-pill">
+                                                <i class="fas fa-solid fa-dollar-sign" style="margin-right:4px;"></i>
+                                                <%# Eval("Salary") %>
+                                            </span>
+                                            <span class="job-pill">
+                                                <i class="fas fa-regular fa-clock" style="margin-right:4px;"></i>
+                                                <%# GetTimeAgo(Eval("CreateDate")) %>
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="items-link f-right">
-                                    <a href='JobDetails.aspx?id=<%# Eval("JobId") %>'><%# Eval("JobType") %></a>
-                                    <%-- Call the C# helper function GetTimeAgo --%>
-                                    <span><%# GetTimeAgo(Eval("CreateDate")) %></span>
+                                    <a href='JobDetails.aspx?id=<%# Eval("JobId") %>' class="btn-action" style="margin-left:10px; margin-right:20px;">View Details</a>
                                 </div>
                             </div>
                         </ItemTemplate>

@@ -37,6 +37,8 @@ CREATE TABLE InterviewQuestions (
     CONSTRAINT FK_Questions_Interview FOREIGN KEY (InterviewId) REFERENCES Interviews(InterviewId)
 );
 
+select * from InterviewQuestions
+
 -- 3. InterviewTranscripts: Stores conversation messages during interview
 CREATE TABLE InterviewTranscripts (
     TranscriptId    INT IDENTITY(1,1) PRIMARY KEY,
@@ -79,18 +81,7 @@ IF COL_LENGTH('dbo.InterviewFeedback', 'JobId') IS NULL
     ALTER TABLE dbo.InterviewFeedback
     ADD JobId INT NULL;
 
-IF COL_LENGTH('dbo.InterviewFeedback', 'ExperienceValidityScore') IS NULL
-    ALTER TABLE dbo.InterviewFeedback
-    ADD ExperienceValidityScore INT NOT NULL
-        CONSTRAINT DF_InterviewFeedback_ExperienceValidityScore DEFAULT (0);
-
-IF COL_LENGTH('dbo.InterviewFeedback', 'ExperienceValidityComment') IS NULL
-    ALTER TABLE dbo.InterviewFeedback
-    ADD ExperienceValidityComment NVARCHAR(MAX) NULL;
-
 select * from InterviewFeedback;
-
-update InterviewFeedback set TotalScore = 90 where FeedbackId = 1
 
 -- 5. InterviewInvitations
 CREATE TABLE InterviewInvitations (

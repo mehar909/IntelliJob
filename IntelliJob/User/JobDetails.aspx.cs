@@ -16,7 +16,7 @@ namespace IntelliJob.User
 {
     public partial class JobDetails : System.Web.UI.Page
     {
-        private const string StaticInterviewPassword = "123456";
+
 
         SqlConnection con;
         SqlCommand cmd;
@@ -735,8 +735,7 @@ namespace IntelliJob.User
 
         private int UpsertInterviewAndInvitation(JobApplicationContext ctx, List<string> questions, out string plainPassword, out Guid accessToken)
         {
-            //plainPassword = Utils.GenerateNumericCode(6);
-            plainPassword = StaticInterviewPassword;
+            plainPassword = Utils.GenerateNumericCode(6);
             accessToken = Guid.NewGuid();
             string salt = Utils.GenerateSalt();
             string hash = Utils.ComputeSha256Hash(plainPassword + salt);
