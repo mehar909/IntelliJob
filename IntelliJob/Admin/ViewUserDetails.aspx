@@ -13,7 +13,7 @@
                     <asp:Label ID="Label1" runat="server"></asp:Label>
                 </div>
                 <div class="input-group h-25">
-                    <asp:HyperLink ID="linkBack" runat="server" NavigateUrl="~/Admin/UserList.aspx" CssClass="btn btn-secondary"> < Back </asp:HyperLink>
+                    <asp:HyperLink ID="linkBack" runat="server" NavigateUrl="~/Admin/UserList.aspx" CssClass="btn btn-secondary">&lt; Back</asp:HyperLink>
                 </div>
             </div>
             <div class="row">

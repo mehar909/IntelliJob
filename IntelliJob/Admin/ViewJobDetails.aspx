@@ -14,7 +14,7 @@
                 </div>
                 <div class="input-group h-25">
                     <asp:HyperLink ID="linkViewApplicants" runat="server" CssClass="btn btn-primary">View All Applicants</asp:HyperLink>
-                    <asp:HyperLink ID="linkBack" runat="server" NavigateUrl="~/Admin/JobList.aspx" CssClass="btn btn-secondary ml-2"> < Back </asp:HyperLink>
+                    <asp:HyperLink ID="linkBack" runat="server" NavigateUrl="~/Admin/JobList.aspx" CssClass="btn btn-secondary ml-2">&lt; Back</asp:HyperLink>
                 </div>
             </div>
             <div class="row">

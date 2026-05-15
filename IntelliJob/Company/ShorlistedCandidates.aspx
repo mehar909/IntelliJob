@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Company/CompanyMaster.Master" EnableEventValidation="false" AutoEventWireup="true" CodeBehind="ShorlistedCandidates.aspx.cs" Inherits="IntelliJob.Company.ShortlistedCandidates" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Company/CompanyMaster.Master" EnableEventValidation="false" EnableViewStateMac="false" AutoEventWireup="true" CodeBehind="ShorlistedCandidates.aspx.cs" Inherits="IntelliJob.Company.ShortlistedCandidates" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 

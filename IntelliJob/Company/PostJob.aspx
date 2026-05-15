@@ -93,7 +93,7 @@
                     <asp:Label ID="Label1" runat="server"></asp:Label>
                 </div>
                 <div class="input-group h-25">
-                    <asp:HyperLink ID="linkBack" runat="server" NavigateUrl="~/Company/JobList.aspx" CssClass="btn btn-secondary" Visible="false"> < Back </asp:HyperLink>
+                    <asp:HyperLink ID="linkBack" runat="server" NavigateUrl="~/Company/JobList.aspx" CssClass="btn btn-secondary" Visible="false">&lt; Back</asp:HyperLink>
                 </div>
             </div>
             <h3 class="text-center"><%Response.Write(Session["title"]); %></h3>

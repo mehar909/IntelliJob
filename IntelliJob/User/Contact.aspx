@@ -288,22 +288,22 @@
                         <div class="row">
                             <div class="col-12">
                                 <div class="form-group">
-                                    <textarea class="form-control w-100" runat="server" name="message" id="message" cols="30" rows="9" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter Message'" placeholder=" Enter Message" required></textarea>
+                                    <asp:TextBox ID="message" runat="server" CssClass="form-control w-100" TextMode="MultiLine" Rows="9" placeholder="Enter Message"></asp:TextBox>
                                 </div>
                             </div>
                             <div class="col-sm-6">
                                 <div class="form-group">
-                                    <input class="form-control valid" runat="server" name="name" id="name" type="text" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter your name'" placeholder="Enter your name" required>
+                                    <asp:TextBox ID="name" runat="server" CssClass="form-control" placeholder="Enter your name"></asp:TextBox>
                                 </div>
                             </div>
                             <div class="col-sm-6">
                                 <div class="form-group">
-                                    <input class="form-control valid" runat="server" name="email" id="email" type="email" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter email address'" placeholder="Email" required>
+                                    <asp:TextBox ID="email" runat="server" CssClass="form-control" TextMode="Email" placeholder="Email"></asp:TextBox>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-group">
-                                    <input class="form-control" runat="server" name="subject" id="subject" type="text" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter Subject'" placeholder="Enter Subject" required>
+                                    <asp:TextBox ID="subject" runat="server" CssClass="form-control" placeholder="Enter Subject"></asp:TextBox>
                                 </div>
                             </div>
                         </div>

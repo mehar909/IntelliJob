@@ -3,6 +3,8 @@
 -- Run this script against the IntelliJob database
 -- ============================================
 
+use intellijob;
+
 -- 1. Interviews: Stores each interview session setup
 CREATE TABLE Interviews (
     InterviewId     INT IDENTITY(1,1) PRIMARY KEY,
@@ -17,6 +19,10 @@ CREATE TABLE Interviews (
     CompletedAt     DATETIME NULL,
     CONSTRAINT FK_Interviews_Users FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
+-- New columns on Interviews table
+ALTER TABLE Interviews ADD JobId INT NULL;
+ALTER TABLE Interviews ADD AppliedJobId INT NULL;
+
 
 -- 2. InterviewQuestions: Questions generated for each interview
 CREATE TABLE InterviewQuestions (
@@ -59,4 +65,30 @@ CREATE TABLE InterviewFeedback (
     CreatedAt           DATETIME NOT NULL DEFAULT GETDATE(),
     CONSTRAINT FK_Feedback_Interview FOREIGN KEY (InterviewId) REFERENCES Interviews(InterviewId),
     CONSTRAINT FK_Feedback_Users FOREIGN KEY (UserId) REFERENCES Users(UserId)
+);
+
+-- New column on InterviewFeedback table
+ALTER TABLE InterviewFeedback ADD JobId INT NULL;
+
+
+-- 5. InterviewInvitations
+CREATE TABLE InterviewInvitations (
+    InvitationId   INT IDENTITY(1,1) PRIMARY KEY,
+    InterviewId    INT NOT NULL UNIQUE,
+    AppliedJobId   INT NOT NULL,
+    JobId          INT NOT NULL,
+    UserId         INT NOT NULL,
+    CompanyId      INT NOT NULL,
+    AccessToken    UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID(),
+    PasswordSalt   NVARCHAR(100) NOT NULL,
+    PasswordHash   NVARCHAR(200) NOT NULL,
+    IsPasswordUsed BIT NOT NULL DEFAULT 0,
+    PasswordUsedAt DATETIME NULL,
+    CreatedAt      DATETIME NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_Invitations_Interviews
+        FOREIGN KEY (InterviewId) REFERENCES Interviews(InterviewId),
+    CONSTRAINT FK_Invitations_AppliedJobs
+        FOREIGN KEY (AppliedJobId) REFERENCES AppliedJobs(AppliedJobId),
+    CONSTRAINT FK_Invitations_Users
+        FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );

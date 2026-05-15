@@ -17,29 +17,38 @@ namespace IntelliJob
     /// </summary>
     public class GeminiService
     {
-        private static readonly HttpClient _httpClient = new HttpClient();
+        private static readonly HttpClient _httpClient = new HttpClient
+        {
+            // Hard timeout: if Gemini doesn't respond in 20 s, fail fast.
+            // Without this the default is 100 s per attempt × 5 models × 2 retries
+            // = up to 1000 s of page hang.
+            Timeout = System.TimeSpan.FromSeconds(20)
+        };
         private readonly string _apiKey;
         private readonly string _model;
         private const string GeminiApiBase = "https://generativelanguage.googleapis.com/v1beta/models/";
 
-        // Fallback models to try when primary model hits rate limits
+        // Fallback models — tried in order when the primary hits rate limits.
+        // Updated March 2026: gemini-2.0-x and gemini-1.5-x are fully retired.
+        // Free-tier available models as of March 2026: 2.5-flash-lite (15 RPM),
+        // 2.5-flash (10 RPM), 2.5-pro (5 RPM).
         private static readonly string[] FallbackModels = new[]
         {
-            "gemini-3.1-flash-lite", // Current fast workhorse
-            "gemini-3-flash",      // Balanced performance
-            "gemini-2.5-flash"     // Older but still stable
+            "gemini-2.5-flash-lite",  // Highest throughput on free tier (15 RPM)
+            "gemini-2.5-flash",       // Mid-tier, good balance (10 RPM)
+            "gemini-2.5-pro"          // Highest quality, lowest quota (5 RPM)
         };
 
         public GeminiService()
         {
             _apiKey = ConfigurationManager.AppSettings["GeminiApiKey"];
-            if (string.IsNullOrEmpty(_apiKey) || _apiKey == "YOUR_GEMINI_API_KEY_HERE")
+            if (string.IsNullOrEmpty(_apiKey))
             {
                 throw new InvalidOperationException("Gemini API key is not configured. Set it in Web.config appSettings under 'GeminiApiKey'.");
             }
             _model = ConfigurationManager.AppSettings["GeminiModel"];
             if (string.IsNullOrEmpty(_model))
-                _model = "gemini-3.1-flash-lite";
+                _model = "gemini-2.5-flash"; // Default: current free-tier model
         }
 
         #region Question Generation
@@ -125,24 +134,46 @@ Return the questions formatted as a JSON array like this:
 
             // Determine scoring guidance based on level
             string levelGuidance;
-            if (level.IndexOf("junior", StringComparison.OrdinalIgnoreCase) >= 0 || 
-                level.IndexOf("entry", StringComparison.OrdinalIgnoreCase) >= 0 || 
+            if (level.IndexOf("junior", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                level.IndexOf("entry", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 level.IndexOf("fresher", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                levelGuidance = "This is a JUNIOR/ENTRY-LEVEL candidate. Be encouraging and lenient. If the candidate shows basic understanding and attempts to answer correctly, give generous scores. Minimum score for any category should be around 30 if the candidate made a reasonable attempt. A junior who answers most questions with basic correctness should score 60-80.";
+                levelGuidance = @"This is a JUNIOR/ENTRY-LEVEL candidate. While you should be encouraging:
+- ONLY award points for actual answers that address the question
+- If the candidate gives no answer or only says 'ok', 'I don't know', or similar, score that category 0-10
+- Basic correct answers should score 40-60
+- Good answers with some depth should score 60-80
+- Excellent, well-articulated answers can score 80-100";
             }
-            else if (level.IndexOf("senior", StringComparison.OrdinalIgnoreCase) >= 0 || 
-                     level.IndexOf("expert", StringComparison.OrdinalIgnoreCase) >= 0 || 
+            else if (level.IndexOf("senior", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                     level.IndexOf("expert", StringComparison.OrdinalIgnoreCase) >= 0 ||
                      level.IndexOf("lead", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                levelGuidance = "This is a SENIOR/EXPERT-LEVEL candidate. Evaluate with higher expectations but remain fair. Score across the full 0-100 range based on depth, accuracy, and communication quality.";
+                levelGuidance = @"This is a SENIOR/EXPERT-LEVEL candidate. Evaluate with high expectations:
+- ONLY award points for substantial, detailed answers
+- Shallow or generic answers should score 20-40
+- Competent answers with good depth should score 50-70
+- Excellent, insightful answers with strong technical depth should score 70-100
+- No answer or 'I don't know' should score 0-5";
             }
             else
             {
-                levelGuidance = "This is a MID-LEVEL candidate. Be fair but supportive. If the candidate shows reasonable understanding, give appropriate credit. Minimum score for any category should be around 15 if the candidate made an attempt. A mid-level candidate answering with moderate correctness should score 50-75.";
+                levelGuidance = @"This is a MID-LEVEL candidate. Be fair and accurate:
+- ONLY award points for answers that actually address the question
+- If the candidate gives no answer or only says 'ok', 'I don't know', or similar, score that category 0-10
+- Basic correct answers should score 30-50
+- Solid answers with reasonable depth should score 50-70
+- Strong, well-explained answers should score 70-100";
             }
 
-            string prompt = $@"You are an AI interviewer analyzing an interview. Evaluate the candidate fairly and constructively. Focus on what the candidate demonstrated well, while noting areas for improvement.
+            string prompt = $@"You are an AI interviewer analyzing an interview transcript. Your job is to provide ACCURATE and STRICT scoring based on what the candidate ACTUALLY said.
+
+CRITICAL SCORING RULES - READ CAREFULLY:
+1. If a candidate does NOT answer a question (says 'ok', 'let's start', 'I don't know', ends call, or gives irrelevant responses), that question receives a score of 0-5 for all categories.
+2. If the candidate barely participates or gives minimal effort, the overall score should be 0-20, NOT 70-80.
+3. ONLY give credit for actual substantive answers that address the questions asked.
+4. Look at the ENTIRE transcript - if the candidate answered only 1 out of 5 questions, they should score around 10-20, not 70.
+5. Empty responses, one-word answers, or refusals to answer MUST result in very low scores (0-10 per category).
 
 Candidate Level: {level}
 {levelGuidance}
@@ -150,12 +181,16 @@ Candidate Level: {level}
 Transcript:
 {formattedTranscript}
 
+BEFORE SCORING: Count how many questions were asked and how many were ACTUALLY answered with substance.
+If the candidate answered less than 50% of questions with real answers, the total score MUST be below 30.
+If the candidate answered NONE of the questions, the total score MUST be 0-10.
+
 Please score the candidate from 0 to 100 in the following areas. Do not add categories other than the ones provided:
-- Communication Skills: Clarity, articulation, structured responses.
-- Technical Knowledge: Understanding of key concepts for the role.
-- Problem-Solving: Ability to analyze problems and propose solutions.
-- Cultural & Role Fit: Alignment with company values and job role.
-- Confidence & Clarity: Confidence in responses, engagement, and clarity.
+- Communication Skills: Clarity, articulation, structured responses. (0 if no real communication occurred)
+- Technical Knowledge: Understanding of key concepts for the role. (0 if no technical answers provided)
+- Problem-Solving: Ability to analyze problems and propose solutions. (0 if no problem-solving demonstrated)
+- Cultural & Role Fit: Alignment with company values and job role. (0 if no substantive interaction)
+- Confidence & Clarity: Confidence in responses, engagement, and clarity. (0 if candidate disengaged or didn't participate)
 
 Return your response as a JSON object with this exact structure (no markdown, no extra text):
 {{
@@ -258,20 +293,20 @@ Return your response as a JSON object with this exact structure (no markdown, no
                 // If parsing fails, return a fallback result with the raw text
                 return new InterviewFeedbackResult
                 {
-                    TotalScore = 50,
-                    CommunicationScore = 50,
-                    CommunicationComment = "Unable to parse AI response. Please try again.",
-                    TechnicalScore = 50,
-                    TechnicalComment = "Unable to parse AI response. Please try again.",
-                    ProblemSolvingScore = 50,
-                    ProblemSolvingComment = "Unable to parse AI response. Please try again.",
-                    CulturalFitScore = 50,
-                    CulturalFitComment = "Unable to parse AI response. Please try again.",
-                    ConfidenceScore = 50,
-                    ConfidenceComment = "Unable to parse AI response. Please try again.",
-                    Strengths = new List<string> { "Could not generate feedback" },
-                    AreasForImprovement = new List<string> { "Please retake the interview" },
-                    FinalAssessment = "The AI feedback could not be parsed. Raw response: " + responseText
+                    TotalScore = 0,
+                    CommunicationScore = 0,
+                    CommunicationComment = "Unable to parse AI response. Please use the Regenerate button to retry.",
+                    TechnicalScore = 0,
+                    TechnicalComment = "Unable to parse AI response. Please use the Regenerate button to retry.",
+                    ProblemSolvingScore = 0,
+                    ProblemSolvingComment = "Unable to parse AI response. Please use the Regenerate button to retry.",
+                    CulturalFitScore = 0,
+                    CulturalFitComment = "Unable to parse AI response. Please use the Regenerate button to retry.",
+                    ConfidenceScore = 0,
+                    ConfidenceComment = "Unable to parse AI response. Please use the Regenerate button to retry.",
+                    Strengths = new List<string> { "Could not generate feedback - parsing error" },
+                    AreasForImprovement = new List<string> { "Please use the Regenerate button to retry feedback generation" },
+                    FinalAssessment = "ERROR: The AI feedback could not be parsed. Exception: " + ex.Message + ". Please use the Regenerate button."
                 };
             }
         }
@@ -348,7 +383,7 @@ Return your response as a JSON object with this exact structure (no markdown, no
                                 break;
 
                             // Per-minute limit: wait and retry
-                            int waitSeconds = 20 * (attempt + 1);
+                            int waitSeconds = 5 * (attempt + 1); // keep retries short
                             var retryMatch = Regex.Match(responseBody, @"retryDelay"":\s*""(\d+)");
                             if (retryMatch.Success)
                                 waitSeconds = int.Parse(retryMatch.Groups[1].Value) + 3;

@@ -1,4 +1,3 @@
-create database intellijob
 
 use intellijob
 
@@ -101,7 +100,14 @@ UserId int,
 Shortlisted varchar(3)
 )
 
+-- New columns on AppliedJobs table
+ALTER TABLE AppliedJobs ADD InterviewPassword VARCHAR(20) NULL;
+ALTER TABLE AppliedJobs ADD PasswordUsed BIT NULL DEFAULT 0;
+ALTER TABLE AppliedJobs ADD InterviewSentAt DATETIME NULL;
+
+
 select* from AppliedJobs
+
 
 
 CREATE TABLE UserFavorites (
