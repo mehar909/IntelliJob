@@ -17,10 +17,8 @@ namespace IntelliJob.User
         protected global::System.Web.UI.WebControls.Literal litTechStack;
         protected global::System.Web.UI.WebControls.Literal litUserAvatar;
         protected global::System.Web.UI.WebControls.Literal litUserName;
-        protected global::System.Web.UI.WebControls.Repeater rptQuestions;
         protected global::System.Web.UI.WebControls.HiddenField hdnInterviewId;
-        protected global::System.Web.UI.WebControls.HiddenField hdnAnswersJson;
         protected global::System.Web.UI.WebControls.HiddenField hdnQuestionsJson;
-        protected global::System.Web.UI.WebControls.Button btnSubmitAnswers;
+        protected global::System.Web.UI.WebControls.HiddenField hdnVapiToken;
     }
 }

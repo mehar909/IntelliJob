@@ -105,11 +105,6 @@
                             </asp:BoundField>
 
 
-                            <asp:BoundField DataField="CompanyName" HeaderText="Company Name">
-                                <ItemStyle HorizontalAlign="Center" />
-                            </asp:BoundField>
-
-
                             <asp:BoundField DataField="Title" HeaderText="Job Title">
                                 <ItemStyle HorizontalAlign="Center" />
                             </asp:BoundField>
@@ -173,6 +168,24 @@
                                         Height="28px"
                                         ImageUrl="~/assets/img/icon/details.jpg"
                                         CommandName="ViewJob" CommandArgument='<%# Eval("JobId") %>' />
+                                </ItemTemplate>
+                                <ItemStyle HorizontalAlign="Center" />
+                            </asp:TemplateField>
+
+                            <asp:TemplateField HeaderText="Interview Report">
+                                <ItemTemplate>
+                                    <asp:HyperLink
+                                        ID="lnkReport" runat="server"
+                                        Text="View Report"
+                                        NavigateUrl='<%# "ViewCandidateReport.aspx?interviewId=" + Eval("InterviewId") %>'
+                                        ForeColor="#7200cf"
+                                        Font-Bold="true"
+                                        Visible='<%# Eval("InterviewId") != DBNull.Value %>' />
+                                    <asp:Label
+                                        ID="lblPending" runat="server"
+                                        Text="Pending"
+                                        ForeColor="Gray"
+                                        Visible='<%# Eval("InterviewId") == DBNull.Value %>' />
                                 </ItemTemplate>
                                 <ItemStyle HorizontalAlign="Center" />
                             </asp:TemplateField>

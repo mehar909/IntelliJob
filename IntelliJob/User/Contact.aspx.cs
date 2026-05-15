@@ -26,10 +26,10 @@ namespace IntelliJob.User
                 con = new SqlConnection(str);
                 string query = @"Insert into Contact values (@Name,@Email,@Subject,@Message)";
                 cmd = new SqlCommand(query, con);
-                cmd.Parameters.AddWithValue("@Name", name.Value.Trim());
-                cmd.Parameters.AddWithValue("@Email", email.Value.Trim());
-                cmd.Parameters.AddWithValue("@Subject", subject.Value.Trim());
-                cmd.Parameters.AddWithValue("@Message", message.Value.Trim());
+                cmd.Parameters.AddWithValue("@Name", name.Text.Trim());
+                cmd.Parameters.AddWithValue("@Email", email.Text.Trim());
+                cmd.Parameters.AddWithValue("@Subject", subject.Text.Trim());
+                cmd.Parameters.AddWithValue("@Message", message.Text.Trim());
                 con.Open();
                 int r = cmd.ExecuteNonQuery();
                 if (r > 0)
@@ -58,10 +58,10 @@ namespace IntelliJob.User
 
         private void clear()
         {
-            name.Value = string.Empty;
-            email.Value = string.Empty;
-            subject.Value = string.Empty;
-            message.Value = string.Empty;
+            name.Text = string.Empty;
+            email.Text = string.Empty;
+            subject.Text = string.Empty;
+            message.Text = string.Empty;
         }
     }
 }

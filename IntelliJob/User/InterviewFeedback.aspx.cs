@@ -75,13 +75,15 @@ namespace IntelliJob.User
                         litType.Text = row["InterviewType"].ToString();
                         litFinalAssessment.Text = row["FinalAssessment"].ToString();
 
-                        // Show regenerate button if feedback failed (score 0 or error in assessment)
+                        // Show regenerate button if feedback failed (score 0 or error in assessment).
+                        // Retake is intentionally NOT shown — once a job-linked interview is completed
+                        // the password is consumed and cannot be reused.
                         int totalScore = Convert.ToInt32(row["TotalScore"]);
                         string assessment = row["FinalAssessment"].ToString();
                         if (totalScore == 0 || assessment.StartsWith("ERROR:"))
                         {
                             pnlRegenerate.Visible = true;
-                            pnlRetake.Visible = true;
+                            // pnlRetake intentionally hidden — completed interviews cannot be retaken
                         }
 
                         // Set interview ID for retake

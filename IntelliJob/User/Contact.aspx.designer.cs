@@ -30,7 +30,7 @@ namespace IntelliJob.User
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlTextArea message;
+        protected global::System.Web.UI.WebControls.TextBox message;
 
         /// <summary>
         /// name control.
@@ -39,7 +39,7 @@ namespace IntelliJob.User
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlInputText name;
+        protected global::System.Web.UI.WebControls.TextBox name;
 
         /// <summary>
         /// email control.
@@ -48,7 +48,7 @@ namespace IntelliJob.User
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlInputGenericControl email;
+        protected global::System.Web.UI.WebControls.TextBox email;
 
         /// <summary>
         /// subject control.
@@ -57,7 +57,7 @@ namespace IntelliJob.User
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlInputText subject;
+        protected global::System.Web.UI.WebControls.TextBox subject;
 
         /// <summary>
         /// btnSend control.

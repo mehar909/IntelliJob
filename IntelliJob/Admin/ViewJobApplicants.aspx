@@ -44,7 +44,7 @@
                     <asp:Label ID="Label1" runat="server"></asp:Label>
                 </div>
                 <div class="input-group h-25">
-                    <asp:HyperLink ID="linkBack" runat="server" CssClass="btn btn-secondary"> < Back </asp:HyperLink>
+                    <asp:HyperLink ID="linkBack" runat="server" CssClass="btn btn-secondary">&lt; Back</asp:HyperLink>
                 </div>
             </div>
             <div class="row">
@@ -91,9 +91,7 @@
 
                             <asp:TemplateField HeaderText="Shortlist Candidate">
                                 <ItemTemplate>
-                                    <asp:ImageButton
-                                        ID="btnShortlist"
-                                        runat="server"
+                                    <asp:ImageButton ID="btnShortlist" runat="server"
                                         ImageUrl="../assets/img/icon/tick.jpg"
                                         Width="25px"
                                         Height="25px"

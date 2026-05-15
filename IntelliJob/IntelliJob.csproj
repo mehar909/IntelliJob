@@ -285,6 +285,7 @@
     <Content Include="Company\PostJob.aspx" />
     <Content Include="Company\ShorlistedCandidates.aspx" />
     <Content Include="Company\ViewApplications.aspx" />
+    <Content Include="Company\ViewCandidateReport.aspx" />
     <Content Include="Company\ViewJobApplicants.aspx" />
     <Content Include="Company\ViewUserDetails.aspx" />
     <Content Include="Global.asax" />
@@ -292,6 +293,7 @@
     <Content Include="User\About.aspx" />
     <Content Include="User\Contact.aspx" />
     <Content Include="User\Home.aspx" />
+    <Content Include="User\InterviewAccess.aspx" />
     <Content Include="User\InterviewFeedback.aspx" />
     <Content Include="User\InterviewHistory.aspx" />
     <Content Include="User\JobDetails.aspx" />
@@ -439,6 +441,13 @@
     <Compile Include="Company\ViewApplications.aspx.designer.cs">
       <DependentUpon>ViewApplications.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Company\ViewCandidateReport.aspx.cs">
+      <DependentUpon>ViewCandidateReport.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Company\ViewCandidateReport.aspx.designer.cs">
+      <DependentUpon>ViewCandidateReport.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Company\ViewJobApplicants.aspx.cs">
       <DependentUpon>ViewJobApplicants.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -481,6 +490,13 @@
     </Compile>
     <Compile Include="User\Home.aspx.designer.cs">
       <DependentUpon>Home.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="User\InterviewAccess.aspx.cs">
+      <DependentUpon>InterviewAccess.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="User\InterviewAccess.aspx.designer.cs">
+      <DependentUpon>InterviewAccess.aspx</DependentUpon>
     </Compile>
     <Compile Include="User\InterviewFeedback.aspx.cs">
       <DependentUpon>InterviewFeedback.aspx</DependentUpon>
@@ -627,6 +643,7 @@
     <Content Include="assets\scss\_variables.scss" />
     <Content Include="Admin\AdminMaster.Master" />
     <Content Include="Company\CompanyMaster.Master" />
+    <Content Include="Company\SendInterviewInvite.ashx" />
     <None Include="packages.config" />
     <Content Include="User\UserMaster.Master" />
     <Content Include="User\RetakeInterview.ashx" />

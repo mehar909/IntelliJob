@@ -44,11 +44,12 @@ namespace IntelliJob.User
                 string role = "", level = "", interviewType = "", techStack = "";
                 int questionCount = 0;
                 string status = "";
+                bool isCompanyInterview = false;
 
                 using (SqlConnection con = new SqlConnection(str))
                 {
                     con.Open();
-                    string query = "SELECT UserId, Role, Level, InterviewType, TechStack, QuestionCount, Status FROM Interviews WHERE InterviewId = @Id";
+                    string query = @"SELECT i.UserId, i.Role, i.Level, i.InterviewType, i.TechStack, i.QuestionCount, i.Status, CASE WHEN ii.InterviewId IS NOT NULL THEN 1 ELSE 0 END AS IsCompanyInterview FROM Interviews i LEFT JOIN InterviewInvitations ii ON i.InterviewId = ii.InterviewId WHERE i.InterviewId = @Id";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@Id", interviewId);
@@ -66,8 +67,17 @@ namespace IntelliJob.User
                             interviewType = reader["InterviewType"].ToString();
                             techStack = reader["TechStack"] == DBNull.Value ? "" : reader["TechStack"].ToString();
                             questionCount = Convert.ToInt32(reader["QuestionCount"]);
+                            isCompanyInterview = Convert.ToInt32(reader["IsCompanyInterview"]) == 1;
                         }
                     }
+                }
+
+                // Block retakes for company-assigned interviews
+                if (isCompanyInterview)
+                {
+                    context.Response.StatusCode = 403;
+                    context.Response.Write("{\"error\":\"Company-assigned interviews cannot be retaken...\"}");
+                    return;
                 }
 
                 // Only allow retake for cancelled or failed-feedback interviews

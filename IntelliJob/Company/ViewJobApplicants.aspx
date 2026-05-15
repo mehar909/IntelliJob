@@ -1,118 +1,144 @@
-<%@ Page Title="" Language="C#" MasterPageFile="~/Company/CompanyMaster.Master" AutoEventWireup="true" CodeBehind="ViewJobApplicants.aspx.cs" Inherits="IntelliJob.Company.ViewJobApplicants" %>
+<%@ Page Title="Job Applicants" Language="C#" MasterPageFile="~/Company/CompanyMaster.Master"
+    AutoEventWireup="true" CodeBehind="ViewJobApplicants.aspx.cs"
+    Inherits="IntelliJob.Company.ViewJobApplicants" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <meta name="google" content="notranslate" />
-    <meta http-equiv="Content-Language" content="en" />
-    <script type="text/javascript">
-        function hideMessage() {
-            var lblMsg = document.getElementById('<%= lblMsg.ClientID %>');
-            if (lblMsg && lblMsg.textContent.trim() !== '') {
-                setTimeout(function () {
-                    if (lblMsg) {
-                        lblMsg.style.display = 'none';
-                    }
-                }, 5000); // Hide after 5 seconds
-            }
-        }
-        window.onload = hideMessage;
-        // Also call after postback
-        if (window.addEventListener) {
-            window.addEventListener('load', hideMessage, false);
-        } else if (window.attachEvent) {
-            window.attachEvent('onload', hideMessage);
-        }
-    </script>
-    <style>
-        .row.mb-3.pt-sm-3 .table-hover tbody tr td {
-            padding: 8px !important;
-            vertical-align: middle !important;
-        }
-        .row.mb-3.pt-sm-3 .table-hover tbody tr {
-            height: auto !important;
-            line-height: 1.2 !important;
-        }
-    </style>
+<style>
+    .gv-wrap { overflow-x: auto; }
+    .gv-wrap table { min-width: 900px; }
+    th { background: #6c5ce7 !important; color: #fff !important; font-weight: 600; }
+    td, th { vertical-align: middle !important; }
+    .btn-invite {
+        background: linear-gradient(135deg,#6c5ce7,#a29bfe);
+        color:#fff; border:none; border-radius:6px;
+        padding:5px 12px; font-size:13px; cursor:pointer;
+    }
+    .btn-invite:hover { opacity:.9; }
+    .btn-report {
+        background:#00b894; color:#fff; border-radius:6px;
+        padding:5px 12px; font-size:13px; text-decoration:none; display:inline-block;
+    }
+    .btn-report:hover { background:#00a381; color:#fff; text-decoration:none; }
+    .status-sent   { color:#6c5ce7; font-size:12px; font-weight:600; }
+    .status-used   { color:#00b894; font-size:12px; font-weight:600; }
+    .status-none   { color:#b2bec3; font-size:12px; }
+</style>
 </asp:Content>
+
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
-    <div style="background-image: url('../Images/bg.jpg'); width: 100%; height: 720px; background-repeat: no-repeat; background-size: cover; background-attachment: fixed;">
-        <div class="container-fluid pt-4 pb-4">
-            <div class="mb-0">
-                <asp:Label ID="lblMsg" runat="server"></asp:Label>
-            </div>
-            <div class="btn-toolbar justify-content-between mb-3">
-                <div class="btn-group">
-                    <asp:Label ID="Label1" runat="server"></asp:Label>
-                </div>
-                <div class="input-group h-25">
-                    <asp:HyperLink ID="linkBack" runat="server" CssClass="btn btn-secondary"> Back </asp:HyperLink>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12 pb-3">
-                    <h3 class="text-center">Job Applicants</h3>
-                </div>
-            </div>
 
-            <div class="row mb-3 pt-sm-3">
-                <div class="col-md-12">
-                    <asp:GridView ID="GridView1" runat="server" CssClass="table table-hover table-bordered" HeaderStyle-HorizontalAlign="Center"
-                        EmptyDataText="No Applicants Found..!" AllowPaging="True" PageSize="5"
-                        OnPageIndexChanging="GridView1_PageIndexChanging" OnRowDataBound="GridView1_RowDataBound" DataKeyNames="UserId,AppliedJobId" AutoGenerateColumns="False">
-                        <Columns>
+<div class="container-fluid py-4">
 
-                            <asp:BoundField DataField="Sr.No" HeaderText="Sr.No">
-                                <ItemStyle HorizontalAlign="Center" />
-                            </asp:BoundField>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 style="color:#2d3436;font-weight:700;">Job Applicants</h4>
+        <asp:HyperLink ID="linkBack" runat="server" CssClass="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i> Back
+        </asp:HyperLink>
+    </div>
 
-                            <asp:BoundField DataField="UserName" HeaderText="User Name">
-                                <ItemStyle HorizontalAlign="Center" />
-                            </asp:BoundField>
+    <asp:Label ID="lblMsg" runat="server" Visible="false" CssClass="alert d-block mb-3" />
 
-                            <asp:BoundField DataField="Email" HeaderText="Email">
-                                <ItemStyle HorizontalAlign="Center" />
-                            </asp:BoundField>
+    <div class="card shadow-sm">
+        <div class="card-body p-0 gv-wrap">
+            <asp:GridView ID="GridView1" runat="server"
+                AutoGenerateColumns="False"
+                CssClass="table table-hover mb-0"
+                AllowPaging="True" PageSize="15"
+                DataKeyNames="AppliedJobId,UserId"
+                OnPageIndexChanging="GridView1_PageIndexChanging"
+                OnRowDataBound="GridView1_RowDataBound">
+                <Columns>
 
-                            <asp:BoundField DataField="Mobile" HeaderText="Mobile No.">
-                                <ItemStyle HorizontalAlign="Center" />
-                            </asp:BoundField>
+                    <asp:BoundField DataField="Sr.No"    HeaderText="#"       ItemStyle-Width="40px" />
+                    <asp:BoundField DataField="Username"  HeaderText="Username" />
+                    <asp:BoundField DataField="Email"     HeaderText="Email" />
+                    <asp:BoundField DataField="Mobile"    HeaderText="Mobile" />
+                    <asp:BoundField DataField="Country"   HeaderText="Country" />
 
-                            <asp:BoundField DataField="Country" HeaderText="Country">
-                                <ItemStyle HorizontalAlign="Center" />
-                            </asp:BoundField>
+                    <%-- View Profile --%>
+                    <asp:TemplateField HeaderText="Profile">
+                        <ItemTemplate>
+                            <asp:HyperLink ID="lnkViewUser" runat="server"
+                                NavigateUrl='<%# "ViewUserDetails.aspx?id=" + Eval("UserId") %>'
+                                CssClass="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-user"></i>
+                            </asp:HyperLink>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
-                            <asp:TemplateField HeaderText="View">
-                                <ItemTemplate>
-                                    <asp:HyperLink ID="lnkViewUser" runat="server" NavigateUrl='<%# "ViewUserDetails.aspx?id=" + Eval("UserId") %>'>
-                                        <asp:Image ID="Img" runat="server" ImageUrl="../assets/img/icon/view.png" Height="22px" Width="22px" />
-                                    </asp:HyperLink>
-                                </ItemTemplate>
-                                <ItemStyle HorizontalAlign="Center" Width="50px" />
-                            </asp:TemplateField>
+                    <%-- Shortlist --%>
+                    <asp:TemplateField HeaderText="Shortlist">
+                        <ItemTemplate>
+                            <asp:ImageButton ID="btnShortlist" runat="server"
+                                ImageUrl="~/Images/shortlist.png"
+                                OnClick="btnShortlist_Click"
+                                ToolTip="Shortlist Candidate"
+                                Width="28px" />
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
-                            <asp:TemplateField HeaderText="Shortlist Candidate">
-                                <ItemTemplate>
-                                    <asp:ImageButton
-                                        ID="btnShortlist"
-                                        runat="server"
-                                        ImageUrl="../assets/img/icon/tick.jpg"
-                                        Width="25px"
-                                        Height="25px"
-                                        CommandName="Shortlist"
-                                        OnClick="btnShortlist_Click"
-                                        ToolTip="Shortlist this candidate" />
-                                </ItemTemplate>
-                                <ItemStyle HorizontalAlign="Center" Width="50px" />
-                            </asp:TemplateField>
+                    <%-- Interview Invite --%>
+                    <asp:TemplateField HeaderText="Interview Invite">
+                        <ItemTemplate>
+                            <div>
+                                <%-- Send / Resend button (calls JS → AJAX → handler) --%>
+                                <asp:Button ID="btnSendInvite" runat="server"
+                                    Text="Send Invite"
+                                    CssClass="btn btn-sm btn-invite"
+                                    OnClientClick=`<%# "sendInvite(" + Eval("AppliedJobId") + "); return false;" %>` />
 
-                        </Columns>
+                                <%-- Status line --%>
+                                <div class="mt-1">
+                                    <%# GetInviteStatus(Eval("InterviewPassword"), Eval("PasswordUsed"), Eval("InterviewSentAt")) %>
+                                </div>
+                            </div>
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
-                        <HeaderStyle BackColor="#7200cf" ForeColor="White" />
-                    </asp:GridView>
-                </div>
-            </div>
+                    <%-- Interview Report --%>
+                    <asp:TemplateField HeaderText="AI Report">
+                        <ItemTemplate>
+                            <asp:HyperLink ID="lnkViewReport" runat="server"
+                                CssClass="btn-report" Visible="false">
+                                <i class="fas fa-chart-bar me-1"></i>View Report
+                            </asp:HyperLink>
+                            <asp:Literal ID="litScore" runat="server" />
+                        </ItemTemplate>
+                    </asp:TemplateField>
 
-
+                </Columns>
+                <EmptyDataTemplate>
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-users fa-2x mb-2 d-block"></i>
+                        No applicants found for this job.
+                    </div>
+                </EmptyDataTemplate>
+            </asp:GridView>
         </div>
     </div>
-</asp:Content>
 
+</div>
+
+<script>
+function sendInvite(appliedJobId) {
+    if (!confirm('Send interview invitation to this candidate?')) return;
+
+    fetch('<%= ResolveUrl("~/Company/SendInterviewInvite.ashx") %>', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'appliedJobId=' + appliedJobId
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message || 'Invitation sent!');
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(() => alert('Network error – please try again.'));
+}
+</script>
+
+</asp:Content>

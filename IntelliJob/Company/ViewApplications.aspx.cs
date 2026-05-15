@@ -57,13 +57,17 @@ namespace IntelliJob.Company
                 SELECT 
                     ROW_NUMBER() OVER (ORDER BY (SELECT 1)) AS [Sr.No],
                     aj.AppliedJobId,
-                    j.CompanyName,
                     aj.JobId,
                     j.Title,
                     js.Mobile,
                     js.Name AS UserName,
                     u.Email,
-                    js.Resume
+                    js.Resume,
+                                        (SELECT TOP 1 i.InterviewId
+                                         FROM Interviews i
+                                         WHERE i.AppliedJobId = aj.AppliedJobId
+                       AND i.Status = 'completed'
+                     ORDER BY i.CreatedAt DESC) AS InterviewId
                 FROM AppliedJobs aj
                 INNER JOIN JobSeekers js ON aj.UserId = js.ProfileId
                 INNER JOIN Users u ON aj.UserId = u.UserId

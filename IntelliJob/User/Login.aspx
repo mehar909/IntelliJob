@@ -32,9 +32,9 @@
                                 <div class="form-group">
                                     <label>Login Type</label>
                                     <asp:DropDownList ID="ddlLoginType" runat="server" CssClass="form-control w-100">
-                                        <asp:ListItem Value="0">Select Login Type</asp:ListItem>
+                                        <asp:ListItem Value="0" >Select Login Type</asp:ListItem>
                                         <asp:ListItem>Admin</asp:ListItem>
-                                        <asp:ListItem>User</asp:ListItem>
+                                        <asp:ListItem Selected="True">User</asp:ListItem>
                                     </asp:DropDownList>
                                     <asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" ErrorMessage="UserType is required" ForeColor="Red" Display="Dynamic" SetFocusOnError="true" Font-Size="Small" InitialValue="0" ControlToValidate="ddlLoginType"></asp:RequiredFieldValidator>
                                 </div>

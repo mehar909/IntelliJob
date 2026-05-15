@@ -65,8 +65,18 @@ namespace IntelliJob.User
                     InsertDummyQuestions(interviewId, role, interviewType, questionCount);
                 }
 
-                // Redirect to the interview page
-                Response.Redirect("TakeInterview.aspx?id=" + interviewId);
+                // Stay on this page, reload list and show success message
+                LoadRecentInterviews();
+                lblMsg.Visible = true;
+                lblMsg.Text = "Interview created successfully! Click <strong>Start</strong> below to begin.";
+                lblMsg.CssClass = "alert alert-success";
+
+                // Clear form fields
+                txtRole.Text = "";
+                ddlLevel.SelectedIndex = 0;
+                ddlType.SelectedIndex = 0;
+                ddlQuestionCount.SelectedIndex = 1;
+                hdnTechStack.Value = "";
             }
             catch (Exception ex)
             {
@@ -187,11 +197,45 @@ namespace IntelliJob.User
             int userId = Convert.ToInt32(Session["userId"]);
             using (SqlConnection con = new SqlConnection(str))
             {
-                string query = @"SELECT TOP 5 mi.InterviewId, mi.Role, mi.Level, mi.InterviewType, mi.Status, mi.CreatedAt,
-                                 ISNULL(mf.TotalScore, -1) as TotalScore
+                // For user-created interviews, we only show the LATEST interview per
+                // (Role, Level, InterviewType) group so that retakes replace the old
+                // cancelled row instead of adding a new one.
+                // Company interviews (those with an InterviewInvitations row) are always
+                // shown individually regardless of duplicates.
+                string query = @"SELECT TOP 5
+                                 mi.InterviewId, mi.Role, mi.Level, mi.InterviewType, mi.Status, mi.CreatedAt,
+                                 ISNULL(mf.TotalScore, -1) AS TotalScore,
+                                 CASE WHEN ii.InterviewId IS NOT NULL THEN 1 ELSE 0 END AS IsCompanyInterview,
+                                 ISNULL(ii.IsPasswordUsed, 0) AS IsPasswordUsed,
+                                 ii.AccessToken,
+                                 CASE
+                                     WHEN ii.InterviewId IS NOT NULL
+                                          AND ISNULL(ii.IsPasswordUsed,0) = 1
+                                          AND mi.Status NOT IN ('completed','cancelled')
+                                     THEN 'access-revoked'
+                                     ELSE mi.Status
+                                 END AS DisplayStatus
                                  FROM Interviews mi
                                  LEFT JOIN InterviewFeedback mf ON mi.InterviewId = mf.InterviewId
+                                 LEFT JOIN InterviewInvitations ii ON mi.InterviewId = ii.InterviewId
                                  WHERE mi.UserId = @UserId
+                                   AND (
+                                         -- Always include company interviews
+                                         ii.InterviewId IS NOT NULL
+                                         OR
+                                         -- For user interviews: only the latest per Role+Level+Type group
+                                         mi.InterviewId = (
+                                             SELECT TOP 1 sub.InterviewId
+                                             FROM Interviews sub
+                                             LEFT JOIN InterviewInvitations subii ON sub.InterviewId = subii.InterviewId
+                                             WHERE sub.UserId = mi.UserId
+                                               AND sub.Role = mi.Role
+                                               AND sub.Level = mi.Level
+                                               AND sub.InterviewType = mi.InterviewType
+                                               AND subii.InterviewId IS NULL
+                                             ORDER BY sub.CreatedAt DESC
+                                         )
+                                       )
                                  ORDER BY mi.CreatedAt DESC";
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
@@ -263,32 +307,56 @@ namespace IntelliJob.User
             return "<span class='score-badge " + css + "'>" + s + "/100</span>";
         }
 
-        public string GetInterviewLink(object interviewId, object status)
+        public string GetInterviewLink(object interviewId, object status, object isCompanyInterview, object isPasswordUsed, object accessToken)
         {
             string s = status.ToString().ToLower();
             if (s == "completed")
                 return "InterviewFeedback.aspx?id=" + interviewId;
-            else if (s == "cancelled")
+            if (s == "cancelled" || s == "access-revoked")
                 return "javascript:void(0)";
-            else
-                return "TakeInterview.aspx?id=" + interviewId;
+
+            bool isCompany = Convert.ToInt32(isCompanyInterview) == 1;
+            bool pwdUsed = Convert.ToBoolean(isPasswordUsed);
+
+            if (isCompany && pwdUsed)
+                return "javascript:void(0)";
+
+            if (isCompany && !pwdUsed)
+            {
+                string token = accessToken?.ToString() ?? "";
+                return "InterviewAccess.aspx?token=" + token;
+            }
+
+            return "TakeInterview.aspx?id=" + interviewId;
         }
 
-        public string GetActionText(object status)
+        public string GetActionText(object status, object isCompanyInterview, object isPasswordUsed)
         {
             string s = status.ToString().ToLower();
             if (s == "completed") return "View Feedback";
-            if (s == "in-progress") return "Continue";
             if (s == "cancelled") return "Cancelled";
+            if (s == "access-revoked") return "Access Revoked";
+
+            bool isCompany = Convert.ToInt32(isCompanyInterview) == 1;
+            bool pwdUsed = Convert.ToBoolean(isPasswordUsed);
+
+            if (isCompany && pwdUsed) return "Access Revoked";
+            if (s == "in-progress") return "Continue";
             return "Start";
         }
 
-        public string GetRetakeButton(object interviewId, object status)
+        public string GetRetakeButton(object interviewId, object status, object isCompanyInterview)
         {
             string s = status.ToString().ToLower();
+            bool isCompany = Convert.ToInt32(isCompanyInterview) == 1;
+
+            // Company interviews cannot be retaken — the one-time password is consumed
+            // and the company controls re-invitation. Also hide for access-revoked.
+            if (isCompany) return "";
+
             if (s == "cancelled")
             {
-                return "<a href='javascript:void(0)' onclick='retakeInterview(" + interviewId + ")' class='btn btn-sm' style='border:1px solid #00b894; color:#00b894; border-radius:6px; margin-left:5px;' title='Retake with same questions'><i class='fas fa-redo'></i> Retake</a>";
+                return "<a href='javascript:void(0)' onclick='retakeInterview(" + interviewId + ")' class='btn-card-outline' title='Retake with same settings'><i class='fas fa-redo'></i> Retake</a>";
             }
             return "";
         }

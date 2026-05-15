@@ -292,131 +292,6 @@
             margin-top: 12px;
         }
 
-        /* Questions panel (for text-based Phase 1) */
-        .questions-panel {
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            border: 1px solid #e9ecef;
-            margin-top: 30px;
-            overflow: hidden;
-        }
-
-        .questions-panel .panel-header {
-            background: linear-gradient(135deg, #2d3436, #636e72);
-            color: #fff;
-            padding: 15px 25px;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .question-item {
-            padding: 18px 25px;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-        }
-
-        .question-item:last-child {
-            border-bottom: none;
-        }
-
-        .question-number {
-            background: #FF4357;
-            color: #fff;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-
-        .question-item.answered .question-number {
-            background: #00b894;
-        }
-
-        .question-text {
-            font-size: 15px;
-            color: #2d3436;
-            flex: 1;
-        }
-
-        .answer-area {
-            margin-top: 10px;
-        }
-
-        .answer-area textarea {
-            width: 100%;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 10px 15px;
-            font-size: 14px;
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .answer-area textarea:focus {
-            border-color: #FF4357;
-            outline: none;
-            box-shadow: 0 0 0 0.2rem rgba(255, 67, 87, 0.15);
-        }
-
-        .btn-submit-answers {
-            background: linear-gradient(135deg, #FF4357 0%, #ff6b7a 100%);
-            color: #fff !important;
-            border: none;
-            border-radius: 8px;
-            padding: 14px 40px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin: 25px auto;
-            display: block;
-            box-shadow: 0 4px 12px rgba(255, 67, 87, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .btn-submit-answers:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(255, 67, 87, 0.4);
-        }
-
-        /* Mode toggle */
-        .mode-toggle {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .mode-toggle .mode-btn {
-            padding: 10px 28px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            border: 2px solid #dee2e6;
-            background: #fff;
-            color: #636e72;
-            transition: all 0.3s ease;
-        }
-
-        .mode-toggle .mode-btn.active {
-            border-color: #FF4357;
-            background: #FF4357;
-            color: #fff;
-        }
-
-        .mode-toggle .mode-btn:hover:not(.active) {
-            border-color: #FF4357;
-            color: #FF4357;
-        }
-
         /* Voice transcript messages */
         .voice-messages {
             max-height: 350px;
@@ -594,7 +469,8 @@
             margin-top: 20px;
         }
 
-        .confirm-btns .btn-back {
+        .confirm-btns .btn-back,
+        .btn-back {
             padding: 10px 25px;
             border: 2px solid #dee2e6;
             border-radius: 8px;
@@ -605,9 +481,11 @@
             transition: all 0.3s ease;
         }
 
-        .confirm-btns .btn-back:hover { border-color: #FF4357; color: #FF4357; }
+        .confirm-btns .btn-back:hover,
+        .btn-back:hover { border-color: #FF4357; color: #FF4357; }
 
-        .confirm-btns .btn-confirm {
+        .confirm-btns .btn-confirm,
+        .btn-confirm {
             padding: 10px 25px;
             border: none;
             border-radius: 8px;
@@ -619,7 +497,8 @@
             transition: all 0.3s ease;
         }
 
-        .confirm-btns .btn-confirm:hover { transform: translateY(-2px); }
+        .confirm-btns .btn-confirm:hover,
+        .btn-confirm:hover { transform: translateY(-2px); }
 
         /* Voice Submit Area */
         .voice-submit-area {
@@ -677,18 +556,8 @@
                     </div>
                 </div>
 
-                <!-- Mode Toggle -->
-                <div class="mode-toggle">
-                    <button type="button" class="mode-btn active" id="btnTextMode" onclick="switchMode('text')">
-                        <i class="fas fa-keyboard"></i> Text Mode
-                    </button>
-                    <button type="button" class="mode-btn" id="btnVoiceMode" onclick="switchMode('voice')">
-                        <i class="fas fa-microphone"></i> Voice Mode
-                    </button>
-                </div>
-
-                <!-- Voice Interview Section (hidden by default) -->
-                <div id="voiceSection" style="display:none;">
+                <!-- Voice Interview Section -->
+                <div id="voiceSection" style="display:block;">
                     <!-- Live Transcript -->
                     <div class="transcript-box" id="transcriptBox">
                         <div class="voice-messages" id="voiceMessages">
@@ -713,53 +582,18 @@
                 <div class="voice-submit-area" id="voiceSubmitArea">
                     <p style="color: #636e72; margin-bottom: 15px;"><i class="fas fa-check-circle" style="color: #00b894;"></i> Voice interview complete. Review the transcript above, then submit for evaluation.</p>
                     <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-                        <button type="button" class="btn-submit-answers" onclick="confirmVoiceSubmit()">
-                            <i class="fas fa-paper-plane"></i> Submit for Evaluation
-                        </button>
-                        <button type="button" onclick="cancelInterview()" style="background:#fff; border:2px solid #e74c3c; color:#e74c3c; border-radius:8px; padding:14px 30px; font-size:16px; font-weight:600; cursor:pointer; transition:all 0.3s ease;">
+                        <button type="button" class="btn-back" style="font-size:14px;" onclick="cancelInterview()">
                             <i class="fas fa-times"></i> Cancel Interview
                         </button>
+                        <button type="button" class="btn-confirm" style="font-size:14px;" onclick="confirmVoiceSubmit()">
+                            <i class="fas fa-paper-plane"></i> Submit for Evaluation
+                        </button>
                     </div>
-                </div>
-
-                <!-- Text Interview Section (visible by default) -->
-                <div class="questions-panel">
-                    <div class="panel-header">
-                        <i class="fas fa-question-circle"></i> Interview Questions
-                        <span style="float: right; font-weight: 400; font-size: 14px;">
-                            Answer each question thoughtfully
-                        </span>
-                    </div>
-
-                    <asp:Repeater ID="rptQuestions" runat="server">
-                        <ItemTemplate>
-                            <div class="question-item" id='q_<%# Eval("QuestionId") %>'>
-                                <div class="question-number"><%# Eval("SortOrder") %></div>
-                                <div style="flex: 1;">
-                                    <div class="question-text"><%# Eval("QuestionText") %></div>
-                                    <div class="answer-area">
-                                        <textarea name='answer_<%# Eval("QuestionId") %>' 
-                                            placeholder="Type your answer here..." 
-                                            data-questionid='<%# Eval("QuestionId") %>'></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </ItemTemplate>
-                    </asp:Repeater>
                 </div>
 
                 <asp:HiddenField ID="hdnInterviewId" runat="server" />
-                <asp:HiddenField ID="hdnAnswersJson" runat="server" />
                 <asp:HiddenField ID="hdnQuestionsJson" runat="server" />
-
-                <div id="textSubmitArea" style="text-align: center; margin-top: 25px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-                    <asp:Button ID="btnSubmitAnswers" runat="server" Text="Submit Answers & Get Feedback" 
-                        CssClass="btn-submit-answers" OnClick="btnSubmitAnswers_Click" 
-                        OnClientClick="return collectAnswers();" />
-                    <button type="button" onclick="cancelInterview()" style="background:#fff; border:2px solid #e74c3c; color:#e74c3c; border-radius:8px; padding:14px 30px; font-size:16px; font-weight:600; cursor:pointer; transition:all 0.3s ease;">
-                        <i class="fas fa-times"></i> Cancel Interview
-                    </button>
-                </div>
+                <asp:HiddenField ID="hdnVapiToken" runat="server" />
             </div>
         </div>
 
@@ -773,7 +607,7 @@
                     <button type="button" class="btn-back" onclick="closeConfirmation()">
                         <i class="fas fa-arrow-left"></i> Go Back
                     </button>
-                    <button type="button" class="btn-confirm" id="btnFinalSubmit" onclick="finalSubmit()">
+                    <button type="button" class="btn-confirm" id="btnFinalSubmit" onclick="finalVoiceSubmit()">
                         <i class="fas fa-check"></i> Confirm & Submit
                     </button>
                 </div>
@@ -814,7 +648,8 @@
 
     <script type="text/javascript">
         // === Config ===
-        var VAPI_TOKEN = '<%= System.Configuration.ConfigurationManager.AppSettings["VapiWebToken"] %>';
+        // Token is written server-side into hdnVapiToken — never hard-coded in markup
+        var VAPI_TOKEN = document.getElementById('<%= hdnVapiToken.ClientID %>').value;
         var INTERVIEW_ID = '<%= hdnInterviewId.ClientID %>';
         var interviewQuestions = [];
         try {
@@ -825,64 +660,6 @@
         // === Debug Logging (console only) ===
         function feedbackLog(msg) {
             console.log('[TakeInterview] ' + msg);
-        }
-
-        // === Mode Switching ===
-        function switchMode(mode) {
-            var voiceSection = document.getElementById('voiceSection');
-            var textSection = document.querySelector('.questions-panel');
-            var textSubmit = document.getElementById('textSubmitArea');
-            var btnText = document.getElementById('btnTextMode');
-            var btnVoice = document.getElementById('btnVoiceMode');
-
-            if (mode === 'voice') {
-                if (!VAPI_TOKEN || VAPI_TOKEN === 'YOUR_VAPI_WEB_TOKEN_HERE') {
-                    alert('Voice mode requires a Vapi Web Token. Add it to Web.config under VapiWebToken.');
-                    return;
-                }
-                voiceSection.style.display = 'block';
-                textSection.style.display = 'none';
-                textSubmit.style.display = 'none';
-                btnVoice.classList.add('active');
-                btnText.classList.remove('active');
-                feedbackLog('Switched to VOICE mode');
-            } else {
-                voiceSection.style.display = 'none';
-                textSection.style.display = 'block';
-                textSubmit.style.display = 'block';
-                btnText.classList.add('active');
-                btnVoice.classList.remove('active');
-                feedbackLog('Switched to TEXT mode');
-            }
-        }
-
-        // === Text Mode: Collect answers ===
-        function collectAnswers() {
-            feedbackLog('Collecting answers from textareas...');
-            var answers = {};
-            var textareas = document.querySelectorAll('.answer-area textarea');
-            var hasAnswer = false;
-            var answeredCount = 0;
-
-            for (var i = 0; i < textareas.length; i++) {
-                var qid = textareas[i].getAttribute('data-questionid');
-                var val = textareas[i].value.trim();
-                if (val) {
-                    answers[qid] = val;
-                    hasAnswer = true;
-                    answeredCount++;
-                }
-            }
-
-            if (!hasAnswer) {
-                alert('Please answer at least one question before submitting.');
-                return false;
-            }
-
-            // Store answers and show confirmation modal
-            window._pendingAnswers = answers;
-            showTextConfirmation(answers);
-            return false;
         }
 
         // === Voice Mode: Vapi Integration ===
@@ -997,7 +774,7 @@
             s.parentNode.insertBefore(g, s);
             g.onload = function () {
                 feedbackLog('Vapi SDK script loaded');
-                if (!VAPI_TOKEN || VAPI_TOKEN === 'YOUR_VAPI_WEB_TOKEN_HERE') return;
+                if (!VAPI_TOKEN || VAPI_TOKEN === 'YOUR_VAPI_PUBLIC_KEY') return;
                 try {
                     vapiInstance = window.vapiSDK.run({
                         apiKey: VAPI_TOKEN,
@@ -1025,8 +802,8 @@
         function startVoiceCall() {
             if (callActive) return;
 
-            if (!VAPI_TOKEN || VAPI_TOKEN === 'YOUR_VAPI_WEB_TOKEN_HERE') {
-                alert('Voice mode requires a Vapi Web Token. Configure it in Web.config.');
+            if (!VAPI_TOKEN || VAPI_TOKEN === 'YOUR_VAPI_PUBLIC_KEY') {
+                alert('Voice mode requires a Vapi Web Token. Configure it in AppSettings.config.');
                 return;
             }
 
@@ -1143,7 +920,7 @@
                     document.getElementById('voiceSubmitArea').style.display = 'block';
                 } else {
                     feedbackLog('WARNING: No transcript messages captured');
-                    document.getElementById('callStatusText').textContent = 'No transcript captured. Try again or use text mode.';
+                    document.getElementById('callStatusText').textContent = 'No transcript captured. Please try again.';
                 }
             });
 
@@ -1338,7 +1115,7 @@
                     } else {
                         feedbackLog('ERROR saving transcript: ' + xhr.responseText);
                         overlay.style.display = 'none';
-                        alert('Failed to save transcript. Error: ' + xhr.responseText + '\nYou can still use text mode.');
+                        alert('Failed to save transcript. Error: ' + xhr.responseText);
                     }
                 }
             };
@@ -1349,49 +1126,8 @@
         }
 
         // === Confirmation Modal Functions ===
-        function showTextConfirmation(answers) {
-            var summary = document.getElementById('confirmSummary');
-            var html = '';
-            var questions = document.querySelectorAll('.question-item');
-
-            for (var i = 0; i < questions.length; i++) {
-                var qText = questions[i].querySelector('.question-text').textContent;
-                var textarea = questions[i].querySelector('textarea');
-                var qid = textarea.getAttribute('data-questionid');
-                var answer = answers[qid] || '';
-
-                html += '<div class="confirm-item">';
-                html += '<div class="q-label">Question ' + (i + 1) + '</div>';
-                html += '<div class="q-text">' + escapeHtml(qText) + '</div>';
-                if (answer) {
-                    html += '<div class="a-text"><i class="fas fa-check" style="color:#00b894;margin-right:5px;"></i>' + escapeHtml(answer) + '</div>';
-                } else {
-                    html += '<div class="a-text" style="color:#b2bec3;"><i class="fas fa-minus" style="margin-right:5px;"></i>Not answered</div>';
-                }
-                html += '</div>';
-            }
-
-            summary.innerHTML = html;
-            document.getElementById('btnFinalSubmit').setAttribute('onclick', 'finalSubmit()');
-            document.getElementById('confirmOverlay').style.display = 'flex';
-        }
-
         function closeConfirmation() {
             document.getElementById('confirmOverlay').style.display = 'none';
-        }
-
-        function finalSubmit() {
-            if (window._pendingAnswers) {
-                var jsonStr = JSON.stringify(window._pendingAnswers);
-                document.getElementById('<%= hdnAnswersJson.ClientID %>').value = jsonStr;
-                feedbackLog('Submitting to server...');
-
-                var overlay = document.getElementById('feedbackOverlay');
-                if (overlay) overlay.style.display = 'flex';
-                document.getElementById('confirmOverlay').style.display = 'none';
-
-                __doPostBack('<%= btnSubmitAnswers.UniqueID %>', '');
-            }
         }
 
         function confirmVoiceSubmit() {

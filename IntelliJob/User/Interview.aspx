@@ -42,6 +42,14 @@
             transition: border-color 0.3s ease;
         }
 
+        /* Make dropdown menus larger and more prominent */
+        .interview-setup-card select.form-control {
+            padding: 14px 18px;
+            font-size: 16px;
+            font-weight: 500;
+            min-height: 50px;
+        }
+
         .interview-setup-card .form-control:focus {
             border-color: #FF4357;
             box-shadow: 0 0 0 0.2rem rgba(255, 67, 87, 0.15);
@@ -54,25 +62,7 @@
             font-size: 14px;
         }
 
-        .btn-start-interview {
-            background: linear-gradient(135deg, #FF4357 0%, #ff6b7a 100%);
-            color: #fff !important;
-            border: none;
-            border-radius: 8px;
-            padding: 14px 40px;
-            font-size: 16px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(255, 67, 87, 0.3);
-            cursor: pointer;
-        }
-
-        .btn-start-interview:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(255, 67, 87, 0.4);
-        }
+        .btn-start-interview-placeholder { display: none; }
 
         .techstack-tags {
             display: flex;
@@ -105,15 +95,27 @@
             background: #ffffff;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            padding: 25px 30px;
+            padding: 20px 25px;
             border: 1px solid #e9ecef;
             margin-bottom: 15px;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            overflow: visible;
+            min-width: 900px;
         }
 
         .history-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .history-card .row {
+            align-items: center;
+            flex-wrap: nowrap !important;
+            margin: 0 -10px;
+        }
+
+        .history-card .row > div {
+            padding: 0 10px;
         }
 
         .history-card .role-title {
@@ -152,7 +154,119 @@
         .status-completed { background: #d4edda; color: #155724; }
         .status-in-progress { background: #cce5ff; color: #004085; }
         .status-cancelled { background: #f8d7da; color: #721c24; }
+        .status-access-revoked { background: #f8d7da; color: #721c24; opacity: 0.8; }
 
+        /* Unified card buttons - same size, same style */
+        .btn-card-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 10px 22px;
+            min-width: 140px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 6px;
+            border: 2px solid #FF4357;
+            background-color: #FF4357;
+            color: #fff !important;
+            white-space: nowrap;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            line-height: 1.4;
+        }
+        .btn-card-primary:hover {
+            background-color: #e03248;
+            border-color: #e03248;
+            color: #fff !important;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+        .btn-card-primary.disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        /* Retake button — outlined, same red theme */
+        .btn-card-outline {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 10px 22px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 6px;
+            border: 2px solid #FF4357;
+            background-color: transparent;
+            color: #FF4357 !important;
+            white-space: nowrap;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            line-height: 1.4;
+        }
+        .btn-card-outline:hover {
+            background-color: #FF4357;
+            color: #fff !important;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+        /* View Past Interviews header button */
+        .btn-header-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #fb246a;
+            border: 2px solid #fb246a;
+            color: #ffffff !important;
+            border-radius: 8px;
+            padding: 12px 28px;
+            font-weight: 600;
+            font-size: 15px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-header-action:hover {
+            background-color: #da2461;
+            border-color: #da2461;
+            color: #fff !important;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+        /* Generate Interview button */
+        .btn-start-interview {
+            background: #fb246a !important;
+            background-image: none !important;
+            color: #fff !important;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(251, 36, 106, 0.3);
+            cursor: pointer;
+        }
+        .btn-start-interview:hover {
+            background: #da2461 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(251, 36, 106, 0.4);
+        }
+
+        /* Form dropdowns — match text input height */
+        .interview-setup-card select.form-control {
+            height: 50px;
+            padding: 12px 15px;
+            font-size: 15px;
+            appearance: auto;
+        }
         .page-header-section {
             padding: 50px 0 30px;
         }
@@ -167,6 +281,11 @@
             color: #636e72;
             font-size: 16px;
         }
+
+        .interview-setup-card .form-group label {
+            display: block;
+            margin-bottom: 6px;
+        }
     </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -180,7 +299,7 @@
                         <p>Practice your interview skills with our AI-powered interviewer. Get instant feedback and improve your performance.</p>
                     </div>
                     <div class="col-lg-4 text-right pt-3">
-                        <a href="InterviewHistory.aspx" class="btn" style="border: 2px solid #FF4357; color: #FFFFFF; border-radius: 8px; padding: 10px 25px; font-weight: 600;">
+                        <a href="InterviewHistory.aspx" class="btn-header-action">
                             <i class="fas fa-history"></i> View Past Interviews
                         </a>
                     </div>
@@ -204,7 +323,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
-                                        <label>Job Role / Position</label>
+                                        <label for="<%= txtRole.ClientID %>">Job Role / Position</label>
                                         <asp:TextBox ID="txtRole" runat="server" CssClass="form-control" placeholder="e.g., Software Engineer"></asp:TextBox>
                                         <asp:RequiredFieldValidator ID="rfvRole" runat="server" ControlToValidate="txtRole"
                                             ErrorMessage="Role is required" CssClass="text-danger" Display="Dynamic" ValidationGroup="interview"></asp:RequiredFieldValidator>
@@ -212,8 +331,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
-                                        <label>Experience Level</label>
-                                        <asp:DropDownList ID="ddlLevel" runat="server" CssClass="form-control">
+                                        <label for="<%= ddlLevel.ClientID %>">Experience Level</label>
+                                        <asp:DropDownList ID="ddlLevel" runat="server" CssClass="form-control" style="width:100%;">
                                             <asp:ListItem Text="-- Select Level --" Value="" />
                                             <asp:ListItem Text="Junior (0-2 years)" Value="Junior" />
                                             <asp:ListItem Text="Mid-Level (2-5 years)" Value="Mid" />
@@ -228,8 +347,8 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
-                                        <label>Interview Type</label>
-                                        <asp:DropDownList ID="ddlType" runat="server" CssClass="form-control">
+                                        <label for="<%= ddlType.ClientID %>">Interview Type</label>
+                                        <asp:DropDownList ID="ddlType" runat="server" CssClass="form-control" style="width:100%;">
                                             <asp:ListItem Text="-- Select Type --" Value="" />
                                             <asp:ListItem Text="Technical" Value="Technical" />
                                             <asp:ListItem Text="Behavioral" Value="Behavioral" />
@@ -241,8 +360,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
-                                        <label>Number of Questions</label>
-                                        <asp:DropDownList ID="ddlQuestionCount" runat="server" CssClass="form-control">
+                                        <label for="<%= ddlQuestionCount.ClientID %>">Number of Questions</label>
+                                        <asp:DropDownList ID="ddlQuestionCount" runat="server" CssClass="form-control" style="width:100%;">
                                             <asp:ListItem Text="3 Questions" Value="3" />
                                             <asp:ListItem Text="5 Questions" Value="5" Selected="True" />
                                             <asp:ListItem Text="8 Questions" Value="8" />
@@ -261,7 +380,7 @@
                                 <div id="techTagContainer" class="techstack-tags"></div>
                             </div>
 
-                            <div style="margin-top: 35px; text-align: center;">
+                            <div style="margin-top: 35px; display: flex; justify-content: center;">
                                 <asp:Button ID="btnStartInterview" runat="server" Text="Generate Interview" 
                                     CssClass="btn-start-interview" OnClick="btnStartInterview_Click" ValidationGroup="interview" />
                             </div>
@@ -279,8 +398,8 @@
                         <asp:Repeater ID="rptRecentInterviews" runat="server">
                             <ItemTemplate>
                                 <div class="history-card">
-                                    <div class="row align-items-center">
-                                        <div class="col-md-5">
+                                    <div class="row align-items-center" style="flex-wrap: nowrap;">
+                                        <div class="col-md-4">
                                             <div class="role-title"><%# Eval("Role") %> Interview</div>
                                             <div class="meta-info">
                                                 <i class="fas fa-layer-group"></i> <%# Eval("Level") %> &middot;
@@ -288,20 +407,20 @@
                                                 <%# GetTimeAgo(Eval("CreatedAt")) %>
                                             </div>
                                         </div>
-                                        <div class="col-md-3 text-center">
-                                            <span class='status-badge status-<%# Eval("Status").ToString().ToLower().Replace(" ", "-") %>'>
-                                                <%# Eval("Status") %>
+                                        <div class="col-md-2 text-center">
+                                            <span class='status-badge status-<%# Eval("DisplayStatus").ToString().ToLower().Replace(" ", "-") %>'>
+                                                <%# Eval("DisplayStatus").ToString().ToLower() == "access-revoked" ? "Access Revoked" : Eval("Status").ToString() %>
                                             </span>
                                         </div>
                                         <div class="col-md-2 text-center">
                                             <%# GetScoreBadge(Eval("TotalScore")) %>
                                         </div>
-                                        <div class="col-md-2 text-right">
-                                            <a href='<%# GetInterviewLink(Eval("InterviewId"), Eval("Status")) %>' 
-                                               class="btn btn-sm" style="border: 1px solid #FF4357; color: #FFFFFF; border-radius: 6px;">
-                                                <%# GetActionText(Eval("Status")) %>
+                                        <div class="col-md-4" style="display:flex; flex-direction:column; align-items:flex-end; justify-content:center; gap:6px; padding-right:15px;">
+                                            <a href='<%# GetInterviewLink(Eval("InterviewId"), Eval("Status"), Eval("IsCompanyInterview"), Eval("IsPasswordUsed"), Eval("AccessToken")) %>'
+                                               class='btn-card-primary <%# (Eval("DisplayStatus").ToString().ToLower() == "access-revoked" || Eval("Status").ToString().ToLower() == "cancelled") ? "disabled" : "" %>'>
+                                                <%# GetActionText(Eval("Status"), Eval("IsCompanyInterview"), Eval("IsPasswordUsed")) %>
                                             </a>
-                                            <%# GetRetakeButton(Eval("InterviewId"), Eval("Status")) %>
+                                            <%# GetRetakeButton(Eval("InterviewId"), Eval("Status"), Eval("IsCompanyInterview")) %>
                                         </div>
                                     </div>
                                 </div>
@@ -320,37 +439,28 @@
             <div style="width:60px;height:60px;border:5px solid #f3f3f3;border-top:5px solid #FF4357;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px;"></div>
             <h4 style="color:#2d3436;font-weight:700;">Generating Your Interview...</h4>
             <p style="color:#636e72;">AI is preparing personalized questions. This may take a few seconds.</p>
-            <div id="debugLog" style="margin-top:15px;font-size:12px;color:#888;"></div>
+
         </div>
     </div>
     <style>@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}</style>
 
     <script type="text/javascript">
-        // Debug logging helper
-        function debugLog(msg) {
-            console.log('[Interview] ' + msg);
-            var logDiv = document.getElementById('debugLog');
-            if (logDiv) logDiv.innerHTML += '<div>' + msg + '</div>';
-        }
+        // Hide loading overlay when page is fully loaded (after postback)
+        window.addEventListener('load', function () {
+            var overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.style.display = 'none';
+        });
 
         // Show loading overlay on form submit
         var form = document.querySelector('form');
         if (form) {
             form.addEventListener('submit', function (e) {
-                debugLog('Form submit triggered at ' + new Date().toISOString());
-                // Check if validation passed
                 if (typeof Page_ClientValidate === 'function') {
                     var valid = Page_ClientValidate('interview');
-                    debugLog('Client validation result: ' + valid);
-                    if (!valid) {
-                        debugLog('Validation failed - form will not submit');
-                        return;
-                    }
+                    if (!valid) return;
                 }
-                debugLog('Showing loading overlay...');
                 var overlay = document.getElementById('loadingOverlay');
                 if (overlay) overlay.style.display = 'flex';
-                debugLog('PostBack starting - waiting for server response...');
             });
         }
 
@@ -400,7 +510,23 @@
             }
         }
 
+        // Auto-dismiss success/info banner after 4 seconds
+        (function () {
+            var msg = document.getElementById('<%= lblMsg.ClientID %>');
+            if (msg && msg.offsetParent !== null && msg.innerHTML.trim() !== '') {
+                setTimeout(function () {
+                    msg.style.transition = 'opacity 0.5s ease';
+                    msg.style.opacity = '0';
+                    setTimeout(function () { msg.style.display = 'none'; }, 500);
+                }, 4000);
+            }
+        })();
+
         function retakeInterview(interviewId) {
+            if (!confirm('Retake this interview with the same settings?')) return;
+            var btn = event.currentTarget;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+            btn.style.pointerEvents = 'none';
             var xhr = new XMLHttpRequest();
             xhr.open('POST', 'RetakeInterview.ashx', true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -410,7 +536,7 @@
                         try {
                             var resp = JSON.parse(xhr.responseText);
                             if (resp.success && resp.newInterviewId) {
-                                window.location.href = 'TakeInterview.aspx?id=' + resp.newInterviewId;
+                                window.location.href = 'Interview.aspx';
                                 return;
                             }
                         } catch (e) { }
@@ -418,6 +544,8 @@
                     } else {
                         alert('Failed to retake: ' + xhr.responseText);
                     }
+                    btn.innerHTML = '<i class="fas fa-redo"></i> Retake';
+                    btn.style.pointerEvents = '';
                 }
             };
             xhr.send('InterviewId=' + encodeURIComponent(interviewId));
