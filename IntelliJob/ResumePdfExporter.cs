@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -9,272 +10,515 @@ namespace IntelliJob
 {
     public static class ResumePdfExporter
     {
-        private const double PageWidth = 595.0;
-        private const double PageHeight = 842.0;
-        private const double LeftMargin = 42.0;
-        private const double RightMargin = 42.0;
-        private const double TopMargin = 48.0;
-        private const double BottomMargin = 48.0;
+        private const double PageWidth   = 595.0;
+        private const double PageHeight  = 842.0;
+        private const double LeftMargin  = 72.0;   // 1 inch
+        private const double RightMargin = 72.0;
+        private const double TopMargin   = 72.0;
+        private const double BottomMargin = 54.0;
 
-        public static byte[] Build(ResumeEnhancementReportRecord report)
+        /// <summary>
+        /// Builds a one-page professional resume PDF matching the MY_RESUME template.
+        /// Times-Roman / Times-Bold, centered header with real PNG icons, clickable links.
+        /// </summary>
+        public static byte[] BuildResume(ResumeProfileDocument doc, string iconsFolder)
         {
-            if (report == null)
-                throw new ArgumentNullException("report");
+            if (doc == null) throw new ArgumentNullException("doc");
+            iconsFolder = iconsFolder ?? string.Empty;
 
-            var result = report.Result ?? new ResumeEnhancementResult();
-            var lines = new List<PdfLine>();
+            const double CW   = PageWidth - LeftMargin - RightMargin;
+            const int    NS   = 18;    // name font size
+            const int    BS   = 10;    // body font size
+            const int    HS   = 12;    // heading font size
+            const double LH   = 13.5; // body line height (pts)
+            const double ICON = 8.5;   // icon size (0.3 cm ≈ 8.5 pt)
+            const double IGAP = 3.0;   // gap after icon
 
-            AddHeading(lines, "Enhanced Resume Report", 20, true, 0, 14);
-            AddText(lines, string.Format(CultureInfo.InvariantCulture, "{0} at {1}", SafeText(report.JobTitle, "Untitled Role"), SafeText(report.CompanyName, "Unknown Company")), 13, true, 0, 12);
-            AddText(lines, string.Format(CultureInfo.InvariantCulture, "Generated: {0}", ToLocalString(report.GeneratedAt)), 10, false, 0, 5);
-            AddText(lines, string.Format(CultureInfo.InvariantCulture, "Resume source: {0}", SafeText(report.ResumeSource, "profile")), 10, false, 0, 4);
-            AddText(lines, string.Format(CultureInfo.InvariantCulture, "Scores: Overall {0}% | ATS {1}% | Semantic {2}% | Keywords {3}%", result.OverallScore, result.AtsScore, result.SemanticScore, result.KeywordScore), 10, false, 0, 12);
+            // ── Decode PNG icons → raw RGB + Alpha via System.Drawing ──
+            var imgRgb   = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
+            var imgAlpha = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
+            var imgDims  = new Dictionary<string, int[]>(StringComparer.OrdinalIgnoreCase);
 
-            AddSection(lines, "Resume Summary");
-            AddParagraph(lines, result.ResumeSummary, 11);
-
-            AddSection(lines, "Strengths");
-            AddBulletList(lines, result.Strengths, 11);
-
-            AddSection(lines, "Gaps To Improve");
-            AddBulletList(lines, result.Gaps, 11);
-
-            AddSection(lines, "Priority Keywords");
-            AddBulletList(lines, result.PriorityKeywords, 11);
-
-            AddSection(lines, "Final Assessment");
-            AddParagraph(lines, result.FinalAssessment, 11);
-
-            AddSection(lines, "Enhanced Resume Preview");
-            AddParagraph(lines, SafeText(report.UpdatedResumeText, report.OriginalResumeText), 10);
-
-            AddSection(lines, "Assessment Context");
-            AddParagraph(lines, BuildAssessmentContext(report), 10);
-
-            return RenderPdf(lines);
-        }
-
-        private static void AddHeading(ICollection<PdfLine> lines, string text, int fontSize, bool bold, double indent, double spacingAfter)
-        {
-            lines.Add(new PdfLine(text, fontSize, bold, indent, 0, spacingAfter));
-        }
-
-        private static void AddSection(ICollection<PdfLine> lines, string title)
-        {
-            lines.Add(new PdfLine(title, 13, true, 0, 8, 4));
-            lines.Add(new PdfLine(string.Empty, 1, false, 0, 0, 0));
-        }
-
-        private static void AddText(ICollection<PdfLine> lines, string text, int fontSize, bool bold, double indent, double spacingAfter)
-        {
-            lines.Add(new PdfLine(SanitizeText(text), fontSize, bold, indent, 0, spacingAfter));
-        }
-
-        private static void AddParagraph(ICollection<PdfLine> lines, string text, int fontSize)
-        {
-            foreach (string paragraph in SplitParagraphs(text))
+            foreach (string fn in new[] {
+                "email_icon.png", "phone_icon.png", "location_icon.png",
+                "linkedin_icon.png", "github_icon.png", "portfolio_icon.png" })
             {
-                if (string.IsNullOrWhiteSpace(paragraph))
+                string fp = Path.Combine(iconsFolder, fn);
+                if (!File.Exists(fp)) continue;
+                try
                 {
-                    lines.Add(new PdfLine(string.Empty, fontSize, false, 0, 0, 0));
-                    continue;
+                    using (var bmp = new Bitmap(fp))
+                    {
+                        int w = bmp.Width, h = bmp.Height;
+                        var rgb = new byte[w * h * 3];
+                        var alp = new byte[w * h];
+                        int ri = 0, ai = 0;
+                        // PDF image coordinate origin is bottom-left, so flip rows
+                        for (int row = h - 1; row >= 0; row--)
+                            for (int col = 0; col < w; col++)
+                            {
+                                Color c = bmp.GetPixel(col, row);
+                                rgb[ri++] = c.R; rgb[ri++] = c.G; rgb[ri++] = c.B;
+                                alp[ai++] = c.A;
+                            }
+                        imgRgb[fn]   = rgb;
+                        imgAlpha[fn] = alp;
+                        imgDims[fn]  = new[] { w, h };
+                    }
+                }
+                catch { /* skip corrupt / missing icon */ }
+            }
+
+            var sb     = new StringBuilder();
+            var annots = new List<PdfLinkAnnotation>();
+            double y   = PageHeight - TopMargin;
+
+            // Estimate text width: Times-Roman avg char ≈ 0.5 * fontSize
+            Func<string, int, double> tw = (t, s) => (t ?? "").Length * s * 0.5;
+
+            // Append a PDF text-show operator
+            Action<string, double, double, bool, int> wt = (txt, x, ty, bold, sz) =>
+                sb.AppendFormat(CultureInfo.InvariantCulture,
+                    "BT /{0} {1} Tf 1 0 0 1 {2:0.##} {3:0.##} Tm ({4}) Tj ET\n",
+                    bold ? "F2" : "F1", sz, x, ty, EscapePdfText(txt));
+
+            // Draw a full-width horizontal rule at y-coordinate ry
+            Action<double> hRule = ry =>
+                sb.AppendFormat(CultureInfo.InvariantCulture,
+                    "0.5 w 0 0 0 RG {0:0.##} {1:0.##} m {2:0.##} {1:0.##} l S\n",
+                    LeftMargin, ry, PageWidth - RightMargin);
+
+            // ── NAME (centered, 18 pt bold) ──
+            string nm = SanitizeText(doc.FullName ?? "");
+            if (!string.IsNullOrWhiteSpace(nm))
+            {
+                double nx = LeftMargin + (CW - tw(nm, NS)) / 2.0;
+                wt(nm, nx, y, true, NS);
+                y -= NS * 1.5;
+            }
+
+            // ── CONTACT LINE (centered, icons + text, separated by " | ") ──
+            var cItems = new List<string[]>(); // [icon, display, url]
+
+            if (!string.IsNullOrWhiteSpace(doc.Email))
+                cItems.Add(new[] { "email_icon.png",
+                    SanitizeText(doc.Email.Trim()), "mailto:" + doc.Email.Trim() });
+
+            if (!string.IsNullOrWhiteSpace(doc.Mobile))
+                cItems.Add(new[] { "phone_icon.png",
+                    SanitizeText(doc.Mobile.Trim()), "" });
+
+            if (!string.IsNullOrWhiteSpace(doc.Address))
+                cItems.Add(new[] { "location_icon.png",
+                    SanitizeText(doc.Address.Trim()), "" });
+
+            if (!string.IsNullOrWhiteSpace(doc.LinkedInUrl))
+                cItems.Add(new[] { "linkedin_icon.png",
+                    GetDisplayUrl(doc.LinkedInUrl), NormalizeUrl(doc.LinkedInUrl) });
+
+            if (!string.IsNullOrWhiteSpace(doc.PortfolioUrl))
+            {
+                bool gh = doc.PortfolioUrl.IndexOf("github.com",
+                              StringComparison.OrdinalIgnoreCase) >= 0;
+                cItems.Add(new[] {
+                    gh ? "github_icon.png" : "portfolio_icon.png",
+                    GetDisplayUrl(doc.PortfolioUrl), NormalizeUrl(doc.PortfolioUrl) });
+            }
+
+            if (cItems.Count > 0)
+            {
+                const string SEP = "  |  ";
+                double sepW = tw(SEP, BS);
+
+                // Measure total width first so we can center
+                double tot = 0;
+                for (int i = 0; i < cItems.Count; i++)
+                {
+                    if (i > 0) tot += sepW;
+                    if (imgRgb.ContainsKey(cItems[i][0])) tot += ICON + IGAP;
+                    tot += tw(cItems[i][1], BS);
                 }
 
-                foreach (string wrapped in WrapText(SanitizeText(paragraph), fontSize, 0))
-                    lines.Add(new PdfLine(wrapped, fontSize, false, 0, 0, 0));
+                double cx = LeftMargin + (CW - tot) / 2.0;
+                if (cx < LeftMargin) cx = LeftMargin;
 
-                lines.Add(new PdfLine(string.Empty, fontSize, false, 0, 0, 0));
-            }
-        }
-
-        private static void AddBulletList(ICollection<PdfLine> lines, IEnumerable<string> items, int fontSize)
-        {
-            var cleaned = (items ?? Enumerable.Empty<string>()).Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
-            if (cleaned.Count == 0)
-            {
-                AddText(lines, "No items were available for this section.", fontSize, false, 0, 6);
-                return;
-            }
-
-            foreach (string item in cleaned)
-            {
-                string text = "- " + SanitizeText(item.Trim());
-                foreach (string wrapped in WrapText(text, fontSize, 10))
-                    lines.Add(new PdfLine(wrapped, fontSize, false, 10, 0, 0));
-                lines.Add(new PdfLine(string.Empty, fontSize, false, 0, 0, 0));
-            }
-        }
-
-        private static IEnumerable<string> SplitParagraphs(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-                return Array.Empty<string>();
-
-            return text.Replace("\r\n", "\n").Replace("\r", "\n").Split(new[] { '\n' }, StringSplitOptions.None);
-        }
-
-        private static IEnumerable<string> WrapText(string text, int fontSize, double indent)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-                return new[] { string.Empty };
-
-            int maxChars = Math.Max(28, (int)Math.Floor((PageWidth - LeftMargin - RightMargin - indent) / Math.Max(4.5, fontSize * 0.52)));
-            var lines = new List<string>();
-
-            string[] words = text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            if (words.Length == 0)
-                return new[] { string.Empty };
-
-            var current = new StringBuilder();
-            foreach (string word in words)
-            {
-                if (current.Length == 0)
+                for (int i = 0; i < cItems.Count; i++)
                 {
-                    current.Append(word);
-                    continue;
-                }
+                    if (i > 0) { wt(SEP, cx, y, false, BS); cx += sepW; }
 
-                if (current.Length + 1 + word.Length <= maxChars)
-                {
-                    current.Append(' ').Append(word);
-                    continue;
-                }
+                    string icon = cItems[i][0];
+                    string disp = cItems[i][1];
+                    string url  = cItems[i][2];
 
-                lines.Add(current.ToString());
-                current.Clear();
-                current.Append(word);
+                    if (imgRgb.ContainsKey(icon))
+                    {
+                        string ikey = icon.Replace(".png", "").Replace("_", "");
+                        sb.AppendFormat(CultureInfo.InvariantCulture,
+                            "q {0:0.##} 0 0 {0:0.##} {1:0.##} {2:0.##} cm /{3} Do Q\n",
+                            ICON, cx, y - 1.5, ikey);
+                        cx += ICON + IGAP;
+                    }
+
+                    double dtw = tw(disp, BS);
+                    wt(disp, cx, y, false, BS);
+
+                    if (!string.IsNullOrWhiteSpace(url))
+                        annots.Add(new PdfLinkAnnotation
+                            { X = cx, Y = y - 2, Width = dtw, Height = BS + 2, Url = url });
+
+                    cx += dtw;
+                }
+                y -= BS * 1.5;
             }
 
-            if (current.Length > 0)
-                lines.Add(current.ToString());
+            // Thin rule under contact header
+            hRule(y);
+            y -= 7;
 
-            return lines;
-        }
-
-        private static byte[] RenderPdf(IReadOnlyList<PdfLine> lines)
-        {
-            var pages = new List<string>();
-            var current = new StringBuilder();
-            double y = PageHeight - TopMargin;
-            bool hasContent = false;
-
-            Action flushPage = () =>
+            // ── SECTION HEADING: uppercase bold 12pt + rule ──
+            Action<string> sec = title =>
             {
-                if (hasContent)
-                    pages.Add(current.ToString());
-                current.Clear();
-                y = PageHeight - TopMargin;
-                hasContent = false;
+                if (y < BottomMargin + 20) return;
+                y -= 5;
+                wt(title.ToUpperInvariant(), LeftMargin, y, true, HS);
+                y -= 4;
+                hRule(y);
+                y -= HS * 0.85;
             };
 
-            foreach (PdfLine line in lines)
+            // ── PARAGRAPH ──
+            Action<string> para = text =>
             {
-                if (line == null)
-                    continue;
-
-                if (line.SpacingBefore > 0)
-                    y -= line.SpacingBefore;
-
-                if (string.IsNullOrWhiteSpace(line.Text))
+                if (string.IsNullOrWhiteSpace(text)) return;
+                foreach (string ln in WrapText(SanitizeText(text), BS, 0))
                 {
-                    y -= Math.Max(8, line.FontSize * 0.55);
-                    if (y < BottomMargin)
-                        flushPage();
-                    continue;
+                    if (y < BottomMargin + 8) return;
+                    wt(ln, LeftMargin, y, false, BS);
+                    y -= LH;
                 }
-
-                foreach (string wrapped in WrapText(line.Text, line.FontSize, line.Indent))
-                {
-                    double lineHeight = Math.Max(12, line.FontSize * 1.4);
-                    if (y < BottomMargin + lineHeight)
-                        flushPage();
-
-                    string fontName = line.Bold ? "/F2" : "/F1";
-                    current.AppendFormat(CultureInfo.InvariantCulture, "BT {0} {1} Tf 1 0 0 1 {2:0.##} {3:0.##} Tm ({4}) Tj ET\n", fontName, line.FontSize, LeftMargin + line.Indent, y, EscapePdfText(wrapped));
-                    hasContent = true;
-                    y -= lineHeight;
-                }
-
-                if (line.SpacingAfter > 0)
-                    y -= line.SpacingAfter;
-            }
-
-            if (hasContent)
-                pages.Add(current.ToString());
-
-            if (pages.Count == 0)
-                pages.Add(string.Empty);
-
-            return BuildPdfFile(pages);
-        }
-
-        private static byte[] BuildPdfFile(IReadOnlyList<string> pageContents)
-        {
-            var objects = new List<string>
-            {
-                "<< /Type /Catalog /Pages 2 0 R >>",
-                BuildPagesObject(pageContents.Count),
-                "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
-                "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>"
             };
 
-            var pageObjectNumbers = new List<int>();
-            for (int i = 0; i < pageContents.Count; i++)
+            // ── BULLET ITEM (indented 20pt, WinAnsi bullet \225) ──
+            Action<string> bul = text =>
             {
-                int pageObjectNumber = objects.Count + 1;
-                int contentObjectNumber = objects.Count + 2;
-                pageObjectNumbers.Add(pageObjectNumber);
-                objects.Add(string.Format(CultureInfo.InvariantCulture,
-                    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {0} {1}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents {2} 0 R >>",
-                    PageWidth, PageHeight, contentObjectNumber));
-                objects.Add(BuildContentObject(pageContents[i]));
+                if (string.IsNullOrWhiteSpace(text) || y < BottomMargin + 8) return;
+                string clean = SanitizeText(text.TrimStart('-', '*', '\u2022', ' ').Trim());
+                if (string.IsNullOrWhiteSpace(clean)) return;
+
+                var wrappedLines = WrapText(clean, BS, 20.0).ToList();
+                for (int li = 0; li < wrappedLines.Count; li++)
+                {
+                    if (y < BottomMargin + 8) return;
+                    if (li == 0)
+                    {
+                        // \225 is octal for WinAnsi bullet •
+                        sb.AppendFormat(CultureInfo.InvariantCulture,
+                            "BT /F1 {0} Tf 1 0 0 1 {1:0.##} {2:0.##} Tm (\\225) Tj ET\n",
+                            BS, LeftMargin + 8, y);
+                        wt(wrappedLines[li], LeftMargin + 20, y, false, BS);
+                    }
+                    else
+                    {
+                        wt(wrappedLines[li], LeftMargin + 20, y, false, BS);
+                    }
+                    y -= LH;
+                }
+            };
+
+            // ── SKILL LINE: bold "Category:" then regular values ──
+            Action<string> skillLine = text =>
+            {
+                if (string.IsNullOrWhiteSpace(text) || y < BottomMargin + 8) return;
+                string clean = SanitizeText(text.Trim());
+                int colon = clean.IndexOf(':');
+                if (colon > 0)
+                {
+                    string label  = clean.Substring(0, colon + 1);
+                    string values = clean.Substring(colon + 1).TrimStart();
+                    double lx     = LeftMargin;
+                    wt(label, lx, y, true, BS);
+                    lx += tw(label, BS) + BS * 0.3;
+                    var vlines = WrapText(values, BS, 0).ToList();
+                    for (int li = 0; li < vlines.Count; li++)
+                    {
+                        if (y < BottomMargin + 8) return;
+                        wt(vlines[li], li == 0 ? lx : LeftMargin + tw(label, BS) + BS * 0.3, y, false, BS);
+                        if (li < vlines.Count - 1) y -= LH;
+                    }
+                }
+                else
+                {
+                    wt(clean, LeftMargin, y, false, BS);
+                }
+                y -= LH;
+            };
+
+            // ── RENDER SECTIONS ──
+
+            if (!string.IsNullOrWhiteSpace(doc.Summary))
+            {
+                sec("Professional Summary");
+                para(doc.Summary);
             }
 
-            objects[1] = BuildPagesObject(pageContents.Count, pageObjectNumbers);
-
-            var output = new MemoryStream();
-            var offsets = new List<long> { 0 };
-            WriteAscii(output, "%PDF-1.4\n");
-
-            for (int i = 0; i < objects.Count; i++)
+            if (doc.Education != null && doc.Education.Any(x => !string.IsNullOrWhiteSpace(x)))
             {
-                offsets.Add(output.Position);
-                WriteAscii(output, string.Format(CultureInfo.InvariantCulture, "{0} 0 obj\n{1}\nendobj\n", i + 1, objects[i]));
+                sec("Education");
+                foreach (var e in doc.Education.Where(x => !string.IsNullOrWhiteSpace(x)))
+                    bul(e);
             }
 
-            long xrefPosition = output.Position;
-            WriteAscii(output, string.Format(CultureInfo.InvariantCulture, "xref\n0 {0}\n", objects.Count + 1));
-            WriteAscii(output, "0000000000 65535 f \n");
-            for (int i = 1; i < offsets.Count; i++)
-                WriteAscii(output, string.Format(CultureInfo.InvariantCulture, "{0:0000000000} 00000 n \n", offsets[i]));
-
-            WriteAscii(output, string.Format(CultureInfo.InvariantCulture, "trailer\n<< /Size {0} /Root 1 0 R >>\nstartxref\n{1}\n%%EOF", objects.Count + 1, xrefPosition));
-            return output.ToArray();
-        }
-
-        private static string BuildPagesObject(int count, IList<int> pageObjectNumbers)
-        {
-            var builder = new StringBuilder();
-            builder.Append("<< /Type /Pages /Kids [");
-            for (int i = 0; i < pageObjectNumbers.Count; i++)
+            if (doc.Experience != null && doc.Experience.Any(x => !string.IsNullOrWhiteSpace(x)))
             {
-                if (i > 0)
-                    builder.Append(' ');
-                builder.Append(pageObjectNumbers[i]).Append(" 0 R");
+                sec("Experience");
+                foreach (var e in doc.Experience.Where(x => !string.IsNullOrWhiteSpace(x)))
+                    bul(e);
             }
-            builder.Append("] /Count ").Append(count).Append(" >>");
-            return builder.ToString();
+
+            if (doc.Projects != null && doc.Projects.Any(x => !string.IsNullOrWhiteSpace(x)))
+            {
+                sec("Projects");
+                foreach (var e in doc.Projects.Where(x => !string.IsNullOrWhiteSpace(x)))
+                    bul(e);
+            }
+
+            if (doc.Skills != null && doc.Skills.Any(x => !string.IsNullOrWhiteSpace(x)))
+            {
+                sec("Skills");
+                foreach (var e in doc.Skills.Where(x => !string.IsNullOrWhiteSpace(x)))
+                    skillLine(e);
+            }
+
+            if (doc.Certifications != null && doc.Certifications.Any(x => !string.IsNullOrWhiteSpace(x)))
+            {
+                sec("Certifications");
+                foreach (var e in doc.Certifications.Where(x => !string.IsNullOrWhiteSpace(x)))
+                    bul(e);
+            }
+
+            if (doc.Languages != null && doc.Languages.Any(x => !string.IsNullOrWhiteSpace(x)))
+            {
+                sec("Languages");
+                para(string.Join(", ", doc.Languages
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Select(x => SanitizeText(x.Trim()))));
+            }
+
+            return BuildResumePdfFile(sb.ToString(), imgRgb, imgAlpha, imgDims, annots);
         }
 
-        private static string BuildPagesObject(int count)
+        // ────────────────────────────────────────────────────────────────────────
+        // PDF file builder – clean single-xref structure
+        // ────────────────────────────────────────────────────────────────────────
+        private static byte[] BuildResumePdfFile(
+            string pageContent,
+            Dictionary<string, byte[]> imgRgb,
+            Dictionary<string, byte[]> imgAlpha,
+            Dictionary<string, int[]>  imgDims,
+            List<PdfLinkAnnotation>    annots)
         {
-            return string.Format(CultureInfo.InvariantCulture, "<< /Type /Pages /Kids [] /Count {0} >>", count);
+            // Collect all PDF objects as (dictionary-string, optional-binary-data) pairs.
+            // Index in list == objectNumber - 1 (1-based in PDF).
+            var objDicts = new List<string>();
+            var objData  = new List<byte[]>(); // null = non-stream object
+
+            // Helper: add a non-stream object
+            Action<string> addObj = dict => { objDicts.Add(dict); objData.Add(null); };
+
+            // Helper: add a stream object
+            Action<string, byte[]> addStream = (dict, data) =>
+            {
+                string full = string.Format(CultureInfo.InvariantCulture,
+                    "{0}\nstream\n", dict);
+                objDicts.Add(full);
+                objData.Add(data);
+            };
+
+            // obj 1: Catalog (Pages ref filled after we know page obj number)
+            addObj("<< /Type /Catalog /Pages 2 0 R >>");       // placeholder
+
+            // obj 2: Pages (Kids filled after we know page obj number)
+            addObj("<< /Type /Pages /Kids [] /Count 0 >>");    // placeholder
+
+            // obj 3: Times-Roman
+            addObj("<< /Type /Font /Subtype /Type1 /BaseFont /Times-Roman " +
+                   "/Encoding /WinAnsiEncoding >>");
+
+            // obj 4: Times-Bold
+            addObj("<< /Type /Font /Subtype /Type1 /BaseFont /Times-Bold " +
+                   "/Encoding /WinAnsiEncoding >>");
+
+            // Image XObjects (SMask first, then RGB)
+            var imgObjMap   = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            var smaskObjMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var kv in imgRgb)
+            {
+                string fn  = kv.Key;
+                byte[] rgb = kv.Value;
+                int[] dims = imgDims[fn];
+                int w = dims[0], h = dims[1];
+
+                // SMask (alpha channel)
+                if (imgAlpha.ContainsKey(fn))
+                {
+                    byte[] alp = imgAlpha[fn];
+                    string smd = string.Format(CultureInfo.InvariantCulture,
+                        "<< /Type /XObject /Subtype /Image /Width {0} /Height {1}" +
+                        " /ColorSpace /DeviceGray /BitsPerComponent 8 /Length {2} >>",
+                        w, h, alp.Length);
+                    addStream(smd, alp);
+                    smaskObjMap[fn] = objDicts.Count; // 1-based
+                }
+
+                // RGB image
+                string smRef = smaskObjMap.ContainsKey(fn)
+                    ? string.Format(CultureInfo.InvariantCulture,
+                        "/SMask {0} 0 R ", smaskObjMap[fn])
+                    : "";
+                string imd = string.Format(CultureInfo.InvariantCulture,
+                    "<< /Type /XObject /Subtype /Image /Width {0} /Height {1}" +
+                    " /ColorSpace /DeviceRGB /BitsPerComponent 8 {2}/Length {3} >>",
+                    w, h, smRef, rgb.Length);
+                addStream(imd, rgb);
+                imgObjMap[fn] = objDicts.Count;
+            }
+
+            // Build XObject resource fragment
+            var xres = new StringBuilder();
+            if (imgObjMap.Count > 0)
+            {
+                xres.Append("/XObject << ");
+                foreach (var kv in imgObjMap)
+                {
+                    string key = kv.Key.Replace(".png", "").Replace("_", "");
+                    xres.AppendFormat(CultureInfo.InvariantCulture,
+                        "/{0} {1} 0 R ", key, kv.Value);
+                }
+                xres.Append(">>");
+            }
+
+            // Content stream
+            byte[] contentBytes = Encoding.ASCII.GetBytes(pageContent);
+            string csDict = string.Format(CultureInfo.InvariantCulture,
+                "<< /Length {0} >>", contentBytes.Length);
+            addStream(csDict, contentBytes);
+            int contentObjNum = objDicts.Count;
+
+            // Annotation objects
+            var annotNums = new List<int>();
+            foreach (var a in annots)
+            {
+                string ad = string.Format(CultureInfo.InvariantCulture,
+                    "<< /Type /Annot /Subtype /Link" +
+                    " /Rect [{0:0.##} {1:0.##} {2:0.##} {3:0.##}]" +
+                    " /Border [0 0 0]" +
+                    " /A << /Type /Action /S /URI /URI ({4}) >> >>",
+                    a.X, a.Y, a.X + a.Width, a.Y + a.Height,
+                    EscapePdfText(a.Url));
+                addObj(ad);
+                annotNums.Add(objDicts.Count);
+            }
+
+            // Page object
+            var annotArr = new StringBuilder();
+            if (annotNums.Count > 0)
+            {
+                annotArr.Append("/Annots [");
+                foreach (int n in annotNums)
+                    annotArr.AppendFormat(CultureInfo.InvariantCulture, " {0} 0 R", n);
+                annotArr.Append(" ]");
+            }
+
+            string pageDict = string.Format(CultureInfo.InvariantCulture,
+                "<< /Type /Page /Parent 2 0 R" +
+                " /MediaBox [0 0 {0} {1}]" +
+                " /Resources << /Font << /F1 3 0 R /F2 4 0 R >> {2} >>" +
+                " /Contents {3} 0 R {4} >>",
+                PageWidth, PageHeight, xres, contentObjNum, annotArr);
+            addObj(pageDict);
+            int pageObjNum = objDicts.Count;
+
+            // Fix Catalog (obj 1) and Pages (obj 2)
+            objDicts[0] = string.Format(CultureInfo.InvariantCulture,
+                "<< /Type /Catalog /Pages 2 0 R >>");
+            objDicts[1] = string.Format(CultureInfo.InvariantCulture,
+                "<< /Type /Pages /Kids [{0} 0 R] /Count 1 >>", pageObjNum);
+
+            // ── Serialize ──
+            var ms      = new MemoryStream();
+            var offsets = new List<long>();
+
+            WriteAscii(ms, "%PDF-1.4\n%\xe2\xe3\xcf\xd3\n");
+
+            for (int i = 0; i < objDicts.Count; i++)
+            {
+                offsets.Add(ms.Position);
+                int num = i + 1;
+
+                if (objData[i] == null)
+                {
+                    // Non-stream object
+                    WriteAscii(ms, string.Format(CultureInfo.InvariantCulture,
+                        "{0} 0 obj\n{1}\nendobj\n", num, objDicts[i]));
+                }
+                else
+                {
+                    // Stream object: dictionary string already ends with "\nstream\n"
+                    WriteAscii(ms, string.Format(CultureInfo.InvariantCulture,
+                        "{0} 0 obj\n{1}", num, objDicts[i]));
+                    ms.Write(objData[i], 0, objData[i].Length);
+                    WriteAscii(ms, "\nendstream\nendobj\n");
+                }
+            }
+
+            // xref table
+            long xrefPos = ms.Position;
+            int  total   = objDicts.Count + 1; // +1 for free entry 0
+            WriteAscii(ms, string.Format(CultureInfo.InvariantCulture,
+                "xref\n0 {0}\n", total));
+            WriteAscii(ms, "0000000000 65535 f \n");
+            foreach (long off in offsets)
+                WriteAscii(ms, string.Format(CultureInfo.InvariantCulture,
+                    "{0:0000000000} 00000 n \n", off));
+
+            WriteAscii(ms, string.Format(CultureInfo.InvariantCulture,
+                "trailer\n<< /Size {0} /Root 1 0 R >>\nstartxref\n{1}\n%%EOF",
+                total, xrefPos));
+
+            return ms.ToArray();
         }
 
-        private static string BuildContentObject(string content)
+        // ── Helpers ──────────────────────────────────────────────────────────
+
+        private static string GetDisplayUrl(string url)
         {
-            content = content ?? string.Empty;
-            return string.Format(CultureInfo.InvariantCulture, "<< /Length {0} >>\nstream\n{1}endstream", Encoding.ASCII.GetByteCount(content), content);
+            if (string.IsNullOrWhiteSpace(url)) return "";
+            string s = url.Trim()
+                .Replace("https://www.", "")
+                .Replace("http://www.",  "")
+                .Replace("https://",     "")
+                .Replace("http://",      "")
+                .TrimEnd('/');
+            return SanitizeText(s);
+        }
+
+        private static string NormalizeUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url)) return "";
+            string s = url.Trim();
+            if (!s.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                s = "https://" + s;
+            return s;
+        }
+
+        private sealed class PdfLinkAnnotation
+        {
+            public double X      { get; set; }
+            public double Y      { get; set; }
+            public double Width  { get; set; }
+            public double Height { get; set; }
+            public string Url    { get; set; }
         }
 
         private static void WriteAscii(Stream stream, string text)
@@ -283,107 +527,64 @@ namespace IntelliJob
             stream.Write(bytes, 0, bytes.Length);
         }
 
-        private static string SafeText(string value, string fallback)
-        {
-            string text = string.IsNullOrWhiteSpace(value) ? fallback : value;
-            return SanitizeText(text);
-        }
-
-        private static string BuildAssessmentContext(ResumeEnhancementReportRecord report)
-        {
-            var builder = new StringBuilder();
-            builder.AppendLine(string.Format(CultureInfo.InvariantCulture, "Role: {0}", SafeText(report.JobTitle, "Untitled Role")));
-            builder.AppendLine(string.Format(CultureInfo.InvariantCulture, "Company: {0}", SafeText(report.CompanyName, "Unknown Company")));
-            builder.AppendLine(string.Format(CultureInfo.InvariantCulture, "Resume source: {0}", SafeText(report.ResumeSource, "profile")));
-            builder.AppendLine(string.Format(CultureInfo.InvariantCulture, "Keywords: {0}", SafeText(report.KeywordHints, "None")));
-            if (!string.IsNullOrWhiteSpace(report.InterviewFeedback))
-            {
-                builder.AppendLine();
-                builder.AppendLine(SafeText(report.InterviewFeedback, string.Empty));
-            }
-            return builder.ToString().Trim();
-        }
-
         private static string EscapePdfText(string text)
         {
-            if (string.IsNullOrEmpty(text))
-                return string.Empty;
-
+            if (string.IsNullOrEmpty(text)) return string.Empty;
             return text
                 .Replace("\\", "\\\\")
-                .Replace("(", "\\(")
-                .Replace(")", "\\)");
+                .Replace("(",  "\\(")
+                .Replace(")",  "\\)");
         }
 
         private static string SanitizeText(string text)
         {
-            if (string.IsNullOrWhiteSpace(text))
-                return string.Empty;
+            if (string.IsNullOrWhiteSpace(text)) return string.Empty;
 
-            string normalized = text
+            string n = text
                 .Replace("\u00A0", " ")
                 .Replace("\u2019", "'")
                 .Replace("\u2018", "'")
-                .Replace("\u201C", '"'.ToString())
-                .Replace("\u201D", '"'.ToString())
+                .Replace("\u201C", "\"")
+                .Replace("\u201D", "\"")
                 .Replace("\u2013", "-")
                 .Replace("\u2014", "-")
-                .Replace("•", "-")
-                .Replace("→", "->");
+                .Replace("\u2022", "-")   // bullet → dash (raw text only)
+                .Replace("\u2192", "->");
 
-            var builder = new StringBuilder(normalized.Length);
-            foreach (char character in normalized)
+            var sb = new StringBuilder(n.Length);
+            foreach (char c in n)
             {
-                if (character == '\r' || character == '\n' || character == '\t')
-                {
-                    builder.Append(' ');
-                }
-                else if (character >= 32 && character <= 126)
-                {
-                    builder.Append(character);
-                }
-                else
-                {
-                    builder.Append('?');
-                }
+                if (c == '\r' || c == '\n' || c == '\t') sb.Append(' ');
+                else if (c >= 32 && c <= 126)            sb.Append(c);
+                else                                     sb.Append('?');
             }
-
-            return builder.ToString().Replace("  ", " ").Trim();
+            return sb.ToString().Replace("  ", " ").Trim();
         }
 
-        private static string ToLocalString(DateTime value)
+        private static IEnumerable<string> WrapText(string text, int fontSize, double indent)
         {
-            if (value == DateTime.MinValue)
-                return "Unknown";
+            if (string.IsNullOrWhiteSpace(text))
+                return new[] { string.Empty };
 
-            return value.Kind == DateTimeKind.Utc
-                ? value.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture)
-                : value.ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture);
-        }
+            double usableWidth = PageWidth - LeftMargin - RightMargin - indent;
+            int maxChars = Math.Max(28, (int)Math.Floor(usableWidth / Math.Max(4.5, fontSize * 0.52)));
 
-        private sealed class PdfLine
-        {
-            public PdfLine(string text, int fontSize, bool bold, double indent, double spacingBefore, double spacingAfter)
+            var lines = new List<string>();
+            string[] words = text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (words.Length == 0) return new[] { string.Empty };
+
+            var cur = new StringBuilder();
+            foreach (string word in words)
             {
-                Text = text ?? string.Empty;
-                FontSize = fontSize;
-                Bold = bold;
-                Indent = indent;
-                SpacingBefore = spacingBefore;
-                SpacingAfter = spacingAfter;
+                if (cur.Length == 0) { cur.Append(word); continue; }
+                if (cur.Length + 1 + word.Length <= maxChars)
+                { cur.Append(' ').Append(word); continue; }
+                lines.Add(cur.ToString());
+                cur.Clear();
+                cur.Append(word);
             }
-
-            public string Text { get; }
-
-            public int FontSize { get; }
-
-            public bool Bold { get; }
-
-            public double Indent { get; }
-
-            public double SpacingBefore { get; }
-
-            public double SpacingAfter { get; }
+            if (cur.Length > 0) lines.Add(cur.ToString());
+            return lines;
         }
     }
 }

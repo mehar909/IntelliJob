@@ -38,6 +38,7 @@ namespace IntelliJob
         public string ResumeSource { get; set; }
         public string OriginalResumeText { get; set; }
         public string UpdatedResumeText { get; set; }
+        public string UpdatedResumeStructuredJson { get; set; }
         public string InterviewFeedback { get; set; }
         public string KeywordHints { get; set; }
         public DateTime GeneratedAt { get; set; }

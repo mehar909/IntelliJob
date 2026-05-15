@@ -39,3 +39,22 @@ IntelliJob/Company/EditJobDetails.aspx.cs: changed missing company-logo default 
 IntelliJob/User/Register.aspx.cs, IntelliJob/User/Profile.aspx.cs, IntelliJob/User/ResumeBuild.aspx.cs: added resume import, structured resume storage, and profile editing updates.
 IntelliJob/User/ResumeBuild.aspx, IntelliJob/User/Profile.aspx: capped resume textarea height and hid the profile import block when a resume is already stored.
 IntelliJob/User/ResumeBuild.aspx.cs: opened the resume-path lookup connection before update so the builder can save edits.
+IntelliJob/Models/ResumeEnhancementModels.cs: added UpdatedResumeStructuredJson field to preserve edited resume data without re-parsing.
+IntelliJob/User/ResumeEnhancer.aspx.cs: fixed preview sync by storing structured JSON, removed BindEditablePreview call after save, BuildEditableDocument now tries JSON before text parsing, simplified edit toggle to enter-only, ApplyPreviewEditorState hides Edit button when editing.
+IntelliJob/User/ResumeEnhancer.aspx: removed Lock Preview concept, renamed save panel to Update Resume with single Update button, updated instruction text.
+IntelliJob/User/ResumeEnhancer.aspx: removed radio selection, save target auto-detected from hfLoadedResumeSource, commented out hero Update Resume button, added editor-section class and edit-mode CSS to hide report sections during editing.
+IntelliJob/User/ResumeEnhancer.aspx.cs: replaced rblEnhSaveTarget logic with hfLoadedResumeSource auto-detection, removed radio references from BindEditablePreview, added JS class toggle for edit-mode section hiding.
+IntelliJob/User/ResumeEnhancer.aspx.designer.cs: removed rblEnhSaveTarget field reference.
+IntelliJob/Models/ResumeProfileModels.cs: added LinkedInUrl and PortfolioUrl optional fields to ResumeProfileDocument.
+IntelliJob/User/ResumeEnhancer.aspx: added Resume Source hero chip, LinkedIn/Portfolio form fields, moved Export PDF button beside Edit Preview.
+IntelliJob/User/ResumeEnhancer.aspx.cs: wired LinkedIn/Portfolio in PopulateEditablePreview, BuildDocumentFromForm, MergeDocumentDefaults, BuildStructuredResumeText, ApplyPreviewEditorState; added litResumeSource in RenderReport; added btnExportResumePdf_Click handler for template-based resume PDF export.
+IntelliJob/User/ResumeEnhancer.aspx.designer.cs: added litResumeSource, txtEnhLinkedIn, txtEnhPortfolio, btnExportResumePdf field declarations.
+IntelliJob/ResumePdfExporter.cs: added BuildResume() method for one-page template-based resume PDF with icon XObjects, section headings with separator lines, clickable hyperlink annotations, and proper A4 layout matching MY_RESUME/resume.docx template.
+IntelliJob/assets/img/resume-icons/: copied 6 contact icons (email, phone, location, linkedin, github, portfolio) from MY_RESUME for PDF embedding.
+IntelliJob/GeminiService.cs: updated GenerateQuestionsAsync to accept optional resumeText for tailored questions.
+IntelliJob/User/JobDetails.aspx.cs, IntelliJob/Company/ShorlistedCandidates.aspx.cs, IntelliJob/User/Interview.aspx.cs: integrated ResumeTextExtractor to fetch specific application or profile resume text and pass it to Gemini for questions generation.
+IntelliJob/User/TakeInterview.aspx.cs: confirmed company-led interviews are securely gated by AuthorizedInterviewId and IsPasswordUsed, ensuring one-time conduction.
+IntelliJob/User/ResumeEnhancer.aspx.cs: confirmed enhancement uses specific applied resume and caches report to ensure one-time generation per application.
+IntelliJob/User/ResumeEnhancer.aspx, IntelliJob/User/ResumeEnhancer.aspx.cs: replaced plain score texts with SVG Score Circle visual components for overall, ATS, semantic, and keyword matches.
+IntelliJob/User/InterviewFeedback.aspx, IntelliJob/User/InterviewFeedback.aspx.cs: replaced plain progress bars with SVG Score Gauge components for categorical performance scores.
+IntelliJob/User/TakeInterview.aspx: added a fallback Text Chat mode to allow users to conduct interviews sequentially via text without using VAPI tokens, seamlessly hooking into the existing transcript submission flow.

@@ -135,11 +135,6 @@ namespace IntelliJob.User
             ReportLoaded = true;
             ShowReportLoadedStatus(savedReport.AppliedJobId, "Saved resume history loaded from your application record.");
 
-            if (string.Equals(Request.QueryString["download"], "pdf", StringComparison.OrdinalIgnoreCase))
-            {
-                DownloadResumeReportPdf(savedReport);
-                return;
-            }
 
             RevealReportBody();
         }
@@ -301,11 +296,6 @@ namespace IntelliJob.User
             ReportLoaded = true;
             ShowReportLoadedStatus(report.AppliedJobId, "This resume report has been saved to your application history.");
 
-            if (string.Equals(Request.QueryString["download"], "pdf", StringComparison.OrdinalIgnoreCase))
-            {
-                DownloadResumeReportPdf(report);
-                return;
-            }
 
             RevealReportBody();
         }
@@ -349,18 +339,55 @@ namespace IntelliJob.User
             litCompany.Text = Server.HtmlEncode(string.IsNullOrWhiteSpace(report.CompanyName) ? row["CompanyName"].ToString() : report.CompanyName);
             litLevel.Text = Server.HtmlEncode(row["Level"].ToString());
             litInterviewType.Text = Server.HtmlEncode(row["InterviewType"].ToString());
+            litResumeSource.Text = Server.HtmlEncode(string.IsNullOrWhiteSpace(report.ResumeSource) ? "Profile Resume" : (report.ResumeSource.IndexOf("profile", StringComparison.OrdinalIgnoreCase) >= 0 ? "Profile Resume" : "Job Resume"));
 
-            litOverallScore.Text = result.OverallScore.ToString();
-            litAtsScore.Text = result.AtsScore.ToString();
-            litSemanticScore.Text = result.SemanticScore.ToString();
-            litKeywordScore.Text = result.KeywordScore.ToString();
+            //litOverallScore.Text = result.OverallScore.ToString();
+            //litAtsScore.Text = result.AtsScore.ToString();
+            //litSemanticScore.Text = result.SemanticScore.ToString();
+            //litKeywordScore.Text = result.KeywordScore.ToString();
+
+            litOverallVisual.Text = GenerateScoreCircleHtml(result.OverallScore);
+            litAtsVisual.Text = GenerateScoreCircleHtml(result.AtsScore);
+            litSemanticVisual.Text = GenerateScoreCircleHtml(result.SemanticScore);
+            litKeywordVisual.Text = GenerateScoreCircleHtml(result.KeywordScore);
 
             litResumeSummary.Text = Server.HtmlEncode(result.ResumeSummary ?? string.Empty);
             litStrengths.Text = BuildListHtml(result.Strengths, "No strengths were returned yet.", true);
             litGaps.Text = BuildListHtml(result.Gaps, "No gaps were returned yet.", true);
             litPriorityKeywords.Text = BuildListHtml(result.PriorityKeywords, "No priority keywords were returned yet.", true);
-            litRewriteSuggestions.Text = BuildRewriteHtml(result.RewriteSuggestions);
-            litFinalAssessment.Text = Server.HtmlEncode(result.FinalAssessment ?? string.Empty);
+            int interviewScore = 0;
+            if (row.Table.Columns.Contains("TotalScore") && row["TotalScore"] != DBNull.Value)
+            {
+                int.TryParse(row["TotalScore"].ToString(), out interviewScore);
+            }
+
+            int resumeScore = result.OverallScore;
+
+            if (interviewScore > 0)
+            {
+                if (interviewScore >= 70 && resumeScore >= 60)
+                {
+                    litFinalAssessment.Text = "We will contact you shortly for the next phase.";
+                }
+                else if (interviewScore >= 70 && resumeScore < 60)
+                {
+                    litFinalAssessment.Text = "We will contact you shortly for the next phase. Please review the suggestions on your resume below.";
+                }
+                else if (interviewScore < 70 && resumeScore >= 60)
+                {
+                    litFinalAssessment.Text = "Please improve yourself and prepare more for future interviews. Your resume aligns well with the job.";
+                }
+                else
+                {
+                    litFinalAssessment.Text = "Please improve yourself and prepare more for future interviews. Also, review the suggestions on your resume below.";
+                }
+                litRewriteSuggestions.Text = BuildRewriteHtml(result.RewriteSuggestions);
+            }
+            else
+            {
+                litFinalAssessment.Text = Server.HtmlEncode(result.FinalAssessment ?? string.Empty);
+                litRewriteSuggestions.Text = BuildRewriteHtml(result.RewriteSuggestions);
+            }
 
             string previewText = !string.IsNullOrWhiteSpace(report.UpdatedResumeText)
                 ? report.UpdatedResumeText
@@ -368,10 +395,36 @@ namespace IntelliJob.User
             litResumePreview.Text = Server.HtmlEncode(TruncateText(previewText, 5000));
         }
 
+        private string GenerateScoreCircleHtml(int score)
+        {
+            double radius = 46;
+            double stroke = 6;
+            double normalizedRadius = radius - stroke / 2.0;
+            double circumference = 2 * Math.PI * normalizedRadius;
+            double progress = score / 100.0;
+            double strokeDashoffset = circumference * (1 - progress);
+            string gradId = "grad-" + Guid.NewGuid().ToString("N");
+
+            return $@"
+                <div class='visual-score-circle'>
+                    <svg viewBox='0 0 100 100'>
+                        <defs>
+                            <linearGradient id='{gradId}' x1='1' y1='0' x2='0' y2='1'>
+                                <stop offset='0%' stop-color='#FF97AD' />
+                                <stop offset='100%' stop-color='#5171FF' />
+                            </linearGradient>
+                        </defs>
+                        <circle class='circle-bg' cx='50' cy='50' r='{normalizedRadius}' style='stroke-width: {stroke}px;' />
+                        <circle class='circle-progress' cx='50' cy='50' r='{normalizedRadius}'
+                                style='stroke: url(#{gradId}); stroke-width: {stroke}px; stroke-dasharray: {circumference}; stroke-dashoffset: {strokeDashoffset};' />
+                    </svg>
+                    <div class='score-text'>{score}%</div>
+                </div>";
+        }
+
         protected void btnToggleEnhPreviewEdit_Click(object sender, EventArgs e)
         {
-            PreviewEditMode = !PreviewEditMode;
-            ApplyPreviewEditorState();
+            PreviewEditMode = true;
         }
 
         protected void btnSaveEnhancedResume_Click(object sender, EventArgs e)
@@ -398,7 +451,8 @@ namespace IntelliJob.User
             MergeDocumentDefaults(document, fallback);
 
             string structuredText = BuildStructuredResumeText(document);
-            if (rblEnhSaveTarget.SelectedValue == "profile")
+            bool isProfileResume = string.Equals(hfLoadedResumeSource.Value, "profile", StringComparison.OrdinalIgnoreCase);
+            if (isProfileResume)
             {
                 string savedProfilePath = SaveEnhancedProfileResume(userId, document);
                 if (string.IsNullOrWhiteSpace(savedProfilePath))
@@ -427,13 +481,13 @@ namespace IntelliJob.User
             }
 
             report.UpdatedResumeText = structuredText;
+            report.UpdatedResumeStructuredJson = ResumeProfileService.SerializeDocument(document);
             if (report.Result == null)
                 report.Result = new ResumeEnhancementResult();
             report.Result.UpdatedResumeText = structuredText;
 
             ApplicationDataStore.SaveResumeEnhancementReport(report);
             PersistPreviewDocument(document);
-            BindEditablePreview(null, report);
             PreviewEditMode = false;
             ApplyPreviewEditorState();
         }
@@ -458,12 +512,6 @@ namespace IntelliJob.User
             hfLoadedResumeSource.Value = report.ResumeSource ?? string.Empty;
             hfLoadedOriginalFileName.Value = string.IsNullOrWhiteSpace(report.ResumePath) ? string.Empty : Path.GetFileName(report.ResumePath);
 
-            if (rblEnhSaveTarget.Items.FindByValue("job") != null && rblEnhSaveTarget.Items.FindByValue("profile") != null)
-            {
-                string defaultTarget = string.Equals(report.ResumeSource, "profile", StringComparison.OrdinalIgnoreCase) ? "profile" : "job";
-                rblEnhSaveTarget.SelectedValue = defaultTarget;
-            }
-
             PopulateEditablePreview(document);
             ViewState[CurrentDocumentViewStateKey] = ResumeProfileService.SerializeDocument(document);
         }
@@ -472,6 +520,14 @@ namespace IntelliJob.User
         {
             if (report == null)
                 return new ResumeProfileDocument();
+
+            // Prefer the structured JSON which preserves exact user edits
+            if (!string.IsNullOrWhiteSpace(report.UpdatedResumeStructuredJson))
+            {
+                ResumeProfileDocument fromJson = ResumeProfileService.DeserializeDocument(report.UpdatedResumeStructuredJson);
+                if (fromJson != null && HasPreviewContent(fromJson))
+                    return fromJson;
+            }
 
             string originalFileName = string.IsNullOrWhiteSpace(report.ResumePath)
                 ? string.Empty
@@ -530,6 +586,8 @@ namespace IntelliJob.User
             txtEnhProjects.Text = JoinLines(document != null ? document.Projects : null);
             txtEnhCertifications.Text = JoinLines(document != null ? document.Certifications : null);
             txtEnhLanguages.Text = JoinLines(document != null ? document.Languages : null);
+            txtEnhLinkedIn.Text = document != null ? document.LinkedInUrl : string.Empty;
+            txtEnhPortfolio.Text = document != null ? document.PortfolioUrl : string.Empty;
         }
 
         private ResumeProfileDocument GetCurrentEditableDocument()
@@ -555,6 +613,8 @@ namespace IntelliJob.User
                 Projects = SplitLines(txtEnhProjects.Text),
                 Certifications = SplitLines(txtEnhCertifications.Text),
                 Languages = SplitLines(txtEnhLanguages.Text),
+                LinkedInUrl = txtEnhLinkedIn.Text.Trim(),
+                PortfolioUrl = txtEnhPortfolio.Text.Trim(),
                 RawText = GetCurrentEditableDocument().RawText,
                 OriginalFileName = hfLoadedOriginalFileName.Value,
                 StoredFilePath = hfLoadedResumePath.Value,
@@ -580,6 +640,8 @@ namespace IntelliJob.User
             if (target.Projects == null || target.Projects.Count == 0) target.Projects = fallback.Projects;
             if (target.Certifications == null || target.Certifications.Count == 0) target.Certifications = fallback.Certifications;
             if (target.Languages == null || target.Languages.Count == 0) target.Languages = fallback.Languages;
+            if (string.IsNullOrWhiteSpace(target.LinkedInUrl)) target.LinkedInUrl = fallback.LinkedInUrl;
+            if (string.IsNullOrWhiteSpace(target.PortfolioUrl)) target.PortfolioUrl = fallback.PortfolioUrl;
             if (string.IsNullOrWhiteSpace(target.RawText)) target.RawText = fallback.RawText;
             if (string.IsNullOrWhiteSpace(target.OriginalFileName)) target.OriginalFileName = fallback.OriginalFileName;
             if (string.IsNullOrWhiteSpace(target.StoredFilePath)) target.StoredFilePath = fallback.StoredFilePath;
@@ -603,6 +665,8 @@ namespace IntelliJob.User
             AppendSection(builder, "Projects", JoinLines(document.Projects));
             AppendSection(builder, "Certifications", JoinLines(document.Certifications));
             AppendSection(builder, "Languages", JoinLines(document.Languages));
+            AppendSection(builder, "LinkedIn", document.LinkedInUrl);
+            AppendSection(builder, "Portfolio", document.PortfolioUrl);
             return builder.ToString().Trim();
         }
 
@@ -734,11 +798,17 @@ namespace IntelliJob.User
             txtEnhProjects.ReadOnly = !editable;
             txtEnhCertifications.ReadOnly = !editable;
             txtEnhLanguages.ReadOnly = !editable;
+            txtEnhLinkedIn.ReadOnly = !editable;
+            txtEnhPortfolio.ReadOnly = !editable;
 
-            btnToggleEnhPreviewEdit.Text = editable ? "Lock Preview" : "Edit Preview";
+            btnToggleEnhPreviewEdit.Visible = !editable;
             pnlEnhSaveOptions.Visible = editable;
-            rblEnhSaveTarget.Enabled = editable;
-            btnSaveEnhancedResume.Enabled = editable;
+
+            // Toggle CSS class on report body to hide/show non-editor sections
+            string editModeScript = editable
+                ? "var rb=document.getElementById('resumeReportBody'); if(rb) rb.classList.add('enhancer-editing');"
+                : "var rb=document.getElementById('resumeReportBody'); if(rb) rb.classList.remove('enhancer-editing');";
+            ClientScript.RegisterStartupScript(GetType(), "enhancerEditMode", editModeScript, true);
         }
 
         private int GetLoadedAppliedJobId()
@@ -869,9 +939,10 @@ namespace IntelliJob.User
                 return "<div class='muted-box'>No rewrite suggestions were returned yet.</div>";
 
             var builder = new StringBuilder();
+            builder.AppendLine("<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 20px;'>");
             foreach (ResumeRewriteSuggestion suggestion in list)
             {
-                builder.AppendLine("<div class='rewrite-card'>");
+                builder.AppendLine("<div class='rewrite-card' style='margin-bottom: 0;'>");
                 builder.AppendLine("<h4>" + Server.HtmlEncode(string.IsNullOrWhiteSpace(suggestion.SectionName) ? "Suggested Improvement" : suggestion.SectionName) + "</h4>");
                 if (!string.IsNullOrWhiteSpace(suggestion.CurrentObservation))
                 {
@@ -883,6 +954,7 @@ namespace IntelliJob.User
                 }
                 builder.AppendLine("</div>");
             }
+            builder.AppendLine("</div>");
             return builder.ToString();
         }
 
@@ -923,10 +995,37 @@ namespace IntelliJob.User
             litStatus.Text = "<div class='" + css + "'>" + Server.HtmlEncode(message) + "</div>";
         }
 
-        private void DownloadResumeReportPdf(ResumeEnhancementReportRecord report)
+
+        protected void btnExportResumePdf_Click(object sender, EventArgs e)
         {
-            byte[] pdfBytes = ResumePdfExporter.Build(report);
-            string fileName = string.Format(System.Globalization.CultureInfo.InvariantCulture, "Resume-Report-{0}-{1}.pdf", report.AppliedJobId, DateTime.Now.ToString("yyyyMMddHHmmss"));
+            int userId = Convert.ToInt32(Session["userId"]);
+            int appliedJobId = GetLoadedAppliedJobId();
+
+            ResumeEnhancementReportRecord report;
+            ResumeProfileDocument document;
+
+            if (appliedJobId > 0 && ApplicationDataStore.TryGetResumeEnhancementReport(userId, appliedJobId, out report) && report != null)
+            {
+                document = BuildEditableDocument(report);
+            }
+            else
+            {
+                document = GetCurrentEditableDocument();
+            }
+
+            if (document == null || !HasPreviewContent(document))
+            {
+                ShowStatus("There is no resume data available to export.", true);
+                return;
+            }
+
+            string iconsFolder = Server.MapPath("~/assets/img/resume-icons");
+            if (!Directory.Exists(iconsFolder))
+                iconsFolder = Server.MapPath("~/");
+
+            byte[] pdfBytes = ResumePdfExporter.BuildResume(document, iconsFolder);
+            string safeName = string.IsNullOrWhiteSpace(document.FullName) ? "resume" : SanitizeFileName(document.FullName);
+            string fileName = safeName + "-" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".pdf";
 
             Response.Clear();
             Response.Buffer = true;

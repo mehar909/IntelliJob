@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/User/UserMaster.Master" AutoEventWireup="true" CodeBehind="Profile.aspx.cs" Inherits="IntelliJob.User.Profile" %>
+<%@ Page Title="" Language="C#" MasterPageFile="~/User/UserMaster.Master" AutoEventWireup="true" CodeBehind="Profile.aspx.cs" Inherits="IntelliJob.User.Profile" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <style>
@@ -76,6 +76,36 @@
         .chat-messages-container::-webkit-scrollbar-thumb {
             background: #ccc;
             border-radius: 4px;
+        }
+        .btn-resume-preview {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #fb246a;
+            border: 2px solid #fb246a;
+            color: #ffffff !important;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .btn-resume-preview:hover {
+            background-color: #da2461;
+            border-color: #da2461;
+            transform: translateY(-1px);
+        }
+        .btn-resume-preview.danger {
+            background-color: #fff;
+            color: #dc3545 !important;
+            border-color: #dc3545;
+        }
+        .btn-resume-preview.danger:hover {
+            background-color: #dc3545;
+            color: #fff !important;
         }
     </style>
     <script type="text/javascript">
@@ -156,7 +186,7 @@
                                             <h6 class="mb-0">Resume Upload</h6>
                                         </div>
                                         <div class="col-sm-9 text-secondary">
-                                            <asp:HyperLink ID="lnkResume" runat="server" 
+                                            <asp:HyperLink ID="lnkResume" runat="server"
                                                 NavigateUrl='<%# Eval("Resume") != DBNull.Value && !string.IsNullOrEmpty(Eval("Resume").ToString()) ? "~/" + Eval("Resume").ToString() : "#" %>'
                                                 Target="_blank"
                                                 CssClass="text-primary"
@@ -164,54 +194,94 @@
                                                 Visible='<%# Eval("Resume") != DBNull.Value && !string.IsNullOrEmpty(Eval("Resume").ToString()) %>'>
                                                 <i class="fas fa-download"></i> View Resume
                                             </asp:HyperLink>
-                                            <asp:Label ID="lblNoResume" runat="server" 
-                                                Text="Not Uploaded" 
+                                            <asp:Label ID="lblNoResume" runat="server"
+                                                Text="Not Uploaded"
                                                 Visible='<%# Eval("Resume") == DBNull.Value || string.IsNullOrEmpty(Eval("Resume").ToString()) %>'
                                                 CssClass="text-muted"></asp:Label>
-                                            <asp:LinkButton ID="btnDeleteResume" runat="server"
-                                                CommandName="DeleteResume"
-                                                CommandArgument='<%# Eval("UserId") %>'
-                                                Visible='<%# Eval("Resume") != DBNull.Value && !string.IsNullOrEmpty(Eval("Resume").ToString()) %>'
-                                                CssClass="btn btn-outline-danger btn-sm mt-2"
-                                                OnClientClick="return confirm('Are you sure you want to remove your stored resume?');">
-                                                <i class="fas fa-trash"></i> Remove Resume
-                                            </asp:LinkButton>
-                                        </div>
-                                    </div>
-                                    <hr />
-                                    <asp:Panel ID="pnlImportResume" runat="server" Visible='<%# Eval("Resume") == DBNull.Value || string.IsNullOrEmpty(Eval("Resume").ToString()) %>'>
-                                        <div class="row">
-                                            <div class="col-sm-3">
-                                                <h6 class="mb-0">Import Resume</h6>
-                                            </div>
-                                            <div class="col-sm-9 text-secondary">
-                                                <asp:FileUpload ID="fuResumeImport" runat="server" CssClass="form-control" />
-                                                <asp:LinkButton ID="btnImportResume" runat="server"
-                                                    CommandName="ImportResume"
-                                                    CommandArgument='<%# Eval("UserId") %>'
-                                                    CssClass="btn btn-primary btn-sm mt-2">
-                                                    <i class="fas fa-file-import"></i> Import & Parse Resume
-                                                </asp:LinkButton>
-                                                <div class="text-muted small mt-2">Upload a PDF or DOCX resume to refresh the parsed profile sections.</div>
-                                            </div>
-                                        </div>
-                                        <hr />
-                                    </asp:Panel>
-                                    <div class="row">
-                                        <div class="col-sm-12">
-                                            <%# BuildResumeOverviewHtml(Eval("ResumeParseStatus"), Eval("ResumeValidationMessage"), Eval("ResumeOriginalFileName"), Eval("ResumeHeadline"), Eval("ResumeSummary"), Eval("ResumeSkills"), Eval("ResumeEducation"), Eval("ResumeExperienceDetails"), Eval("ResumeProjects"), Eval("ResumeCertifications"), Eval("ResumeLanguages")) %>
-                                        </div>
-                                    </div>
-                                    <hr />
-                                    <div class="row">
-                                        <div class="col-sm-12">
-                                            <asp:Button ID="btmEdit" runat="server" Text="Edit" CssClass="btn btn-primary" CommandName="EditUserProfile" CommandArgument='<%# Eval("UserId") %>' />
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Resume Preview Card -->
+                    <div class="card mb-4" style="border-radius: 18px; box-shadow: 0 8px 26px rgba(15, 23, 42, 0.06); border: none;">
+                        <div class="card-body" style="padding: 25px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                                <h3 style="margin: 0; font-size: 20px; font-weight: 800; color: #111827;"><i class="fas fa-file-invoice" style="color:#fb246a;"></i> Resume Preview</h3>
+                                <div style="display: flex; gap: 8px;">
+                                    <asp:Button ID="btmEdit" runat="server" Text="Edit Resume" CssClass="btn-resume-preview" CommandName="EditUserProfile" CommandArgument='<%# Eval("UserId") %>' Visible='<%# Eval("Resume") != DBNull.Value && !string.IsNullOrEmpty(Eval("Resume").ToString()) %>' />
+                                    <asp:LinkButton ID="btnDeleteResume" runat="server" CommandName="DeleteResume" CommandArgument='<%# Eval("UserId") %>' CssClass="btn-resume-preview danger" OnClientClick="return confirm('Are you sure you want to remove your stored resume?');" Visible='<%# Eval("Resume") != DBNull.Value && !string.IsNullOrEmpty(Eval("Resume").ToString()) %>'><i class="fas fa-trash"></i> Delete Resume</asp:LinkButton>
+                                </div>
+                            </div>
+
+                            <asp:Panel ID="pnlImportResume" runat="server" Visible='<%# Eval("Resume") == DBNull.Value || string.IsNullOrEmpty(Eval("Resume").ToString()) %>'>
+                                <div class="alert alert-secondary text-center" style="padding: 40px 20px; border-radius: 12px; border: 1px dashed #ced4da; background-color: #f8f9fa;">
+                                    <i class="fas fa-file-upload fa-3x mb-3" style="color: #adb5bd;"></i>
+                                    <h5 style="font-weight: 700; color: #495057;">No Resume Uploaded</h5>
+                                    <p class="text-muted mb-4">Upload a PDF or DOCX resume to automatically parse and build your profile.</p>
+                                    <div class="d-flex justify-content-center align-items-center" style="gap: 10px; flex-wrap: wrap;">
+                                        <asp:FileUpload ID="fuResumeImport" runat="server" CssClass="form-control" style="max-width: 300px; height: auto;" />
+                                        <asp:LinkButton ID="btnImportResume" runat="server" CommandName="ImportResume" CommandArgument='<%# Eval("UserId") %>' CssClass="btn-resume-preview"><i class="fas fa-file-import"></i> Import & Parse Resume</asp:LinkButton>
+                                    </div>
+                                </div>
+                            </asp:Panel>
+
+                            <asp:Panel ID="pnlResumePreview" runat="server" Visible='<%# Eval("Resume") != DBNull.Value && !string.IsNullOrEmpty(Eval("Resume").ToString()) %>'>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 600; color: #4b5563; margin-bottom: 6px; display: block;">Headline</label>
+                                            <div class="form-control" style="height:auto; min-height:40px; background:#f9fafb; white-space:pre-wrap;"><%# Eval("ResumeHeadline") %></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 600; color: #4b5563; margin-bottom: 6px; display: block;">Summary</label>
+                                            <div class="form-control" style="height:auto; min-height:40px; background:#f9fafb; white-space:pre-wrap;"><%# Eval("ResumeSummary") %></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 600; color: #4b5563; margin-bottom: 6px; display: block;">Skills</label>
+                                            <div class="form-control" style="height:auto; min-height:40px; background:#f9fafb; white-space:pre-wrap;"><%# Eval("ResumeSkills") %></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 600; color: #4b5563; margin-bottom: 6px; display: block;">Education</label>
+                                            <div class="form-control" style="height:auto; min-height:40px; background:#f9fafb; white-space:pre-wrap;"><%# Eval("ResumeEducation") %></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 600; color: #4b5563; margin-bottom: 6px; display: block;">Experience</label>
+                                            <div class="form-control" style="height:auto; min-height:40px; background:#f9fafb; white-space:pre-wrap;"><%# Eval("ResumeExperienceDetails") %></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 600; color: #4b5563; margin-bottom: 6px; display: block;">Projects</label>
+                                            <div class="form-control" style="height:auto; min-height:40px; background:#f9fafb; white-space:pre-wrap;"><%# Eval("ResumeProjects") %></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 600; color: #4b5563; margin-bottom: 6px; display: block;">Certifications</label>
+                                            <div class="form-control" style="height:auto; min-height:40px; background:#f9fafb; white-space:pre-wrap;"><%# Eval("ResumeCertifications") %></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <label style="font-weight: 600; color: #4b5563; margin-bottom: 6px; display: block;">Languages</label>
+                                            <div class="form-control" style="height:auto; min-height:40px; background:#f9fafb; white-space:pre-wrap;"><%# Eval("ResumeLanguages") %></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </asp:Panel>
+                                    </div>
+                                </div>
                 </ItemTemplate>
             </asp:DataList>
 

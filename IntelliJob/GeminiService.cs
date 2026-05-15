@@ -59,7 +59,7 @@ namespace IntelliJob
         /// <summary>
         /// Generates interview questions using Gemini API based on role, level, type, tech stack, and count.
         /// </summary>
-        public async Task<List<string>> GenerateQuestionsAsync(string role, string level, string interviewType, string techStack, int questionCount, List<string> previousQuestions = null)
+        public async Task<List<string>> GenerateQuestionsAsync(string role, string level, string interviewType, string techStack, int questionCount, List<string> previousQuestions = null, string resumeText = null)
         {
             string avoidSection = "";
             if (previousQuestions != null && previousQuestions.Count > 0)
@@ -70,17 +70,35 @@ namespace IntelliJob
                 avoidSection += "\nGenerate fresh, unique questions that cover different aspects of the role and skills.";
             }
 
+            string resumeContext = "";
+            if (!string.IsNullOrWhiteSpace(resumeText))
+            {
+                resumeContext = $"\n\nCANDIDATE RESUME:\n{resumeText}\n";
+            }
+
             string prompt = $@"Prepare questions for a job interview.
 The job role is {role}.
 The job experience level is {level}.
 The tech stack used in the job is: {(string.IsNullOrEmpty(techStack) ? "General" : techStack)}.
 The focus between behavioural and technical questions should lean towards: {interviewType}.
 The amount of questions required is: {questionCount}.
+
+CRITICAL CRITERIA:
+Note: The candidate has APPLIED for this job, they are not currently working there. Frame questions appropriately.
+Distribute the questions exactly as follows (or as close as possible given the question count):
+- 15% from skills, projects, tools, and certifications mentioned in their resume.
+- 50% related to the role and job description to judge what they can do for the role.
+- 10% from their past experiences to evaluate if they have a valid experience level.
+- 10% scenario-based questions (tailored to the role, resume, and tech stack).
+- 10% technical questions (about the tech stack, OOP, DB, DSA, algorithms, etc.).
+- The remaining questions (approx 5%) should be about personal interests, future goals, or general industry thought-provoking questions (e.g., ""AI is taking our jobs. What do you think about this?"").
+If no resume is provided, distribute the resume-specific percentages into the role-specific questions.
+
 Be creative and vary your questions. Each time this prompt is called, generate a different set of questions covering different angles, scenarios, and depths of the topic.
 Please return only the questions, without any additional text.
 The questions are going to be read by a voice assistant so do not use special characters like / or * which might break the voice assistant.
 Return the questions formatted as a JSON array like this:
-[""Question 1"", ""Question 2"", ""Question 3""]{avoidSection}";
+[""Question 1"", ""Question 2"", ""Question 3""]{avoidSection}{resumeContext}";
 
             string responseText = await CallGeminiAsync(prompt, temperature: 1.0);
 
@@ -195,6 +213,8 @@ Please score the candidate from 0 to 100 in the following areas. Do not add cate
 - Cultural & Role Fit: Alignment with company values and job role. (0 if no substantive interaction)
 - Confidence & Clarity: Confidence in responses, engagement, and clarity. (0 if candidate disengaged or didn't participate)
 
+- Experience Validity: Based on their answers, do they demonstrate genuine past experience? (Score 1 to 10, where 1 is no real experience and 10 is highly validated experience)
+
 Return your response as a JSON object with this exact structure (no markdown, no extra text):
 {{
   ""totalScore"": 75,
@@ -203,7 +223,8 @@ Return your response as a JSON object with this exact structure (no markdown, no
     {{ ""name"": ""Technical Knowledge"", ""score"": 70, ""comment"": ""Your comment here"" }},
     {{ ""name"": ""Problem Solving"", ""score"": 75, ""comment"": ""Your comment here"" }},
     {{ ""name"": ""Cultural Fit"", ""score"": 78, ""comment"": ""Your comment here"" }},
-    {{ ""name"": ""Confidence and Clarity"", ""score"": 72, ""comment"": ""Your comment here"" }}
+    {{ ""name"": ""Confidence and Clarity"", ""score"": 72, ""comment"": ""Your comment here"" }},
+    {{ ""name"": ""Experience Validity"", ""score"": 8, ""comment"": ""Your comment here"" }}
   ],
   ""strengths"": [""Strength 1"", ""Strength 2"", ""Strength 3""],
   ""areasForImprovement"": [""Area 1"", ""Area 2"", ""Area 3""],
@@ -267,6 +288,11 @@ Return your response as a JSON object with this exact structure (no markdown, no
                         {
                             result.ConfidenceScore = score;
                             result.ConfidenceComment = comment;
+                        }
+                        else if (name.Contains("Experience") || name.Contains("Validity"))
+                        {
+                            result.ExperienceValidityScore = score;
+                            result.ExperienceValidityComment = comment;
                         }
                     }
                 }
@@ -585,6 +611,8 @@ Return only valid JSON with this exact structure and no extra text:
         public string CulturalFitComment { get; set; }
         public int ConfidenceScore { get; set; }
         public string ConfidenceComment { get; set; }
+        public int ExperienceValidityScore { get; set; }
+        public string ExperienceValidityComment { get; set; }
         public List<string> Strengths { get; set; }
         public List<string> AreasForImprovement { get; set; }
         public string FinalAssessment { get; set; }

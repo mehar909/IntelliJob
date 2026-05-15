@@ -51,6 +51,15 @@ namespace IntelliJob.User
         protected global::System.Web.UI.WebControls.Literal litInterviewType;
 
         /// <summary>
+        /// litResumeSource control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litResumeSource;
+
+        /// <summary>
         /// litStatus control.
         /// </summary>
         /// <remarks>
@@ -59,51 +68,86 @@ namespace IntelliJob.User
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal litStatus;
 
+        /// <summary>
+        /// hfLoadedAppliedJobId control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
         protected global::System.Web.UI.WebControls.HiddenField hfLoadedAppliedJobId;
 
+        /// <summary>
+        /// hfLoadedInterviewId control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
         protected global::System.Web.UI.WebControls.HiddenField hfLoadedInterviewId;
 
+        /// <summary>
+        /// hfLoadedResumePath control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
         protected global::System.Web.UI.WebControls.HiddenField hfLoadedResumePath;
 
+        /// <summary>
+        /// hfLoadedResumeSource control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
         protected global::System.Web.UI.WebControls.HiddenField hfLoadedResumeSource;
 
+        /// <summary>
+        /// hfLoadedOriginalFileName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
         protected global::System.Web.UI.WebControls.HiddenField hfLoadedOriginalFileName;
 
         /// <summary>
-        /// litOverallScore control.
+        /// litOverallVisual control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litOverallScore;
+        protected global::System.Web.UI.WebControls.Literal litOverallVisual;
 
         /// <summary>
-        /// litAtsScore control.
+        /// litAtsVisual control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litAtsScore;
+        protected global::System.Web.UI.WebControls.Literal litAtsVisual;
 
         /// <summary>
-        /// litSemanticScore control.
+        /// litSemanticVisual control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litSemanticScore;
+        protected global::System.Web.UI.WebControls.Literal litSemanticVisual;
 
         /// <summary>
-        /// litKeywordScore control.
+        /// litKeywordVisual control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litKeywordScore;
+        protected global::System.Web.UI.WebControls.Literal litKeywordVisual;
 
         /// <summary>
         /// litResumeSummary control.
@@ -133,47 +177,6 @@ namespace IntelliJob.User
         protected global::System.Web.UI.WebControls.Literal litGaps;
 
         /// <summary>
-        /// litResumePreview control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litResumePreview;
-
-        protected global::System.Web.UI.WebControls.TextBox txtEnhFullName;
-
-        protected global::System.Web.UI.WebControls.TextBox txtEnhEmail;
-
-        protected global::System.Web.UI.WebControls.TextBox txtEnhMobile;
-
-        protected global::System.Web.UI.WebControls.TextBox txtEnhAddress;
-
-        protected global::System.Web.UI.WebControls.TextBox txtEnhHeadline;
-
-        protected global::System.Web.UI.WebControls.TextBox txtEnhSummary;
-
-        protected global::System.Web.UI.WebControls.TextBox txtEnhSkills;
-
-        protected global::System.Web.UI.WebControls.TextBox txtEnhEducation;
-
-        protected global::System.Web.UI.WebControls.TextBox txtEnhExperience;
-
-        protected global::System.Web.UI.WebControls.TextBox txtEnhProjects;
-
-        protected global::System.Web.UI.WebControls.TextBox txtEnhCertifications;
-
-        protected global::System.Web.UI.WebControls.TextBox txtEnhLanguages;
-
-        protected global::System.Web.UI.WebControls.Button btnToggleEnhPreviewEdit;
-
-        protected global::System.Web.UI.WebControls.Panel pnlEnhSaveOptions;
-
-        protected global::System.Web.UI.WebControls.RadioButtonList rblEnhSaveTarget;
-
-        protected global::System.Web.UI.WebControls.Button btnSaveEnhancedResume;
-
-        /// <summary>
         /// litRewriteSuggestions control.
         /// </summary>
         /// <remarks>
@@ -199,5 +202,176 @@ namespace IntelliJob.User
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal litFinalAssessment;
+
+        /// <summary>
+        /// btnToggleEnhPreviewEdit control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnToggleEnhPreviewEdit;
+
+        /// <summary>
+        /// btnExportResumePdf control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnExportResumePdf;
+
+        /// <summary>
+        /// txtEnhFullName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtEnhFullName;
+
+        /// <summary>
+        /// txtEnhEmail control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtEnhEmail;
+
+        /// <summary>
+        /// txtEnhMobile control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtEnhMobile;
+
+        /// <summary>
+        /// txtEnhAddress control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtEnhAddress;
+
+        /// <summary>
+        /// txtEnhHeadline control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtEnhHeadline;
+
+        /// <summary>
+        /// txtEnhSummary control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtEnhSummary;
+
+        /// <summary>
+        /// txtEnhSkills control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtEnhSkills;
+
+        /// <summary>
+        /// txtEnhEducation control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtEnhEducation;
+
+        /// <summary>
+        /// txtEnhExperience control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtEnhExperience;
+
+        /// <summary>
+        /// txtEnhProjects control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtEnhProjects;
+
+        /// <summary>
+        /// txtEnhCertifications control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtEnhCertifications;
+
+        /// <summary>
+        /// txtEnhLanguages control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtEnhLanguages;
+
+        /// <summary>
+        /// txtEnhLinkedIn control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtEnhLinkedIn;
+
+        /// <summary>
+        /// txtEnhPortfolio control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtEnhPortfolio;
+
+        /// <summary>
+        /// pnlEnhSaveOptions control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlEnhSaveOptions;
+
+        /// <summary>
+        /// btnSaveEnhancedResume control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnSaveEnhancedResume;
+
+        /// <summary>
+        /// litResumePreview control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litResumePreview;
     }
 }

@@ -3,29 +3,57 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <style>
         .applications-container {
+            background-color: #f8f9fa;
             padding: 50px 0 80px;
         }
 
-        .applications-hero {
-            background: linear-gradient(135deg, #111827 0%, #1f2937 50%, #FF4357 100%);
-            color: #fff;
-            border-radius: 24px;
-            padding: 28px 30px;
-            box-shadow: 0 16px 40px rgba(17, 24, 39, 0.18);
-            margin-bottom: 24px;
+        .page-header-section {
+            background: linear-gradient(100deg, #da2461 10%, #011B43  90%);
+            padding: 54px 0 28px;
+           min-height:450px;
         }
 
-        .applications-hero h2 {
-            color: #fff;
-            font-size: 30px;
-            font-weight: 800;
-            margin-bottom: 8px;
+        .page-header-section .container {
+
+            padding: 100px 32px;
         }
 
-        .applications-hero p {
-            margin: 0;
-            color: rgba(255, 255, 255, 0.85);
-            line-height: 1.7;
+        .page-header-section h2 {
+            font-size: 40px;
+            font-weight: 700;
+            text-transform: capitalize;
+            font-family: "Muli", sans-serif;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .page-header-section p {
+            color: #ffffff;
+            font-size: 20px;
+            max-width: 600px;
+        }
+
+        .btn-header-action {
+             display: inline-flex;
+             align-items: center;
+             gap: 8px;
+             background-color: #fb246a;
+             border: 2px solid #fb246a;
+             color: #ffffff !important;
+             border-radius: 12px;
+             padding: 12px 28px;
+             font-weight: 600;
+             font-size: 15px;
+             text-decoration: none;
+             transition: all 0.2s ease;
+             white-space: nowrap;
+        }
+        .btn-header-action:hover {
+            background-color: #da2461;
+            border-color: #da2461;
+            color: #fff !important;
+            text-decoration: none;
+            transform: translateY(-1px);
         }
 
         .application-card {
@@ -107,18 +135,28 @@
         .score-none { background: #edf2f7; color: #6b7280; }
 
         .btn-action {
+             align-items: center;
+             gap: 8px;
+             background-color: #fb246a;
+             border: 2px solid #fb246a;
+             color: #ffffff !important;
+             font-size: 15px;
+             transition: all 0.2s ease;
+             white-space: nowrap;
+
             display: inline-block;
-            padding: 11px 18px;
+            padding: 12px 18px;
+            margin-top: 18px;
             border-radius: 10px;
-            background: linear-gradient(135deg, #FF4357 0%, #ff6b7a 100%);
-            color: #fff;
             font-weight: 700;
             text-decoration: none;
             box-shadow: 0 4px 12px rgba(255, 67, 87, 0.25);
         }
 
         .btn-action:hover {
-            color: #fff;
+            background-color: #da2461;
+            border-color: #da2461;
+            color: #fff !important;
             text-decoration: none;
             transform: translateY(-1px);
         }
@@ -145,42 +183,35 @@
         }
 
         .top-links {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-bottom: 18px;
-        }
-
-        .top-links a {
-            display: inline-block;
-            border: 1px solid #FF4357;
-            color: #FF4357;
-            border-radius: 10px;
-            padding: 10px 16px;
-            text-decoration: none;
-            font-weight: 700;
-            background: #fff;
-        }
-
-        .top-links a:hover {
-            background: #fff5f6;
+            display: none;
         }
     </style>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
     <main>
-        <div class="applications-container">
+        <!-- Page Header -->
+        <div class="page-header-section">
             <div class="container">
-                <div class="applications-hero">
-                    <h2>My Job Applications</h2>
-                    <p>Track every role you have applied for, open the saved resume report, and jump to the interview history for that job.</p>
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h2>My Job Applications</h2>
+                        <p>Track every role you have applied for, open the saved resume report, and jump to the interview history for that job.</p>
+                    </div>
+                    <div class="col-lg-4 text-right pt-3 d-flex flex-column align-items-end justify-content-center gap-2" style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+                        <a href="JobListing.aspx" class="btn-header-action">
+                            <i class="fas fa-search"></i> Browse Jobs
+                        </a>
+                        <%--<a href="Home.aspx" class="btn-header-action">
+                            <i class="fas fa-home"></i> Home
+                        </a>--%>
+                    </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="top-links">
-                    <a href="JobListing.aspx"><i class="fas fa-search"></i> Browse Jobs</a>
-                    <a href="Home.aspx"><i class="fas fa-home"></i> Home</a>
-                </div>
+        <div class="applications-container" style="padding-top: 60px;">
+            <div class="container">
 
                 <asp:Literal ID="litEmpty" runat="server" />
 

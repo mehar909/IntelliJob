@@ -591,6 +591,53 @@
                     </div>
                 </div>
 
+                <!-- ================== START TEXT MODE ADDITION ================== -->
+                <div class="mode-toggle" style="display:flex; justify-content:center; gap:10px; margin:20px 0;">
+                    <button type="button" class="mode-btn active" id="btnVoiceMode" onclick="switchMode('voice')" style="padding:10px 28px; border-radius:8px; font-weight:600; cursor:pointer; border:2px solid #dee2e6; background:#FF4357; color:#fff;">
+                        <i class="fas fa-microphone"></i> Voice Mode
+                    </button>
+                    <button type="button" class="mode-btn" id="btnTextMode" onclick="switchMode('text')" style="padding:10px 28px; border-radius:8px; font-weight:600; cursor:pointer; border:2px solid #dee2e6; background:#fff; color:#636e72;">
+                        <i class="fas fa-keyboard"></i> Text Mode
+                    </button>
+                </div>
+
+                <!-- Text Chat Interview Section (hidden by default) -->
+                <div id="textSection" style="display:none; max-width:700px; margin:0 auto;">
+                    <div class="transcript-box" style="background:#f8f9fa; border-radius:12px; border:1px solid #e9ecef; padding:20px 25px; margin:20px auto; min-height:300px; display:flex; flex-direction:column;">
+
+                        <div class="voice-messages" id="textChatMessages" style="flex:1; max-height:400px; overflow-y:auto; margin-bottom:15px;">
+                            <p class="transcript-placeholder" style="color:#b2bec3; font-style:italic; text-align:center; margin-top:50px;">Switch to Text Mode and click Start to begin your text chat interview.</p>
+                        </div>
+
+                        <div id="textStartControls" style="text-align:center;">
+                            <button type="button" onclick="startTextInterview()" style="background:linear-gradient(135deg, #00b894, #00cec9); color:#fff; border:none; border-radius:8px; padding:12px 30px; font-weight:600; font-size:16px; cursor:pointer;">
+                                <i class="fas fa-play"></i> Start Text Interview
+                            </button>
+                        </div>
+
+                        <div id="textInputArea" style="display:none; position:relative;">
+                            <textarea id="textChatInput" rows="3" placeholder="Type your answer here..." style="width:100%; border-radius:8px; border:1px solid #dee2e6; padding:12px; font-size:14px; resize:none; outline:none;"></textarea>
+                            <button type="button" id="btnSendText" onclick="sendTextAnswer()" style="position:absolute; bottom:10px; right:10px; background:#FF4357; color:#fff; border:none; border-radius:50%; width:40px; height:40px; cursor:pointer; box-shadow:0 2px 8px rgba(255,67,87,0.4);">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div id="textSubmitArea" style="display:none; text-align:center; margin-top:20px;">
+                        <p style="color: #636e72; margin-bottom: 15px;"><i class="fas fa-check-circle" style="color: #00b894;"></i> Text interview complete. Submit for evaluation.</p>
+                        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                            <button type="button" class="btn-back" style="font-size:14px; background:#fff; border:2px solid #e74c3c; color:#e74c3c; border-radius:8px; padding:10px 25px; cursor:pointer;" onclick="cancelInterview()">
+                                <i class="fas fa-times"></i> Cancel Interview
+                            </button>
+                            <button type="button" class="btn-confirm" style="font-size:14px; background:linear-gradient(135deg, #FF4357, #ff6b7a); color:#fff; border:none; border-radius:8px; padding:10px 25px; cursor:pointer;" onclick="confirmVoiceSubmit()">
+                                <i class="fas fa-paper-plane"></i> Submit for Evaluation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- ================== END TEXT MODE ADDITION ================== -->
+
                 <asp:HiddenField ID="hdnInterviewId" runat="server" />
                 <asp:HiddenField ID="hdnQuestionsJson" runat="server" />
                 <asp:HiddenField ID="hdnVapiToken" runat="server" />
@@ -661,6 +708,86 @@
         function feedbackLog(msg) {
             console.log('[TakeInterview] ' + msg);
         }
+
+        // === Text Mode Variables & Logic ===
+        var currentTextQuestionIndex = -1;
+
+        function switchMode(mode) {
+            var voiceSection = document.getElementById('voiceSection');
+            var textSection = document.getElementById('textSection');
+
+            if (mode === 'voice') {
+                voiceSection.style.display = 'block';
+                if(textSection) textSection.style.display = 'none';
+                document.getElementById('btnVoiceMode').classList.add('active');
+                document.getElementById('btnTextMode').classList.remove('active');
+            } else {
+                voiceSection.style.display = 'none';
+                if(textSection) textSection.style.display = 'block';
+                document.getElementById('btnTextMode').classList.add('active');
+                document.getElementById('btnVoiceMode').classList.remove('active');
+            }
+        }
+
+        function startTextInterview() {
+            if (currentTextQuestionIndex >= 0) return; // already started
+            voiceTranscript = [];
+            document.getElementById('textChatMessages').innerHTML = '';
+            document.getElementById('textStartControls').style.display = 'none';
+            document.getElementById('textInputArea').style.display = 'block';
+
+            document.getElementById('statusBadge').textContent = 'In Progress (Text)';
+            document.getElementById('statusBadge').style.background = '#d4edda';
+            document.getElementById('statusBadge').style.color = '#155724';
+
+            // Start first question
+            currentTextQuestionIndex = 0;
+            var q = "Hello! Let's start the interview. " + interviewQuestions[currentTextQuestionIndex];
+            appendTextChatMessage('assistant', q);
+        }
+
+        function appendTextChatMessage(role, content) {
+            var container = document.getElementById('textChatMessages');
+            var div = document.createElement('div');
+            div.className = 'voice-msg ' + role;
+            div.innerHTML = '<div class="msg-role">' + (role === 'assistant' ? 'AI Interviewer' : 'You') + '</div>' +
+                '<div class="msg-content">' + escapeHtml(content) + '</div>';
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+
+            // Also record to the global transcript array used by submit
+            voiceTranscript.push({ role: role, content: content });
+        }
+
+        function sendTextAnswer() {
+            var inputEl = document.getElementById('textChatInput');
+            var answer = inputEl.value.trim();
+            if (!answer) return;
+
+            // Print User Answer
+            appendTextChatMessage('user', answer);
+            inputEl.value = '';
+
+            // AI asks next question after a short delay
+            document.getElementById('textChatInput').disabled = true;
+            document.getElementById('btnSendText').disabled = true;
+
+            setTimeout(function() {
+                currentTextQuestionIndex++;
+                if (currentTextQuestionIndex < interviewQuestions.length) {
+                    var nextQ = interviewQuestions[currentTextQuestionIndex];
+                    appendTextChatMessage('assistant', nextQ);
+                    document.getElementById('textChatInput').disabled = false;
+                    document.getElementById('btnSendText').disabled = false;
+                    document.getElementById('textChatInput').focus();
+                } else {
+                    appendTextChatMessage('assistant', "That was the last question. Thank you for your time. Please submit your interview for evaluation.");
+                    document.getElementById('textInputArea').style.display = 'none';
+                    document.getElementById('textSubmitArea').style.display = 'block';
+                }
+            }, 800);
+        }
+        // === End Text Mode Logic ===
 
         // === Voice Mode: Vapi Integration ===
         var vapiInstance = null;

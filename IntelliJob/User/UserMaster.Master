@@ -1,4 +1,4 @@
-﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="UserMaster.master.cs" Inherits="IntelliJob.User.UserMaster" %>
+<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="UserMaster.master.cs" Inherits="IntelliJob.User.UserMaster" %>
 
 <!DOCTYPE html>
 
@@ -26,6 +26,10 @@
     <link rel="stylesheet" href="../assets/css/nice-select.css">
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
+        body, html {
+            overflow-x: hidden;
+            width: 100%;
+        }
         @media (max-width: 991.98px) {
             .header-area .header-btn.d-none.d-lg-block {
                 display: flex !important;

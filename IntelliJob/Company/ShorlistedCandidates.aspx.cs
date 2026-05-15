@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
@@ -55,10 +55,10 @@ namespace IntelliJob.Company
                 return;
             }
             query = @"
-                        SELECT 
+                        SELECT
                         ROW_NUMBER() OVER (ORDER BY (SELECT 1)) AS [Sr.No],
                         aj.AppliedJobId,
-                        aj.JobId,  
+                        aj.JobId,
                         j.Title,
                         js.Name AS UserName,
                         u.Email,
@@ -140,7 +140,7 @@ namespace IntelliJob.Company
 
         protected void GridView1_RowDataBound(object sender, GridViewRowEventArgs e)
         {
-            
+
         }
 
         protected void GridView1_SelectedIndexChanged(object sender, EventArgs e)
@@ -266,7 +266,18 @@ namespace IntelliJob.Company
             }
 
             List<string> previousQuestions = LoadPreviousQuestions(context.UserId, context.JobTitle);
-            List<string> questions = GenerateInterviewQuestions(context, previousQuestions);
+
+            string resumeText = null;
+            ApplicationResumeSelection selection;
+            if (ApplicationDataStore.TryGetApplicationResumeSelection(context.UserId, context.AppliedJobId, out selection))
+            {
+                if (System.IO.File.Exists(selection.StoredResumePath))
+                {
+                    resumeText = ResumeTextExtractor.ExtractText(selection.StoredResumePath);
+                }
+            }
+
+            List<string> questions = GenerateInterviewQuestions(context, previousQuestions, resumeText);
             if (questions == null || questions.Count == 0)
             {
                 questions = BuildFallbackQuestions(context.JobTitle, context.JobType, context.QuestionCount);
@@ -355,7 +366,7 @@ namespace IntelliJob.Company
             }
         }
 
-        private List<string> GenerateInterviewQuestions(ApplicationInterviewContext context, List<string> previousQuestions)
+        private List<string> GenerateInterviewQuestions(ApplicationInterviewContext context, List<string> previousQuestions, string resumeText)
         {
             try
             {
@@ -373,7 +384,8 @@ namespace IntelliJob.Company
                             context.JobType,
                             context.TechStack,
                             context.QuestionCount,
-                            previousQuestions).ConfigureAwait(false),
+                            previousQuestions,
+                            resumeText).ConfigureAwait(false),
                         cts.Token);
 
                     if (task.Wait(System.TimeSpan.FromSeconds(25)))
@@ -696,7 +708,7 @@ namespace IntelliJob.Company
                     // Call the shared email function
                     SendInterviewEmail(row);
                     anySelected = true;
-                    // Note: If multiple emails are sent, the lblMsg will only show the status 
+                    // Note: If multiple emails are sent, the lblMsg will only show the status
                     // of the last processed row.
                 }
             }

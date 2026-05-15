@@ -11,9 +11,10 @@ An AI-powered job portal built with **ASP.NET Web Forms (.NET Framework 4.7.2)**
 - **Companies** – Register, post jobs, view applicants, shortlist candidates
 - **Admin Panel** – Manage users, jobs, contacts, and view dashboard analytics
 - **AI Mock Interviews** – Take voice-based mock interviews with AI-generated questions (Gemini + Vapi)
+- **Interview Access Control** – Company interview invitations use one-time passwords before the live session starts
 - **Interview Feedback** – AI-generated scoring on communication, technical skills, problem-solving, and more
 - **Interview History** – Filter past interviews by job and revisit feedback from previous sessions
-- **Resume Builder** – Build, edit, and download resumes from within the platform
+- **Resume Builder** – Build, edit, and download resumes from within the platform, including LinkedIn and portfolio links
 - **Resume Enhancer** – Improve resume content with editable structured output and saved reports
 - **Profile Resume Tools** – Import, update, or remove stored resumes from the user profile
 - **Application Resume Uploads** – Upload a resume while applying for a job or during registration
@@ -206,6 +207,7 @@ IntelliJob/
 | **Database connection error** | Verify your connection string in `Web.config` matches your SQL Server instance |
 | **"Gemini API key is not configured"** | Add a valid API key in `AppSettings.config` |
 | **Interview voice not working** | Add a valid Vapi web token in `AppSettings.config` |
+| **Interview access rejected** | Use the one-time password from the invitation email, then open the interview through the access page |
 | **LocalDB not found** | Install SQL Server LocalDB via Visual Studio Installer (Individual Components → SQL Server Express LocalDB) |
 | **Port conflict on IIS Express** | Right-click project → Properties → Web → change the port number |
 
